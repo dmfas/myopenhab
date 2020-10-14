@@ -1,0 +1,166 @@
+Number MAXcube_freemem "MAX! Cube freier Speicher [%d]"				<number> (Heizung)			{ channel="max:bridge:KMD1023108:free_mem" }
+Number MAXcube_dutycycle "MAX! Cube Duty Cycle [%d]"				<number> (Heizung)			{ channel="max:bridge:KMD1023108:duty_cycle" }
+
+// Dachboden
+
+Contact D_Dachboden_Treppe_Kontakt "Dachbodentreppe [MAP(contacts.map):%s]"	<door> (D_Dachboden,InnenTueren)	{ channel="max:shuttercontact:KMD1023108:LEQ0433928:contact_state" }
+Switch D_Dachboden_Treppe_Batterie "Dachbodentreppe [%s]"			<battery> (Batterien)			{ channel="max:shuttercontact:KMD1023108:LEQ0433928:battery_low" }
+
+
+/*
+//Contact OG_Markus_Fenster_Kontakt "Fenster Markus [MAP(contacts.map):%s]"	<contact> (OG_Markus,Fenster)		{ channel="max:shuttercontact:KMD1023108:KMD4008071:contact_state" }
+//Switch OG_Markus_Fenster_Batterie "Fensterkontakt [%s]" 			<battery> (Batterien)			{ channel="max:shuttercontact:KMD1023108:KMD4008071:battery_low" }
+
+Group OG_Markus_Thermo "Markus Zimmer"						<temperature> (OG_Markus,Heizung)	{ alexa="Endpoint.Thermostat" }
+String OG_Markus_Thermo_Modus "Modus [%s]"					<calendar> (OG_Markus_Thermo,Heizung)	{ channel="max:thermostat:KMD102310:KMD3024277:mode",
+										alexa="ThermostatController.thermostatMode" [binding="max"] }
+Number:Temperature OG_Markus_Thermo_Ist "Temperatur [%.1f °C]"			<temperature> (OG_Markus_Thermo,OG_Markus,SteuerTemp,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3034277:actual_temp", alexa="TemperatureSensor.temperature" }
+//										[itemSensor="OG_Markus_Auge_Temp"] }
+Number:Temperature OG_Markus_Thermo_Soll "Solltemperatur [%.1f °C]"		<temperature> (OG_Markus_Thermo,OG_Markus,SollTempTherm,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3024277:set_temp", 
+										alexa="ThermostatController.targetSetpoint" }
+//Number OG_Markus_Thermo_Ventil "Ventilöffnung [%d %%]"				<sani_valve> (OG_Markus_Thermo)		{ channel="max:thermostat:KMD102310:KMD3024277:valve" }
+Switch OG_Markus_Thermo_Batterie "Batteriewarnung [%s]"				<battery> (Batterien)			{ channel="max:thermostat:KMD102310:KMD3024277:battery_low" }
+*/
+
+
+Contact OG_Lutz_Fenster_Kontakt	"Fenster Lutz [MAP(contacts.map):%s]"		<contact> (OG_Lutz,Fenster)		{ channel="max:shuttercontact:KMD1023108:LEQ1157216:contact_state" }
+Switch OG_Lutz_Fenster_Batterie "Fensterkontakt Lutz [%s]"			<battery> (Batterien)			{ channel="max:shuttercontact:KMD1023108:LEQ1157216:battery_low" }
+
+// war: KMD3028850
+Group OG_Lutz_Thermo "Lutz Zimmer"						<temperature> (OG_Lutz,Heizung)		{ alexa="Endpoint.Thermostat" }
+String OG_Lutz_Thermo_Modus "Modus [%s]"					<calendar> (OG_Lutz_Thermo,Heizung)	{ channel="max:thermostat:KMD1023108:KMD3031132:mode", alexa="ThermostatController.thermostatMode" [binding="max"] }
+Number:Temperature OG_Lutz_Thermo_Ist "Temperatur [%.1f °C]"			<temperature> (OG_Lutz_Thermo,OG_Lutz,SteuerTemp,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3031132:actual_temp", alexa="TemperatureSensor.temperature" }
+Number:Temperature OG_Lutz_Thermo_Soll "Solltemperatur [%.1f °C]"		<temperature> (OG_Lutz_Thermo,OG_Lutz,SollTempTherm,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3031132:set_temp", alexa="ThermostatController.targetSetpoint" }
+Switch OG_Lutz_Thermo_Batterie "Thermostat Lutz Batterie"			<battery> (Batterien)			{ channel="max:thermostat:KMD1023108:KMD3031132:battery_low" }
+//Number OG_Lutz_Thermo_Ventil "Ventilöffnung [%d %%]"				<sani_valve> (OG_Lutz_Thermo)		{ channel="max:thermostat:KMD1023108:KMD3031132:valve" }
+
+
+Group OG_Tim_Thermo "Tims Zimmer"						<temperature> (OG_Tim,Heizung)		{ alexa="Endpoint.Thermostat" }
+String OG_Tim_Thermo_Modus "Modus [%s]"						<calendar> (OG_Tim_Thermo,Heizung)	{ channel="max:thermostat:KMD1023108:KMD3039533:mode", alexa="ThermostatController.thermostatMode" [binding="max"] }
+Number:Temperature OG_Tim_Thermo_Ist "Temperatur [%.1f °C]"			<temperature> (OG_Tim_Thermo,OG_Tim,SteuerTemp,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3039533:actual_temp", alexa="TemperatureSensor.temperature" }
+Number:Temperature OG_Tim_Thermo_Soll "Solltemperatur [%.1f °C]"		<temperature> (OG_Tim_Thermo,OG_Tim,SollTempTherm,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3039533:set_temp", alexa="ThermostatController.targetSetpoint" }
+Switch OG_Tim_Thermo_Batterie "Thermostat Tim Batterie"				<battery> (Batterien)			{ channel="max:thermostat:KMD1023108:KMD3039533:battery_low" }
+
+/*
+Contact OG_Tim_Fenster_Kontakt "Fenster Tim [MAP(contacts.map):%s]"		<contact> (OG_Tim,Fenster)		{ channel="max:shuttercontact:KMD1023108:LEQ1157179:contact_state" }
+Switch OG_Tim_Fenster_Batterie "Fensterkontakt Tim [%s]"			<battery> (Batterien)			{ channel="max:shuttercontact:KMD1023108:LEQ1157179:battery_low" }
+
+Group OG_Tim_Thermo "Tims Zimmer"						<temperature> (OG_Tim,Heizung)		{ channel="max:thermostat:KMD1023108:KMD3039533:mode" }
+String OG_Tim_Thermo_Modus "Modus [%s]"						<calendar> (OG_Tim_Thermo,Heizung)	{ channel="max:thermostat:KMD1023108:KMD3039533:mode",
+										alexa="ThermostatController.thermostatMode" [binding="max"] }
+Number:Temperature OG_Tim_Thermo_Ist "Temperatur [%.1f °C]"			<temperature> (OG_Tim_Thermo,OG_Tim,SteuerTemp,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3039533:actual_temp", alexa="TemperatureSensor.temperature" }
+Number:Temperature OG_Tim_Thermo_Soll "Solltemperatur [%.1f °C]"		<temperature> (OG_Tim_Thermo,OG_Tim,SollTempTherm,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3039533:set_temp", alexa="ThermostatController.targetSetpoint" }
+Switch OG_Tim_Thermo_Batterie "Tim Thermostat Batterie"				<battery> (Batterien)			{ channel="max:thermostat:KMD1023108:KMD3039533:battery_low" }
+//Number OG_Tim_Thermo_Ventil "Ventilöffnung [%d %%]"				<sani_valve> (OG_Tim_Thermo)		{ channel="max:thermostat:KMD1023108:KMD3039533:valve" }
+*/
+
+// Erdgeschoss
+// Diele
+Contact EG_Diele_Eingangstuer_Kontakt "Eingangstür [MAP(contacts.map):%s]"	<contact> (EG_Diele,AussenTueren,Alarmkontakte)			{ channel="max:shuttercontact:KMD1023108:JRE0004439:contact_state" }
+Switch EG_Diele_Eingangstuer "Eingangstür [%s]"					<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:JRE0004439:battery_low" }
+
+// WC
+Contact EG_WC_Fenster_Kontakt "Fenster WC [MAP(contacts.map):%s]"		<contact> (EG_WC,Alarmkontakte)					{ channel="max:shuttercontact:KMD1023108:LEQ1157218:contact_state" }
+Switch EG_WC_Fenster_Batterie "Fenster WC [%s]"					<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:LEQ1157218:battery_low" }
+
+// Küche und Essen
+Contact EG_Kueche_Fenster_Kontakt "Fenster Küche [MAP(contacts.map):%s]"	<contact> (EG_Kueche,Fenster,Alarmkontakte)			{ channel="max:shuttercontact:KMD1023108:KMD4010635:contact_state" }
+Switch EG_Kueche_Fenster_Batterie "Fensterkontakt Küche [%s]"			<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:KMD4010635:battery_low" }
+Contact EG_Kueche_Tuer_Kontakt "Tür Küche [MAP(contacts.map):%s]"		<contact> (EG_Kueche,AussenTueren,WohnraumTueren,Alarmkontakte)	{ channel="max:shuttercontact:KMD1023108:LEQ1157309:contact_state" }
+Switch EG_Kueche_Tuer_Batterie "Türkontakt Küche [%s]"				<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:LEQ1157309:battery_low" }
+
+Contact EG_Essen_Fenster_Kontakt "Fenster Essen [MAP(contacts.map):%s]"		<contact> (EG_Kueche,Fenster,Alarmkontakte)			{ channel="max:shuttercontact:KMD1023108:MKF0008019:contact_state" }
+Switch EG_Essen_Fenster_Batterie "Fensterkontakt Essen [%s]"			<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:MKF0008019:battery_low" }
+
+// Wohnen
+Contact EG_Wohnen_li1_Kontakt "Flügeltür links [MAP(contacts.map):%s]"		<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte)	{ channel="max:shuttercontact:KMD1023108:KEQ0659789:contact_state" }
+Switch EG_Wohnen_li1_Batterie "Flügeltür links [%s]"				<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:KEQ0659789:battery_low" }
+Contact EG_Wohnen_li2_Kontakt "Ecktür links [MAP(contacts.map):%s]"		<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte) { channel="max:shuttercontact:KMD1023108:JRE0004258:contact_state" }
+Switch EG_Wohnen_li2_Batterie "Ecktür links [%s]"				<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:JRE0004258:battery_low" }
+Contact EG_Wohnen_Mitte_li_Kontakt "Mitteltür links [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte) { channel="max:shuttercontact:KMD1023108:KMD4011695:contact_state" }
+Switch EG_Wohnen_Mitte_li_Batterie "Mitteltür links [%s]"			<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:KMD4011695:battery_low" }
+Contact EG_Wohnen_Mitte_re_Kontakt "Mitteltür rechts [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte) { channel="max:shuttercontact:KMD1023108:KEQ0659709:contact_state" }
+Switch EG_Wohnen_Mitte_re_Batterie "Mitteltür rechts [%s]"			<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:KEQ0659709:battery_low" }
+Contact EG_Wohnen_re1_Kontakt "Flügeltür Wohnen rechts [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte) { channel="max:shuttercontact:KMD1023108:KEQ0465530:contact_state" }
+Switch EG_Wohnen_re1_Batterie "Flügeltür Wohnen rechts [%s]"			<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:KEQ0465530:battery_low" }
+Contact EG_Wohnen_re2_Kontakt "Ecktür Wohnen rechts [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte) { channel="max:shuttercontact:KMD1023108:KEQ0664463:contact_state" }
+Switch EG_Wohnen_re2_Batterie "Ecktür Wohnen rechts [%s]"			<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:KEQ0664463:battery_low" }
+Contact EG_Wohnen_alt_Kontakt "Gartentür Wohnen alt [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte) { channel="max:shuttercontact:KMD1023108:LEQ1156818:contact_state" }
+Switch EG_Wohnen_alt_Batterie "Gartentür Wohnen alt [%s]"			<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:LEQ1156818:battery_low" }
+
+// Bianca
+Contact EG_Bianca_Tuer_Kontakt "Gartentür Bianca [MAP(contacts.map):%s]"	<door>	  (EG_Bianca,AussenTueren)				{ channel="max:shuttercontact:KMD1023108:JRE0004534:contact_state" }
+Switch EG_Bianca_Tuer_Batterie "Gartentür Bianca [%s]"				<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:JRE0004534:battery_low" }
+
+// Garage
+Contact Garage_Gartentuer_Kontakt "Gartentür Garage [MAP(contacts.map):%s]"	<door>	  (Garage,AussenTueren,Alarmkontakte)			{ channel="max:shuttercontact:KMD1023108:LEQ0433798:contact_state" }
+Switch Garage_Gartentuer_Batterie "Gartentür Garage [%s]"			<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:LEQ0433798:battery_low" }
+Contact Garage_Fenster_Kontakt "Fenster Garage [MAP(contacts.map):%s]"		<contact> (Garage,Fenster)					{ channel="max:shuttercontact:KMD1023108:KMD4007236:contact_state" }
+Switch Garage_Fenster_Batterie "Fensterkontakt Garage [%s]"			<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:KMD4007236:battery_low" }
+
+// Kellerflur
+Contact K_ELW_Innentuer_Kontakt "Innentür ELW [MAP(contacts.map):%s]"		<contact> (K_ELW,InnenTueren)					{ channel="max:shuttercontact:KMD1023108:JRE0004450:contact_state" }
+Switch K_ELW_Innentuer_Batterie "Innentür ELW [%s]"				<battery> (Batterien)						{ channel="max:shuttercontact:KMD1023108:JRE0004450:battery_low" }
+
+// Waschkeller
+Group K_Waschkeller_Thermo "Waschkeller"					<temperature> (K_Waschkeller,Heizung)		{ alexa="Endpoint.Thermostat" }
+String K_Waschkeller_Thermo_Modus "Modus"					<calendar> (K_Waschkeller_Thermo,Heizung)	{ channel="max:thermostat:KMD1023108:KMD3025697:mode",
+										alexa="ThermostatController.thermostatMode" [binding="max"] }
+Number:Temperature K_Waschkeller_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (K_Waschkeller_Thermo,K_Waschkeller,SteuerTemp,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3025697:actual_temp", alexa="TemperatureSensor.temperature" }
+Number:Temperature K_Waschkeller_Thermo_Soll "Solltemperatur [%.1f °C]"		<temperature> (K_Waschkeller_Thermo,K_Waschkeller,SollTempTherm,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3025697:set_temp",
+										alexa="ThermostatController.targetSetpoint" }
+//Number K_Waschkeller_Thermo_Ventil "Ventilöffnung [%d %%]"			<sani_valve> (K_Waschkeller_Thermo)		{ channel="max:thermostat:KMD1023108:KMD3025697:valve" }
+Switch K_Waschkeller_Thermo_Batterie "Thermostat Waschkeller Batterie"		<battery> (Batterien)				{ channel="max:thermostat:KMD1023108:KMD3025697:battery_low" }
+
+// ELW
+Contact K_ELW_Aussentuer_Kontakt "Tür ELW - Garage [MAP(contacts.map):%s]"	<contact> (K_ELW,Garage,AussenTueren,Alarmkontakte)	{ channel="max:shuttercontact:KMD1023108:JRE0004170:contact_state" }
+Switch K_ELW_Aussentuer_Batterie "Aussentür ELW [%s]"				<battery> (Batterien)				{ channel="max:shuttercontact:KMD1023108:JRE0004170:battery_low" }
+Contact K_ELW_Fenster_Kontakt "Fenster ELW [MAP(contacts.map):%s]"		<contact> (K_ELW,Fenster)			{ channel="max:shuttercontact:KMD1023108:LEQ0433965:contact_state" }
+Switch K_ELW_Fenster_Batterie "Fensterkontakt ELW [%s]"				<battery> (Batterien)				{ channel="max:shuttercontact:KMD1023108:LEQ0433965:battery_low" }
+Contact K_Buero_Fenster_Kontakt "Fenster Büro [MAP(contacts.map):%s]"		<contact> (K_ELW,Fenster)			{ channel="max:shuttercontact:KMD1023108:JRE0004418:contact_state" }
+Switch K_Buero_Fenster_Batterie "Fensterkontakt Büro [%s]"			<battery> (Batterien)				{ channel="max:shuttercontact:KMD1023108:JRE0004418:battery_low" }
+
+Group K_ELW_Thermo "Einliegerwohnung"						<temperature> (K_ELW,Heizung)			{ alexa="Endpoint.Thermostat" }
+String K_ELW_Thermo_Modus "Modus"						<calendar> (K_ELW_Thermo,Heizung)		{ channel="max:thermostat:KMD1023108:KMD3023848:mode",
+										alexa="ThermostatController.thermostatMode" [binding="max"] }
+Number:Temperature K_ELW_Thermo_Ist "Temperatur [%.1f °C]"			<temperature> (K_ELW_Thermo,K_ELW,SteuerTemp,Heizung)	
+										{ channel="max:thermostat:KMD1023108:KMD3023848:actual_temp", alexa="TemperatureSensor.temperature" }
+Number:Temperature K_ELW_Thermo_Soll "Solltemperatur [%.1f °C]"			<temperature> (K_ELW_Thermo,K_ELW,SollTempTherm,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3023848:set_temp",
+										alexa="ThermostatController.targetSetpoint" }
+//Number K_ELW_Thermo_Ventil "Ventilöffnung [%d %%]"				<sani_valve> (K_ELW_Thermo)			{ channel="max:thermostat:KMD1023108:KMD3023848:valve" }
+Switch K_ELW_Thermo_Batterie "Thermostat ELW Batterie"				<battery> (Batterien)				{ channel="max:thermostat:KMD1023108:KMD3023848:battery_low" }
+
+// Büro
+Group K_Buero_Thermo "Büro"							<calendar> (K_Buero,Heizung)			{ alexa="Endpoint.Thermostat" }
+String K_Buero_Thermo_Modus "Modus"						<calendar> (K_Buero_Thermo,Heizung)		{ channel="max:thermostat:KMD1023108:KMD3040649:mode",
+										alexa="ThermostatController.thermostatMode" [binding="max"] }
+Number:Temperature K_Buero_Thermo_Ist "Temperatur [%.1f °C]"			<temperature> (K_Buero_Thermo,K_Buero,SteuerTemp,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3040649:actual_temp", alexa="TemperatureSensor.temperature" }
+Number:Temperature K_Buero_Thermo_Soll "Solltemperatur [%.1f °C]"			<temperature> (K_Buero_Thermo,K_Buero,SollTempTherm,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3040649:set_temp",
+										alexa="ThermostatController.targetSetpoint" }
+//Number K_Buero_Ventil "Ventilöffnung [%d %%]"					<sani_valve> (K_Buero_Thermo)			{ channel="max:thermostat:KMD1023108:KMD3040649:valve" }
+Switch K_Buero_Thermo_Batterie "Büro Thermostat Batterie"			<battery> (Batterien)				{ channel="max:thermostat:KMD1023108:KMD3040649:battery_low" }
+
+// ELW WC
+Group K_WC_Thermo "Keller WC"							<calendar> (K_WC,Heizung)			{ alexa="Endpoint.Thermostat" }
+String K_WC_Thermo_Modus "Modus"						<calendar> (K_WC_Thermo,Heizung)		{ channel="max:thermostat:KMD1023108:KMD3040111:mode",
+										alexa="ThermostatController.thermostatMode" [binding="max"] }
+Number:Temperature K_WC_Thermo_Ist "Temperatur [%.1f °C]"			<temperature> (K_WC_Thermo,K_WC,SteuerTemp,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3040111:actual_temp", alexa="TemperatureSensor.temperature" }
+Number:Temperature K_WC_Thermo_Soll "Solltemperatur [%.1f °C]"			<temperature> (K_WC_Thermo,K_WC,SollTempTherm,Heizung)
+										{ channel="max:thermostat:KMD1023108:KMD3040111:set_temp",
+										alexa="ThermostatController.targetSetpoint" }
+Switch K_WC_Thermo_Batterie "Thermostat ELW WC Batterie"			<battery> (Batterien)				{ channel="max:thermostat:KMD1023108:KMD3040111:battery_low" }
+

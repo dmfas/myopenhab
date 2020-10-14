@@ -1,0 +1,2 @@
+Switch EG_Kueche_Dunstabzug "Dunstabzugshaube"				(EG_Kueche) { channel="shelly:shelly1:e09806968bbd:relay#output", alexa="PowerController.powerState" }
+Switch EG_Kueche_Dunstabzug_Alarm "Dunstabzugshaube Alarm"		(Energie) { channel="shelly:shelly1:e09806968bbd:device#alarm" }

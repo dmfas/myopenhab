@@ -1,0 +1,113 @@
+// in diese Datei kommt alles, wofuer es kein eigenes Items-File gibt
+
+Number FBH_morgens_vorwaermen_Einstellung "FBH morgens vorwärmen [MAP(yesno.map):%s]" 			<heating>		(Einstellungen)
+Number Schwellwert_unten_Luftfeuchte_Waschkeller "Schwellwert unten rh Ventilator [%d %%]"		<humidity>		(K_Waschkeller,Einstellungen,Lueftung)
+Number Schwellwert_oben_Luftfeuchte_Waschkeller "Schwellwert oben rh Ventilator [%d %%]"		<humidity>		(K_Waschkeller,Einstellungen,Lueftung)
+Number Schwellwert_unten_Temperatur_Waschkeller "Schwellwert unten Temp [%.1f °C]"			<humidity>		(K_Waschkeller,Einstellungen,Lueftung)
+Number Stummschaltung_Lueftung "Stummschaltung Lüftungsanlage [%.0f %%]"				<fan>			(Einstellungen,Lueftung)
+Number Stummschaltung_Lueftung_Bianca "Stummschaltung Lüftungventil Bianca [%.0f %%]"			<fan>			(Einstellungen,Lueftung)
+Number Stosslueftung_Dauer "Dauer Stosslüftung [%.0f %%]"						<fan>			(Einstellungen,Lueftung)
+Number Lux_Durchschnitt_morgens "Durchschnitt Ostseite aussen [%.0f lux]"				<sun>			(Sonnenschutz)
+Number Lux_Durchschnitt_mittags "Durchschnitt Südseite aussen [%.0f lux]"				<sun>			(Sonnenschutz)
+Number Lux_Wohnen_mittags "Durchschnitt Südseite innen [%.0f lux]"					<sun>			(Sonnenschutz)
+Number Lux_Grenzwert_Sonnenschutz_morgens_niedrig "Schwellwert unten morgens [%d lux]"			<sun>			(Sonnenschutz,Einstellungen)
+Number Lux_Grenzwert_Sonnenschutz_morgens_hoch "Schwellwert oben morgens [%d lux]"			<sun>			(Sonnenschutz,Einstellungen)
+Number Lux_Grenzwert_Sonnenschutz_mittags_niedrig "Schwellwert unten mittags [%d lux]"			<sun>			(Sonnenschutz,Einstellungen)
+Number Lux_Grenzwert_Sonnenschutz_mittags_hoch "Schwellwert oben mittags [%d lux]"			<sun>			(Sonnenschutz,Einstellungen)
+Number UV_Grenzwert_Sonnenschutz "UV Schwellwert Sonnenschutz [UV index %.0f]"				<sun>			(Sonnenschutz,Einstellungen)
+// Gruppenmitgliedschaft für Number:Intensity items macht Probleme bei Wertekonvertierung, openhab-core #1377/#1406
+Number:Intensity Sonneneinstrahlung "Sonneneinstrahlung [%.1f W/m²]"					<sun>								{ channel="astro:sun:local:radiation#total" }
+Number EWT_Zuheizung "EWT heizt unterhalb [%.1f °C]"							<heating>		(Lueftung,Einstellungen)
+Number EWT_Kuehlung "EWT kühlt oberhalb [%.1f °C]"							<climate>		(Lueftung,Einstellungen)
+Number Aussentemperatur_Grenzwert_Sonnenschutz "Schwellwert Sonnenschutz aussen [%.1f °C]"		<temperature>		(Sonnenschutz,Einstellungen)
+Number Innentemperatur_Grenzwert_Sonnenschutz "Schwellwert Sonnenschutz innen [%.1f °C]"		<temperature>		(Sonnenschutz,Einstellungen)
+Number:Temperature Aussentemperatur_Hysterese_Sonnenschutz "Hysterese Sonnenschutz aussen [%.1f °C]"	<temperature>		(Sonnenschutz,Einstellungen)
+Number:Temperature Innentemperatur_Hysterese_Sonnenschutz "Hysterese Sonnenschutz innen [%.1f °C]"	<temperature>		(Sonnenschutz,Einstellungen)
+Number Rollaedenstatus "Rolladenstatus [MAP(scene.map):%s]"						<rollershutter>		(Einstellungen)
+Number Hysterese_Rollaeden "Schalttoleranz Rolläden [%d]"						<rollershutter>		(Einstellungen)
+Switch Rolladenautomatik "Rolladenautomatik hausweit [MAP(yesno.map):%s]"				<rollershutter>		(Einstellungen) { alexa="PowerController.powerState" }
+Switch Sonnenschutz_Bianca "Sonnenschutz Bianca [MAP(yesno.map):%s]"					<daylight>		(EG_Bianca,Einstellungen) { alexa="PowerController.powerState" }
+Switch Sonnenschutzschaltung "Sonnenschutz hausweit [MAP(yesno.map):%s]"				<blinds>		(Einstellungen)	{ alexa="PowerController.powerState" }
+Number Sonnenschutz "Sonnenschutz [MAP(shading.map):%s]"						<blinds>
+Number Rollaeden_setzen "Rolläden setzen"								<rollershutter>
+
+Group:Number:AVG LuxAussen "Lichtintensität Aussensensoren"						<sun>			(Sonnenschutz,Garten)
+Number:Temperature maxAugeSonnenkorrekturTemp "max. delta Temp Auge Sonne-Schatten zu dieser Uhrzeit [%.1f °C]" <temperature>	(Sonnenschutz,Einstellungen)
+Number:Temperature maxAuge2SonnenkorrekturTemp "max. delta Temp Auge2 Sonne-Schatten zu dieser Uhrzeit [%.1f °C]" <temperature>	(Sonnenschutz,Einstellungen)
+// Gruppenmitgliedschaft für Number:Intensity items macht Probleme bei Wertekonvertierung, openhab-core #1377/#1406
+Number:Intensity maxSonnenscheinRad "max. Sonneneinstrahlung zu dieser Uhrzeit [%.1f W/m²]"		<sun>
+Group:Number:AVG TempTerrasseRohwerte "Rohwerte Aussentemperaturen Terrasse in der Sonne [%.1f °C]"
+Number:Temperature Auge_Korrektur "Temperaturkorrektur Aussensensor Hausecke [%.1f °C]"			<temperature>		(Sonnenschutz,Einstellungen)
+Number:Temperature Auge2_Korrektur "Temperaturkorrektur Aussensensor Bianca [%.1f °C]"			<temperature>		(Sonnenschutz,Einstellungen)
+
+Group Thermostate "Thermostate"										<heating>		(Status)
+Group:Number:AVG SteuerTemp	"Raumtemperaturen Steuergrößen"						<temperature>		(Thermostate)
+Group:Number:AVG SollTempBoden	"Raumtemperaturen Sollgrößen Boden"					<temperature>		(Thermostate)
+Group:Number:AVG SollTempTherm	"Raumtemperaturen Sollgrößen Thermostate"				<temperature>		(Thermostate)
+Group:Number:AVG KorrekturTemp	"Raumtemperaturen Korrekturwerte"					<temperature>		(Thermostate)
+
+Group Temperatursensoren "Temperatursensoren"								<temperature>		(Sensoren)
+Group:Number:AVG TempInnen "Raumtemperatur [%.1f °C]"		 					<temperature>		(Temperatursensoren,Status)
+Group:Number:AVG TempAussen "Aussentemperatur [%.1f °C]"			 			<temperature>		(Temperatursensoren,Status)
+
+Number Kuehlbedarf_Kellerkuehlschrank "Kühlbedarf Kellerkühlschrank ELW [%d]"				<climate>		(K_ELW,Einstellungen)
+
+Group:Switch:OR(ON, OFF) Kellerlueftung "Lüftungsbedarf"						<fan>			(Lueftung)
+Switch Waschkeller_Lueftung "Waschkeller automatisch lüften [MAP(yesno.map):%s]"			<fan>			(Kellerlueftung,Lueftung,Einstellungen)	{ alexa="ToggleController.toggleState" }
+Switch Waschkeller_Lueftungsbedarf "Lüftungsbedarf Waschkeller [MAP(yesno.map):%s]"			<fan>			(Kellerlueftung,Lueftung)
+
+Number:Power K_Waschkeller_Waschmaschine_Power "Leistung Waschmaschine [%.1f W]"			<energy>		(K_Waschkeller,Energie)		{ channel="zwave:device:ddd23e6c:node2:sensor_power"}
+Number:Power K_Waschkeller_Waschmaschine_Watt "Verbrauch Waschmaschine [%.1f W]"			<energy>		(K_Waschkeller,Energie)		{ channel="zwave:device:ddd23e6c:node2:meter_watts" }
+Number Waschmaschine_Status "Betriebszustand [MAP(washer.map):%s]"					<washingmachine>	(K_Waschkeller)
+Switch Waschmaschine_ausgeraeumt "Waschmaschine ausgeräumt ? [MAP(yesno.map):%s]"			<washingmachine>	(K_Waschkeller)	{ alexa="ToggleController.toggleState" }
+
+
+
+// Heizung
+Number:Temperature Soll_Temp_Diele			"Diele [%.1f °C]"				<temperature>		(Heizung,SollTempBoden)
+Number:Temperature Soll_Temp_WC				"WC [%.1f °C]"					<temperature>		(Heizung,SollTempBoden)
+Number:Temperature Soll_Temp_Kueche			"Küche [%.1f °C]"				<temperature>		(Heizung,SollTempBoden)
+Number:Temperature Soll_Temp_Essen			"Esszimmer [%.1f °C]"				<temperature>		(Heizung,SollTempBoden)
+Number:Temperature Soll_Temp_Bianca			"Bianca [%.1f °C]"				<temperature>		(Heizung,SollTempBoden)
+Number:Temperature Soll_Temp_Wohnen			"Wohnzimmer [%.1f °C]"				<temperature>		(Heizung,SollTempBoden)
+Number:Temperature Soll_Temp_Bad			"Bad [%.1f °C]"					<temperature>		(Heizung,SollTempBoden)
+
+Number:Temperature default_Soll_Heizung_Tag_Diele	"Default Diele [%.1f °C]"			<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_WC		"Default WC [%.1f °C]"				<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Kueche	"Default Küche [%.1f °C]"			<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Bianca	"Default Bianca [%.1f °C]"			<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Essen	"Default Essen [%.1f °C]"			<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Wohnen	"Default Wohnen [%.1f °C]"			<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Bad		"Default Bad [%.1f °C]"				<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Markus	"Default Markus [%.1f °C]"			<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Tim		"Default Tim [%.1f °C]"				<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Lutz	"Default Lutz [%.1f °C]"			<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_ELW		"Default ELW [%.1f °C]"				<temperature>		(Heizung)
+Number:Temperature default_Soll_Heizung_Tag_ELW_WC	"Default ELW_WC [%.1f °C]"			<temperature>		(Heizung)
+
+Number:Temperature Korrektur_Ist_Temp_Diele		"Korrektur Diele [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_WC		"Korrektur WC [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Kueche		"Korrektur Küche [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Essen		"Korrektur Esszimmer [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Wohnen		"Korrektur Wohnzimmer [%.1f °C]"		<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Bianca		"Korrektur Bianca [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Bad		"Korrektur Bad [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Markus		"Korrektur Markus [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Tim		"Korrektur Tim [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Lutz		"Korrektur Lutz [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_ELW		"Korrektur ELW [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_ELW_WC		"Korrektur ELW-WC [%.1f °C]"			<temperature>		(Heizung,KorrekturTemp)
+
+Number:Temperature Ist_Temp_Diele			"korr. Temperatur Diele [%.1f °C]"		<temperature>		(Heizung,EG_Diele,IstTemp)
+Number:Temperature Ist_Temp_WC				"korr. Temperatur WC [%.1f °C]"			<temperature>		(Heizung,EG_WC,IstTemp)
+Number:Temperature Ist_Temp_Kueche			"korr. Temperatur Küche [%.1f °C]"		<temperature>		(Heizung,EG_Kueche,IstTemp)
+Number:Temperature Ist_Temp_Essen			"korr. Temperatur Esszimmer [%.1f °C]"		<temperature>		(Heizung,EG_Kueche,IstTemp)
+Number:Temperature Ist_Temp_Wohnen			"korr. Temperatur Wohnzimmer [%.1f °C]"		<temperature>		(Heizung,EG_Wohnen,IstTemp)
+Number:Temperature Ist_Temp_Bianca			"korr. Temperatur Bianca [%.1f °C]"		<temperature>		(Heizung,EG_Bianca,IstTemp)
+Number:Temperature Ist_Temp_Bad				"korr. Temperatur Bad [%.1f °C]"		<temperature>		(Heizung,OG_Bad,IstTemp)
+Number:Temperature Ist_Temp_Markus			"korr. Temperatur Markus [%.1f °C]"		<temperature>		(Heizung,OG_Markus,IstTemp)
+Number:Temperature Ist_Temp_Tim				"korr. Temperatur Tim [%.1f °C]"		<temperature>		(Heizung,OG_Tim,IstTemp)
+Number:Temperature Ist_Temp_Lutz			"korr. Temperatur Lutz [%.1f °C]"		<temperature>		(Heizung,OG_Lutz,IstTemp)
+Number:Temperature Ist_Temp_ELW				"korr. Temperatur ELW [%.1f °C]"		<temperature>		(Heizung,K_ELW,IstTemp)
+Number:Temperature Ist_Temp_ELW_WC			"korr. Temperatur ELW-WC [%.1f °C]"		<temperature>		(Heizung,K_WC,IstTemp)
+

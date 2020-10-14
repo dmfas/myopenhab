@@ -1,0 +1,201 @@
+// in diese Datei kommt alles, wofuer es kein eigenes Items-File gibt
+
+/* Globales */ 
+Number Szene "aktuelle Szene"											<color>		(Szenen)
+Number Alarmmodus "Alarm"		 									<shield>	(Status,Einstellungen)
+Number Animation "Animationsprogramm"	 									<color>		(Status,Einstellungen)
+Number Anwesenheitsmodus "Anwesenheitsmodus"									<heating>	(Einstellungen,Test)
+Number Klingelton "Klingelton"											<bell>		(Einstellungen)
+Switch Durchsagen "Durchsagen [MAP(yesno.map):%s]"								<soundvolume>	(Einstellungen)
+Dimmer Durchsagen_Lautstaerke "Durchsagen-Lautstärke [%d]"							<soundvolume>	(Einstellungen)
+Switch Regen "Regen [MAP(wet.map):%s]"										<rain>		(Sensoren,Test)
+Switch gesaugt "heute schon gesaugt [MAP(yesno.map):%s]"							<luigi>		(Status,Test)
+Number AirQualityIndex "AQI"											<carbondioxide>	(Status,Lueftung)
+Number AirQuality "Air Quality Index [SCALE(airquality_outer.scale):%s]"					<carbondioxide>	(Status,Lueftung)
+Number Fensteroeffnung_maxDauer											<windowcheck>	(Einstellungen)
+Switch Fensteroeffnung_ueberpruefen "Fensteröffnung Check [MAP(yesno.map):%s]" 					<windowcheck>	(Einstellungen)		{ alexa="PowerController.powerState" }
+Switch dynamisches_Treppenlicht "dynamisches Treppenlicht [MAP(yesno.map):%s]" 					<stairs>	(Einstellungen)
+Switch Guten_Morgen_Ansage "Guten-Morgen-Ansage [MAP(yesno.map):%s]"	 					<soundvolume>	(Einstellungen)
+
+Switch Nachtschaltung "Nachtschaltung [MAP(yesno.map):%s]"							<moon>		(Status,Einstellungen)	{ alexa="PowerController.powerState" }
+Switch Tageslicht "Tageslicht [MAP(daylight.map):%s]"								<sun>		(Status)		{ alexa="PowerController.powerState" }
+
+//Switch Kaffeeansagenschaltung "Kaffeeansagenschaltung [MAP(yesno.map):%s]"					<soundvolume>	(Einstellungen)
+Switch Kaffeeansage "Kaffeeansage [%s]"	 									<soundvolume>	(Test)	{ expire="20m,command=OFF" }
+Switch Kaffeeansage_auch_einen "Ansage mir auch einen Kaffee"	 						<soundvolume>	(Test)
+
+String VoiceCommand
+
+/* civil/nautic/astro Dawn/Dusk = Sonne ist 6/12/18 Grad unter Horizont */
+DateTime Sonnenaufgang_Zeit "Sonnenaufgang (6° u.Hz.) [%1$tH:%1$tM]"						<sun>	{ channel="astro:sun:local:rise#start" }
+DateTime Sonnenuntergang_Zeit "Sonnenuntergang (6° u.Hz.) [%1$tH:%1$tM]"					<moon>	{ channel="astro:sun:local:set#start" }
+
+//String FeiertagICAL2		{ http="<[https://www.schulferien.org/media/ical/deutschland/feiertage_nordrhein-westfalen_2020.ics?k=QGUz9zPIs9IbKM6dCQXhlfQCXyUDAoRVy4VkJaTJZkuRkp9WZRrPmObcmkOLkIfj1Mzvoiuec50gFd1KWpH-5lb0sMYikp6omuvUqMheY5k:7200000:JS(ical_Ferien.js)]" }
+//String FerienICAL2		{ http="<[https://www.schulferien.org/media/ical/deutschland/ferien_nordrhein-westfalen_2020.ics?k=Z-RCusfVPE4nXwLNhcXk4Dr94v10KjXTJGOJg48TZ1L2nar4VPfqbmEt0YuPLrxrqRCXeXJ8SgTolQUwjsL-gP4ixYKvfNtLea0ADFJkhf4:7200000:JS(ical_Ferien.js)]" }
+String FeiertagICAL "Feiertage NRW [%s]"											(Status)		{ channel="http:url:9e029ed8:111111" }
+String FerienICAL "Ferien NRW [%s]"												(Status)		{ channel="http:url:9e029ed8:111112" }
+
+Switch arbeitsfreierTag		"Arbeitsfreier Tag"								<calendar>	(Status,Einstellungen)	{ alexa="PowerController.powerState" }
+Switch CoronaRegiert		"Sonderregelungen während der Corona-Zeit"					<calendar>	(Status,Einstellungen)	{ alexa="PowerController.powerState" }
+Switch Feiertag			"Feiertag"									<calendar>	(Status,Einstellungen)	{ alexa="PowerController.powerState" }
+Switch Schulferien		"Schulferien [MAP(school.map):%s]"						<child1>	(Status,Einstellungen)	{ alexa="PowerController.powerState" }
+String SchulferienName		"Schulferien [%s]"								<calendar>	(Status)
+
+Switch Ferienschaltung		"Ferienschaltung [MAP(vacation.map):%s]"					<heating>	(Status,Heizung,Einstellungen)	{ alexa="PowerController.powerState" }
+
+Number markus_telegram_chatid	"Telegram chatID für Benachrichtigungen Markus"			<notification-counter-01>	(Status)
+Number bianca_telegram_chatid	"Telegram chatID für Benachrichtigungen Bianca"			<notification-counter-02> 	(Status)
+
+
+/* Gruppen */
+Group All
+Group EG 					"Erdgeschoß"						<groundfloor>		(All)
+Group OG 					"Obergeschoß"						<firstfloor>		(All)
+Group Keller 					"Keller"						<cellar>		(All)
+Group Garage					"Garage"						<garage>		(All)
+Group Garten			 		"Garten"						<garden>		(All)
+Group Landroid		 			"Landroid"						<garden>		(Garten,Status)
+Group:Number:SUM Rolladen			"Rolläden"						<rollershutter>		(All)
+Group:Rollershutter Jalousien			"Jalousien"						<rollershutter>		(All)
+Group Alarme					"Alarme"									(All)
+Group Sensoren					"Sensoren"									(All)
+Group:Contact:OR(OPEN,CLOSED) Smartphones	"eingeloggte Smartphones [(%d)]"			<phone>			(Status)
+Group PCs					"PCs"							<computer>		(All)
+Group PV					"Photovoltaik"						<sun>			(All)
+Group USV					"USV"							<it_ups>		(Status)
+Group Server					"openHAB Server"					<it_ups>		(Status)
+Group owntracks					"owntracks"						<present>		(Status)
+Group Praesenz					"Präsenz"						<present>		(Status)
+
+Group Schnellzugriff				"Schnellzugriff"					<zoom>			(All)
+Group Sonnenschutz				"Sonnenschutz"						<sun>			(All)
+Group Temperaturen				"Temperaturen"						<temperature>		(All)
+Group Heizung					"Heizungssystem"					<heating>		(All)
+Group Lueftung 					"Lüftung und Ventilatoren"				<fan>			(All)
+Group Abwasser 					"Abwasser und Drainage"					<sewerage>		(All)
+
+Group Status 					"Status"						<chart>			(All)
+Group Einstellungen				"Einstellungen"						<gear>			(All)
+Group Szenen 					"Szenen"						<video>			(All)
+Group Wetter	 				"Wetter"						<weather-unknown>	(All)
+Group Test 					"Test"							<hammer_screwdriver>	(All)
+Group Blinklicht				"Blinklichter"						<light>			(All)
+Group openHABianPi				"openHABianPi"						<it_server>		(All)
+
+Group Bewegungsmelder				"Bewegungsmelder [%d]"					<present>
+Group:Contact:OR(OPEN, CLOSED)BewegungsmelderInnen	"Bewegungsmelder innen [%d]"			<present>		(Bewegungsmelder,Status)
+Group:Contact:OR(OPEN, CLOSED)BewegungsmelderAussen	"Bewegungsmelder aussen [%d]"			<present>		(Bewegungsmelder,Status)
+Group Rauchmelder				"Rauchmelder"						<fire>			(Alarme)
+Group Tampersensoren				"Tamper (Manipulations-)Sensoren"			<fire>			(Alarme)
+Group Lichter					"Alle Lichter"						<sun>			(All)
+Group Lichtsensoren				"Lichtsensoren"						<sun>			(Sensoren,Status)
+Group Dimmerschalter				"Alle Dimmer"						<whites>		(Status)
+Group:Switch:OR(ON, OFF) Lichtschalter 		"Alle Lichtschalter [(%d)]" 				<light>			(Lichter)
+Group:Contact:OR(OPEN, CLOSED) Fenster 		"Offene Fenster [%d]"					<contact>		(Status)
+Group:Number:SUM Alarmkontakte			"Alarm-relevante Fenster- und Türkontakte"		<contact>		(Sensoren)
+Group Tueren					"Türen"							<door>			(Sensoren)
+Group:Number:SUM AussenTueren 			"Offene Außentüren [%d]"				<frontdoor>		(Tueren,Status)
+Group:Number:SUM InnenTueren 			"Offene Innentüren [%d]"				<door>			(Tueren,Status)
+Group:Number:SUM WohnraumTueren			"Wohnraumtüren [%d]"					<door>			(Tueren,Status)
+Group HomBot					"Luigi, der HomBot"					<scene_cleaning>	(All)
+	
+Group Energie 					"Energieverbrauch"					<energy>		(Status)
+Group Batterien					"Batteriestand"						<battery>		(Status)
+
+
+Group EG_Wohnen		 			"Wohnzimmer"						<sofa>	 		(EG)
+Group EG_Kueche 				"Küche" 						<kitchen> 		(EG)
+Group EG_Bianca 				"Biancas Zimmer"				 	<bedroom> 		(EG)
+Group EG_WC			 		"WC" 							<toilet> 		(EG)
+Group EG_Kabuff					"Kabuff" 						<corridor>		(EG)
+Group EG_Diele	 				"Diele"							<corridor> 		(EG)
+	
+Group OG_Markus 				"Markus Zimmer" 					<bedroom> 		(OG)
+Group OG_Tim 					"Tims Zimmer" 						<bedroom> 		(OG)
+Group OG_Lutz 					"Lutz' Zimmer" 						<bedroom> 		(OG)
+Group OG_Bad 					"Bad" 							<bath> 			(OG)
+Group OG_Flur 					"Flur" 							<corridor> 		(OG)
+
+Group D_Dachboden				"Dachboden" 						<attic> 		(OG)
+
+Group K_Waschkeller				"Waschkeller" 						<cellar> 		(Keller)
+Group K_ELW	 				"Einliegerwohnung" 					<sofa> 			(Keller)
+Group K_WC	 				"Einliegerwohnung WC" 					<toilet> 		(Keller)
+
+Group mobil	 				"mobile Geräte" 					<question>		(All)
+Group Bad_Bodenlicht				"Farblicht Bad Boden"					<colorwheel>
+
+
+Switch Szene_TV "Fernsehen"			{ alexa="SceneController.scene" }
+Switch Szene_Kino "Kinomodus"			{ alexa="SceneController.scene" }
+Switch Szene_morgens "morgens"			{ alexa="SceneController.scene" }
+Switch Szene_tagsueber "tagsüber"		{ alexa="SceneController.scene" }
+Switch Szene_abends "abends"			{ alexa="SceneController.scene" }
+Switch Szene_nachts "nachts"			{ alexa="SceneController.scene" }
+Switch Szene_Aus "Aus"				{ alexa="SceneController.scene" }
+Switch Rasenmaeher "Rasenmäher"			{ alexa="SceneController.scene" }
+
+
+DateTime Datum		"Datum [%1$tA, %1$td.%1$tm.%1$tY]"				<calendar> { channel="ntp:ntp:local:dateTime" }
+
+Switch Weihnachtsbeleuchtung								<scene_xmas> (Einstellungen)
+
+
+//Switch Dreambox "Dreambox [%s]"							<player> (EG_Wohnen,Status,Test) { http=">[ON:POST:http://dm900/web/powerstate?newstate=4] >[OFF:POST:http://dm900/web/powerstate?newstate=5]", alexa="PowerController.powerState" }
+//String Dreambox_Standby "Dreambox in Standby [%s]"					<player>	{ http="<[http://dm900/web/powerstate:1000:REGEX(.*?<e2instandby>(.*?)</e2instandby>.*)]" }
+Switch Dreambox "Dreambox [%s]"								<player> (EG_Wohnen,Status) { channel="http:url:e7c6c291:111114", alexa="PowerController.powerState" }
+
+
+//Number Garten_Bewegung "Bewegung Aussenkamera [MAP(foscam.map):%s]"			<motion> (Garten,BewegungsmelderAussen,Test)	{ http="<[http://foscam:88/cgi-bin/CGIProxy.fcgi?cmd=getDevState&usr=admin&pwd=cTNW0Tpe:6000:REGEX(.*?<motionDetectAlarm>(.*?)</motionDetectAlarm>.*)]" }
+//Number Garten_Geraeusch "Geräusch Aussenkamera [MAP(foscam.map):%s]"			<soundvolume> (Garten,BewegungsmelderAussen,Test)	{ http="<[http://foscam:88/cgi-bin/CGIProxy.fcgi?cmd=getDevState&usr=admin&pwd=cTNW0Tpe:10000:REGEX(.*?<soundAlarm>(.*?)</soundAlarm>.*)]" }
+Number Garten_Bewegung "Bewegung Aussenkamera via HTTPv2 [MAP(foscam.map):%s]"		<motion> (Garten,BewegungsmelderAussen,Test)	{ channel="http:url:4591f6f4:987654321" }
+Number Garten_Geraeusch "Geräusch Aussenkamera via HTTPv2 [MAP(foscam.map):%s]"		<soundvolume> (Garten,BewegungsmelderAussen,Test)	{ channel="http:url:4591f6f4:987654320" }
+Number Garten_Bewegung2 "Bewegung Aussenkamera via binding [MAP(motion.map):%s]"	<motion> (Garten,BewegungsmelderAussen,Test)	{ channel="ipcamera:FOSCAM:19216817825:motionAlarm" }
+Number Garten_Geraeusch2 "Geräusch Aussenkamera via binding [MAP(motion.map):%s]"	<soundvolume> (Garten,BewegungsmelderAussen,Test)	{ channel="ipcamera:FOSCAM:19216817825:audioAlarm" }
+
+Switch Fischkopp "unser Fischkopp [MAP(yesno.map):%s]"					<water> (Einstellungen)				{ alexa="PowerController.powerState" }
+
+Group Garten_Baeume "Farblicht Bäume" <colorwheel>
+
+Number:Temperature Garten_Auge_Temp "Auge Hausecke [%.1f °C]"				<temperature> (TempTerrasse)
+Number:Temperature Garten_Auge2_Temp "Terrasse lang Auge [%.1f °C]"			<temperature> (TempTerrasse)
+
+Switch Rasenmaeher_aktiviert "Rasenmäher startet zeitgesteuert [MAP(yesno.map):%s]"	<garden> (Garten,Einstellungen)
+
+DateTime Wettervorhersage_Zeitpunkt "Zeitpunkt der Vorhersage [%1$ta %1$tR]"		<clock>
+String aktuell "aktuell [%s]"										{ weather="locationId=home,type=condition,property=text" }
+String aktuell_common "Wetter [MAP(weather_de.map):%s]"					<weather>	{ weather="locationId=home,type=condition,property=commonId" }
+Number aktuell_Bewoelkung "aktuelle Bewölkung [%d %%]"					<sun_clouds> (Wetter) { weather="locationId=home,type=clouds,property=percent" }
+String Vorhersage "Vorhersage heute [%s]"									{ weather="locationId=home,forecast=0,type=condition,property=text" }
+Number Temp_min "heute min. [%.1f °C]"   						<temperature> (Wetter) { weather="locationId=home,forecast=0,type=temperature,property=min" }
+Number Temp_max "heute max. [%.1f °C]"   						<temperature> (Wetter) { weather="locationId=home,forecast=0,type=temperature,property=max" }
+String Temp_minMax "heute min/max [%s °C]"						<temperature> { weather="locationId=home,forecast=0,type=temperature,property=minMax,scale=1" }
+Number Taupunkt "Taupunkt [%.2f °C]"							<rain> (Wetter) { weather="locationId=home,forecast=0,type=temperature,property=dewpoint" }
+Number Bewoelkung "erwartete Bewölkung [%d %%]"							(Wetter) { weather="locationId=home,forecast=0,type=clouds,property=percent" }
+Number Luftfeuchte "Luftfeuchtigkeit meteo. [%d %%]"					<humidity> (Wetter,Waschkeller) { weather="locationId=home,forecast=0,type=atmosphere,property=humidity" }
+//Number Regenwahrscheinlichkeit "Wahrscheinlichkeit heute [MAP(prob.map): %d]"		<rain> (Wetter) { weather="locationId=home,forecast=0,type=precipitation,property=probability" }
+Number Regenwahrscheinlichkeit "Wahrscheinlichkeit heute [%.1f %%]"			<rain> (Wetter){ weather="locationId=home,forecast=0,type=precipitation,property=probability" }
+Number Regenmenge "aktuelle Regenmenge [%.2f mm/h]"					<rain> (Wetter) { weather="locationId=home,type=precipitation,property=rain" }
+Number heute_Regenmenge "erwartete Regenmenge [%.2f mm/h]"				<rain> (Wetter) { weather="locationId=home,forecast=0,type=precipitation,property=rain" }
+Number Windstaerke "Windstärke heute [%.1f m/s]" 					<wind> (Wetter) { weather="locationId=home,forecast=0,type=wind,property=speed" }
+String morgen_Vorhersage "morgen [%s]" 								{ weather="locationId=home,forecast=1,type=condition,property=text"}
+
+Number morgen_Temp_min "morgen min. [%.1f °C]"   					<temperature> (Wetter) { weather="locationId=home,forecast=1,type=temperature,property=min" }
+Number morgen_Temp_max "morgen max. [%.1f °C]"   					<temperature> (Wetter) { weather="locationId=home,forecast=1,type=temperature,property=max" }
+String morgen_Temp_minMax "morgen min/max [%s °C]"					<temperature> { weather="locationId=home,forecast=1,type=temperature,property=minMax,scale=1" }
+Number morgen_Bewoelkung "Bewölkung morgen [%d %%]"					<weather-cloudy> (Wetter) { weather="locationId=home,forecast=1,type=clouds,property=percent" }
+//Number morgen_Regenwahrscheinlichkeit "Wahrscheinlichkeit morgen [%d %%]"		<rain> (Wetter) { weather="locationId=home,forecast=1,type=precipitation,property=probability" }
+Number morgen_Regenwahrscheinlichkeit "Wahrscheinlichkeit morgen [%.1f %%]"		<rain> (Wetter) { weather="locationId=home,forecast=1,type=precipitation,property=probability" }
+Number morgen_Regenmenge "Regenmenge morgen [%.2f mm/h]"				<rain> (Wetter) { weather="locationId=home,forecast=1,type=precipitation,property=rain" }
+Number morgen_Windstaerke "Windstärke morgen [%.1f m/s]"				<wind> (Wetter) { weather="locationId=home,forecast=1,type=wind,property=speed" }
+Number aktuell_Temp "offizielle Temperatur [%.1f °C]"					<temperature> (Wetter,TempAussen) { weather="locationId=home, type=temperature, property=current" }
+DateTime Wetter_LastUpdate "Letztes Update [%1$ta %1$tR]"				<clock>
+
+
+String Landroid_Status			"Landroid Status [%s]"				<garden> (Landroid)
+String Landroid_Display			"Landroid Display [%s]"				<garden> (Landroid)
+String Landroid_Batterie		"Landroid Batterie [%d %%]"			<garden> (Landroid)
+String Landroid_Request			"Landroid last requested action [%s]"		<garden> (Landroid)
+String Landroid_Command			"Landroid [%s]"					<garden>
+String Landroid_Command_Proxy
+

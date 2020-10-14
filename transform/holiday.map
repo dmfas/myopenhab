@@ -1,0 +1,6 @@
+OFF=Arbeit
+ON=frei
+0=Arbeit
+1=frei
+false=Schulzeit
+-=keine Daten

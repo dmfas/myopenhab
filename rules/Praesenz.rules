@@ -1,0 +1,176 @@
+// Idee: Quorum[Min|Max] als Lambda implementieren
+//       statt Gruppe.state == ON (Gruppe ist vom Typ Number und Gruppe.state enthaelt die SUM)
+//       als QuorumMin.apply(Gruppe,max_false_positives) berechnen
+val Number max_false_positives = 1		// zulaessige Anzahl false positives bei Quorumbildung
+val Number max_false_negatives = 1		// zulaessige Anzahl false negatives bei Quorumbildung
+
+
+val Functions$Function2 <GroupItem,NumberItem,Boolean> QuorumMin = [ g, allowed_false_negatives |
+	var Number size = g.members.size
+//	logDebug("Praesenz", "QuorumMin debug 0: g = " + g + "; #negs = " + allowed_false_negatives + "; size = " + size)
+	var Number r = (size - allowed_false_negatives)
+//	logDebug("Praesenz", "QuorumMin debug 1: g = " + g.members + "; r = size - allowed_false_negatives = " + size + " - " + allowed_false_negatives + " = " + r)
+	var boolean ret  = (g.members.filter[s| s.state == ON].size) >= r
+//	logDebug("Praesenz", "QuorumMin debug 2: g = " + g.name + "; ret = " + ret)
+
+	ret	// einfach so hinschreiben, das definiert den return Wert
+]
+
+val Functions$Function2 <GroupItem,NumberItem,Boolean> QuorumMax = [ g, allowed_false_positives |
+//	logDebug("Praesenz", "QuorumMax debug 0: g = " + g + "; #pos = " + allowed_false_positives)
+	var Number p = allowed_false_positives
+	var boolean ret = (g.members.filter[s| s.state == ON].size) <= p
+//	logDebug("Praesenz", "QuorumMax debug 2: g = " + g + "; p = " + p + "; ret = " + ret)
+
+	ret
+]
+
+
+val Number Markus_idx = 0
+val Number Bianca_idx = 1
+val Number Tim_idx = 2
+val Number Lutz_idx = 3
+val min_Quorum = newArrayList(2,2,2,2)
+val max_Quorum = newArrayList(2,2,2,2)
+// Usage: min_Quorum.get(Markus_idx)
+
+var Timer waitTimer
+
+
+/*
+rule "System started"
+when
+    System started
+then
+    daheim.sendCommand(OFF) // assume no one is home on startup
+end
+*/
+
+
+rule "Update Markus_daheim"
+when
+//	Item Markus_daheim_Gruppe received update
+	Item Markus_daheim_Gruppe changed
+then
+	if (QuorumMin.apply(Markus_daheim_Gruppe, max_false_negatives)) {
+		Markus_daheim.postUpdate(ON)
+        	daheim.sendCommand(ON)
+	}
+end
+
+rule "Update Bianca_daheim"
+when
+//	Item Bianca_daheim_Gruppe received update
+	Item Bianca_daheim_Gruppe changed
+then
+	if (QuorumMin.apply(Bianca_daheim_Gruppe, max_false_negatives)) {
+		Bianca_daheim.postUpdate(ON)
+        	daheim.sendCommand(ON)
+	}
+end
+
+rule "Update Tim_daheim"
+when
+//	Item Tim_daheim_Gruppe received update
+	Item Tim_daheim_Gruppe changed
+then
+	if (QuorumMin.apply(Tim_daheim_Gruppe, max_false_negatives)) {
+		Tim_daheim.postUpdate(ON)
+        	daheim.sendCommand(ON)
+	}
+end
+
+rule "Update Lutz_daheim"
+when
+//	Item Lutz_daheim_Gruppe received update
+	Item Lutz_daheim_Gruppe changed
+then
+	if (QuorumMin.apply(Lutz_daheim_Gruppe, max_false_negatives)) {
+		Lutz_daheim.postUpdate(ON)
+        	daheim.sendCommand(ON)
+	}
+end
+
+
+/*
+rule "daheim_Gruppe upgedated, mind. ein Sensor upgedated."
+when
+    Item daheim_Gruppe received update
+then
+//    logDebug("Praesenz", "daheim_Gruppenupdate debug 0, max.neg = " + max_false_negatives)
+//ORIG:    if(daheim_Gruppe.state == ON && daheim.state != ON) {
+
+    // jemand ist heimgekommen
+    if (QuorumMin.apply(daheim_Gruppe, max_false_negatives) && daheim.state != ON) {
+//        logDebug("Praesenz", "daheim_Gruppenupdate debug 1a, max.neg = " + max_false_negatives)
+        daheim_Timer.postUpdate(OFF) // Timer canceln
+        daheim.sendCommand(ON)
+    }
+
+    // niemand daheim
+    if (QuorumMax.apply(daheim_Gruppe, max_false_positives) && daheim.state != OFF){
+//        logDebug("Praesenz", "daheim_Gruppenupdate debug 1b, max.pos = " + max_false_positives)
+        daheim_Timer.sendCommand(ON) // Timer starten
+    }
+//    logDebug("Praesenz", "daheim_Gruppenupdate debug 2")
+end
+
+
+rule "daheim Timer expired"
+when
+    Item daheim_Timer received command OFF
+then
+    daheim.sendCommand(OFF)
+end
+*/
+
+
+rule "Handys auf Praesenz checken"
+when
+    Time cron "0 0/2 * * * ?"
+then
+	if (daheim.state == NULL) {
+		daheim.sendCommand(ON)
+	}
+
+//	logDebug("Praesenz", "Checke Präsenz, daheim = " + daheim.state)
+//	logDebug("Praesenz", "Checke Präsenz, Smartphones = " + Smartphones)
+//	logDebug("Praesenz", "Checke Präsenz, BewegungsmelderInnen = " + BewegungsmelderInnen)
+
+	if (daheim.state == ON) {
+		if ((Smartphones.members.filter(s | s.state == ON).size == 0) &&
+		    (BewegungsmelderInnen.members.filter(s | s.state == OPEN).size == 0)) {
+			logInfo("Praesenz", "Keine Handies in Reichweite und keine Bewegungsmelder aktiv, überprüfe flapping.")
+			if ((Smartphones.members.filter(s | s.changedSince(now.minusMinutes(5))).size == 0) &&
+			    (BewegungsmelderInnen.members.filter(s | s.changedSince(now.minusMinutes(5))).size == 0)) {
+				logInfo("Praesenz", "Niemand daheim.")
+				daheim.sendCommand(OFF)
+			}
+		}
+	} else {
+		// for initialisation. If Presence is undefined or off, although it should be on.
+		if ((Smartphones.members.filter(s | s.state == ON).size > 0) || 
+		    (BewegungsmelderInnen.members.filter(s | s.state == OPEN).size > 0)) {
+			logInfo("Praesenz", "Jemand daheim.")
+			daheim.sendCommand(ON)
+		}
+	}
+end
+
+
+rule "Coming home"
+when
+        Item Smartphones changed
+	or
+	Item BewegungsmelderInnen changed
+then
+        if (daheim.state != ON) {
+                if ((Smartphones.members.filter(s | s.state == ON).size > 0) ||
+                    (BewegungsmelderInnen.members.filter(s | s.state == OPEN).size > 0)) {
+                        logInfo("Praesenz", "Jemand ist heimgekommen.")
+                        daheim.sendCommand(ON)
+                }
+        }
+
+end
+

@@ -1,0 +1,67 @@
+Group Alexa_Wohnen <player>
+
+// Player control
+Player Echo_Wohnen_Player		"Player"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:player" }
+Dimmer Echo_Wohnen_Volume		"Volume [%.0f %%]"	<soundvolume>	(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:volume" }
+Number Echo_Wohnen_Treble		"Treble"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:equalizerTreble" }
+Number Echo_Wohnen_Midrange		"Midrange"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:equalizerMidrange" }
+Number Echo_Wohnen_Bass			"Bass"					(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:equalizerBass" }
+Switch Echo_Wohnen_Shuffle		"Shuffle"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:shuffle" }
+
+// Media channels
+Dimmer Echo_Wohnen_MediaProgress	"Media progress"			(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:mediaProgress" }
+Number:Time Echo_Wohnen_MediaProgressTime "Media progress time [%d %unit%]"	(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:mediaProgressTime" }
+Number:Time Echo_Wohnen_MediaLength	"Media length [%d %unit%]"		(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:mediaLength" }
+
+// Player Information
+String Echo_Wohnen_ImageUrl		"Image URL"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:imageUrl" }
+String Echo_Wohnen_Title		"Title"					(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:title" }
+String Echo_Wohnen_Subtitle1		"Subtitle 1"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:subtitle1" }
+String Echo_Wohnen_Subtitle2		"Subtitle 2"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:subtitle2" }
+String Echo_Wohnen_ProviderDisplayName	"Provider"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:providerDisplayName" }
+
+// Music provider and start command
+String Echo_Wohnen_MusicProviderId	"Music Provider Id"			(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:musicProviderId" }
+String Echo_Wohnen_PlayMusicCommand	"Play music voice command (Write Only)"	(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:playMusicVoiceCommand" }
+String Echo_Wohnen_StartCommand		"Start Information"			(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:startCommand" }
+
+// TuneIn Radio
+String Echo_Wohnen_RadioStationId	"TuneIn Radio Station Id"		(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:radioStationId" }
+Switch Echo_Wohnen_Radio		"TuneIn Radio"				(Alexa_Wohnen) 		{ channel="amazonechocontrol:echo:168fed91:radio" }
+
+// Amazon Music
+String Echo_Wohnen_AmazonMusicTrackId	"Amazon Music Track Id"                 (Alexa_Wohnen) 		{ channel="amazonechocontrol:echo:168fed91:amazonMusicTrackId" }
+String Echo_Wohnen_AmazonMusicPlayListId "Amazon Music Playlist Id"		(Alexa_Wohnen) 		{ channel="amazonechocontrol:echo:168fed91:amazonMusicPlayListId" }
+Switch Echo_Wohnen_AmazonMusic		"Amazon Music"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:amazonMusic" }
+
+// Bluetooth
+String Echo_Wohnen_BluetoothMAC		"Bluetooth MAC Address"	<bluetooth>	(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:bluetoothMAC" }
+Switch Echo_Wohnen_Bluetooth		"Bluetooth"		<bluetooth>	(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:bluetooth" }
+String Echo_Wohnen_BluetoothDeviceName	"Bluetooth Device"	<bluetooth>	(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:bluetoothDeviceName" }
+
+// Commands
+String Echo_Wohnen_Announcement          "Announcement"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:announcement" }
+String Echo_Wohnen_TTS                   "Text to Speech"			(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:textToSpeech" }
+Dimmer Echo_Wohnen_TTS_Volume            "Text to Speech Volume"		(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:textToSpeechVolume" }
+String Echo_Wohnen_Remind                "Remind"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:remind" }
+String Echo_Wohnen_PlayAlarmSound        "Play Alarm Sound"			(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:playAlarmSound" }
+String Echo_Wohnen_StartRoutine          "Start Routine"			(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:startRoutine" }
+Dimmer Echo_Wohnen_NotificationVolume    "Notification volume"			(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:notificationVolume" }
+Switch Echo_Wohnen_AscendingAlarm        "Ascending alarm"			(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:ascendingAlarm" }
+
+// Feedbacks
+String Echo_Wohnen_LastVoiceCommand	"Last voice command"			(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:lastVoiceCommand" }
+DateTime Echo_Wohnen_NextReminder	"Next reminder"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:nextReminder" }
+DateTime Echo_Wohnen_NextAlarm		"Next alarm"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:nextAlarm" }
+DateTime Echo_Wohnen_NextMusicAlarm	"Next music alarm"			(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:nextMusicAlarm" }
+DateTime Echo_Wohnen_NextTimer		"Next timer"				(Alexa_Wohnen)		{ channel="amazonechocontrol:echo:168fed91:nextTimer" }
+
+
+// Flashbriefings
+Switch FlashBriefing_Technical_Save	"Save (Write only)"					{ channel="amazonechocontrol:flashbriefingprofile:account1:flashbriefing1:save" }
+Switch FlashBriefing_Technical_Active	"Active"						{ channel="amazonechocontrol:flashbriefingprofile:account1:flashbriefing1:active" }
+String FlashBriefing_Technical_Play	"Play (Write only)"					{ channel="amazonechocontrol:flashbriefingprofile:account1:flashbriefing1:playOnDevice" }
+
+Switch FlashBriefing_LifeStyle_Save	"Save (Write only)"					{ channel="amazonechocontrol:flashbriefingprofile:account1:flashbriefing2:save" } 
+Switch FlashBriefing_LifeStyle_Active	"Active"						{ channel="amazonechocontrol:flashbriefingprofile:account1:flashbriefing2:active" }
+String FlashBriefing_LifeStyle_Play	"Play (Write only)"					{ channel="amazonechocontrol:flashbriefingprofile:account1:flashbriefing2:playOnDevice" }

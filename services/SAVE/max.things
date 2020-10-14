@@ -1,0 +1,2 @@
+Bridge max:bridge:KMD1016617 [ ipAddress="192.168.178.24", serialNumber="KMD1016617", ntpServer1=ptbtime1.ptb.de, ntpServer2=0.pool.ntp.org ] {
+}

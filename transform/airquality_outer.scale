@@ -1,0 +1,6 @@
+[0..50]=Gut
+[51..100]=Mässig
+[101..150]=Ungesund fuer Sensitive
+[151..200]=Ungesund
+[201..300]=Sehr ungesund
+[300..10000]=Gefährlich

@@ -1,0 +1,19 @@
+Group  AVReceiver	"VSX Receiver"							(EG_Wohnen,All)	{ alexa="Endpoint.StepSpeaker" }
+Switch  AVR_Power	"Power"								(AVReceiver) 	{ channel="pioneeravr:ipAvr2016:1716d6c5463:zone1#power", alexa="PowerController.powerState" }
+Dimmer  AVR_Volume_perc	"Lautstärke [%.0f %%]"						(AVReceiver) 	{ channel="pioneeravr:ipAvr2016:1716d6c5463:zone1#volumeDimmer", alexa="StepSpeaker.volume" }
+Switch  AVR_Mute	"Mute"								(AVReceiver) 	{ channel="pioneeravr:ipAvr2016:1716d6c5463:zone1#mute", alexa="StepSpeaker.muted" }
+String  AVR_Source	"Quelle [%s]"							(AVReceiver)	{ channel="pioneeravr:ipAvr2016:1716d6c5463:zone1#setInputSource", alexa="InputController.input" [supportedInputs="HDMI 1,HDMI 2,HDMI 3,HDMI 4,HDMI 5,TV,dm900,Bluetooth"] }
+String  AVR_Status	"Status [%s]"							(AVReceiver)	{ channel="pioneeravr:ipAvr2016:1716d6c5463:displayInformation#displayInformation" }
+String  AVR_ListeningMode "Listening Mode [MAP(avrlisteningmode.map):%s]"		(AVReceiver)	{ channel="pioneeravr:ipAvr2016:1716d6c5463:zone1#listeningMode" }
+String  AVR_PlayingListeningMode "Playing Listening Mode [MAP(avrplayingmode.map):%s]"	(AVReceiver)	{ channel="pioneeravr:ipAvr2016:1716d6c5463:zone1#playingListeningMode" }
+
+/*
+Group  AVReceiver	"VSX Receiver"							(EG_Wohnen,All)	{ alexa="Endpoint.StepSpeaker" }
+Switch  AVR_Power	"Power"								(AVReceiver) 	{ channel="pioneeravr:ipAvr2016:5F9EC1B3-ED59-79BB-4530-745e1cb106b2:zone1#power", alexa="PowerController.powerState" }
+Dimmer  AVR_Volume_perc	"Lautstärke [%.0f %%]"						(AVReceiver) 	{ channel="pioneeravr:ipAvr2016:5F9EC1B3-ED59-79BB-4530-745e1cb106b2:zone1#volumeDimmer", alexa="StepSpeaker.volume" }
+Switch  AVR_Mute	"Mute"								(AVReceiver) 	{ channel="pioneeravr:ipAvr2016:5F9EC1B3-ED59-79BB-4530-745e1cb106b2:zone1#mute", alexa="StepSpeaker.muted" }
+String  AVR_Source	"Quelle [%s]"							(AVReceiver)	{ channel="pioneeravr:ipAvr2016:5F9EC1B3-ED59-79BB-4530-745e1cb106b2:zone1#setInputSource", alexa="InputController.input" [supportedInputs="HDMI 1,HDMI 2,HDMI 3,HDMI 4,HDMI 5,TV,dm900,Bluetooth"] }
+String  AVR_Status	"Status [%s]"							(AVReceiver)	{ channel="pioneeravr:ipAvr2016:5F9EC1B3-ED59-79BB-4530-745e1cb106b2:displayInformation#displayInformation" }
+String  AVR_ListeningMode "Listening Mode [MAP(avrlisteningmode.map):%s]"		(AVReceiver)	{ channel="pioneeravr:ipAvr2016:5F9EC1B3-ED59-79BB-4530-745e1cb106b2:listeningMode" }
+String  AVR_PlayingListeningMode "Playing Listening Mode [MAP(avrplayingmode.map):%s]"	(AVReceiver)	{ channel="pioneeravr:ipAvr2016:5F9EC1B3-ED59-79BB-4530-745e1cb106b2:playingListeningMode" }
+*/

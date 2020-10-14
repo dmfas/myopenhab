@@ -1,0 +1,986 @@
+val telegramAction = getActions("telegram","telegram:telegramBot:openhab")
+
+
+val Number static_Ist_Heizung			= 20.0
+val Number ELW_Schwellwert_Heizbedarf		= 21.0
+
+val Number static_Soll_Heizung_Tag_Diele	= 20.0
+val Number static_Soll_Heizung_Tag_WC		= 22.0
+val Number static_Soll_Heizung_Tag_Kueche	= 21.0
+val Number static_Soll_Heizung_Tag_Bianca	= 21.0
+val Number static_Soll_Heizung_Tag_Essen	= 21.0
+val Number static_Soll_Heizung_Tag_Wohnen	= 21.5
+val Number static_Soll_Heizung_Tag_Bad		= 23.0
+val Number static_Soll_Heizung_Tag_Markus	= 21.0
+val Number static_Soll_Heizung_Tag_Tim		= 20.5
+val Number static_Soll_Heizung_Tag_Lutz		= 20.5
+val Number static_Soll_Heizung_Tag_ELW		= 21.0
+val Number static_Soll_Heizung_Tag_ELW_WC	= 21.0
+val Number static_Soll_Heizung_Nacht		= 17.0
+val Number static_Soll_Heizung_Nacht_Bad	= 20.0
+val Number static_Soll_Heizung_Urlaub		= 9.0
+
+val Number static_Korrektur_Diele		= -1.0
+val Number static_Korrektur_WC			= -0.5
+val Number static_Korrektur_Kueche		= -1.0
+val Number static_Korrektur_Essen		= -1.0
+val Number static_Korrektur_Wohnen		= -1.0
+val Number static_Korrektur_Bianca		= -1.0
+val Number static_Korrektur_Bad			= 0.0
+val Number static_Korrektur_Markus		= -0.5
+val Number static_Korrektur_Tim			= -1.0
+val Number static_Korrektur_Lutz		= -0.5
+val Number static_Korrektur_ELW			= -0.5
+val Number static_Korrektur_ELW_WC		= -0.5
+
+val QuantityType<Number> FBH_Ueberschwingtoleranz_Diele		= -0.1
+val QuantityType<Number> FBH_Ueberschwingtoleranz_WC		= -0.1
+val QuantityType<Number> FBH_Ueberschwingtoleranz_Kueche	= -0.1
+val QuantityType<Number> FBH_Ueberschwingtoleranz_Essen		= -0.1
+val QuantityType<Number> FBH_Ueberschwingtoleranz_Bianca	= -0.1
+val QuantityType<Number> FBH_Ueberschwingtoleranz_Wohnen	= -0.1
+val QuantityType<Number> FBH_Ueberschwingtoleranz_Bad		= -0.1
+
+
+var boolean Bianca_bei_Arbeit
+
+var QuantityType<Number> Ist_Diele	// vom Dielenauge
+var QuantityType<Number> Ist_WC		// vom Auge im WC
+var QuantityType<Number> Ist_Kueche	// vom Küchenauge
+var QuantityType<Number> Ist_Bianca	// vom Auge an der Tür (unter Rauchrohr)
+var QuantityType<Number> Ist_Essen	// vom Wohnen Auge
+var QuantityType<Number> Ist_Wohnen	// vom Wohnen Auge
+var QuantityType<Number> Ist_Bad	// vom Bodenthermostat
+var QuantityType<Number> Ist_Markus	// vom Raumthermostat (ACHTUNG, Update nur bei Ventilbewegung !!)
+var QuantityType<Number> Ist_Tim	// vom Raumthermostat (ACHTUNG, Update nur bei Ventilbewegung !!)
+var QuantityType<Number> Ist_Lutz	// vom Raumthermostat (ACHTUNG, Update nur bei Ventilbewegung !!)
+var QuantityType<Number> Ist_ELW	// vom Raumthermostat (ACHTUNG, Update nur bei Ventilbewegung !!)
+var QuantityType<Number> Ist_ELW_WC	// vom Raumthermostat (ACHTUNG, Update nur bei Ventilbewegung !!)
+
+var Number Waermebedarf_Diele
+var Number Waermebedarf_WC
+var Number Waermebedarf_Kueche
+var Number Waermebedarf_Essen
+var Number Waermebedarf_Wohnen
+var Number Waermebedarf_Bianca
+var Number Waermebedarf_Bad
+var Number Waermebedarf_Markus
+var Number Waermebedarf_Tim
+var Number Waermebedarf_Lutz
+var Number Waermebedarf_ELW
+var Number Waermebedarf_ELW_WC
+
+
+
+val Functions$Function2<NumberItem,NumberItem,Boolean> validate_or_reinit = [ i, defaultvalue |
+//        logDebug("Heizung","validate_or_reinit, prüfe item : " + i.name.toString + ".state = " + i.state + "; default = " + defaultvalue)
+	if (i === null) {
+                logDebug("Heizung","Validierung fehlgeschlagen: Objekt=" + i)
+		return false
+	}
+	if (i.state == NULL) {
+                logDebug("Heizung","Defaultkorrektur: Objekt=" + i + "; state = " + i.name.toString + ".state = " + i.state + "; setze := " + defaultvalue)
+                i.postUpdate(defaultvalue)
+		return false
+//	} else {
+//                logDebug("Heizung","Validierung: " + i.name.toString + ".state = " + i.state + " wird beibehalten.")
+//		var Number t = (((i.state as Number)*100).intValue)/100.0
+//		if (t != defaultvalue)
+//                	logDebug("Heizung","Rundungskorrektur: " + i.name.toString + ".state = " + i.state + "; setze := " + defaultvalue)
+        }
+
+	return true
+]
+
+
+rule "Heizung Init virtual Items"
+when
+	System started
+	or
+	Time is midnight
+then
+        logInfo("Heizung", "Heizung Initialisierung.")
+
+	Bianca_bei_Arbeit = false
+
+	validate_or_reinit.apply(Korrektur_Ist_Temp_Diele,static_Korrektur_Diele)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_WC,static_Korrektur_WC)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_Kueche,static_Korrektur_Kueche)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_Bianca,static_Korrektur_Bianca)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_Wohnen,static_Korrektur_Wohnen)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_Essen,static_Korrektur_Essen)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_Bad,static_Korrektur_Bad)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_Markus,static_Korrektur_Markus)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_Tim,static_Korrektur_Tim)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_Lutz,static_Korrektur_Lutz)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_ELW,static_Korrektur_ELW)
+	validate_or_reinit.apply(Korrektur_Ist_Temp_ELW_WC,static_Korrektur_ELW_WC)
+
+	// separate Räume seit Juni 2020
+	K_Buero_Thermo_Modus.sendCommand("MANU-MODE")
+	K_ELW_Thermo_Modus.sendCommand("MANU-MODE")	
+	K_WC_Thermo_Modus.sendCommand("MANU-MODE")
+	K_Waschkeller_Thermo_Modus.sendCommand("MANU-MODE")
+	OG_Markus_Thermo_Modus.sendCommand("MANU-MODE")
+	OG_Tim_Thermo_Modus.sendCommand("MANU-MODE")
+	OG_Lutz_Thermo_Modus.sendCommand("MANU-MODE")
+
+end
+
+
+rule "Temperaturkorrekturen"
+when
+	Item SteuerTemp changed
+	or
+	Item SollTempBoden changed
+	or
+	Item SollTempTherm changed
+	or
+	Item KorrekturTemp changed
+	or
+	Item TempInnen changed
+then
+	// alle items sind in Gruppe Heizung, sollten daher über die Gruppenregel Heizung* persistent sein
+
+	if (Anwesenheitsmodus.state == NULL)
+		Anwesenheitsmodus.postUpdate(1)
+
+
+	logDebug("Heizung","Temperaturkorrekturen: EG_Diele_Auge_Temp.state = "  +  EG_Diele_Auge_Temp.state + "; Korrektur_Ist_Temp_Diele.state = " + Korrektur_Ist_Temp_Diele.state)
+	logDebug("Heizung","Temperaturkorrekturen: EG_WC_Auge_Temp.state = "     +  EG_WC_Auge_Temp.state + "; Korrektur_Ist_Temp_WC.state = " + Korrektur_Ist_Temp_WC.state)
+	logDebug("Heizung","Temperaturkorrekturen: EG_Kueche_Auge_Temp.state = " +  EG_Kueche_Auge_Temp.state + "; Korrektur_Ist_Temp_Kueche.state = " + Korrektur_Ist_Temp_Kueche.state)
+	logDebug("Heizung","Temperaturkorrekturen: EG_Kueche_Auge_Temp.state = " +  EG_Kueche_Auge_Temp.state + "; Korrektur_Ist_Temp_Essen.state = " + Korrektur_Ist_Temp_Essen.state)
+	logDebug("Heizung","Temperaturkorrekturen: EG_Wohnen_Auge_Temp.state = " +  EG_Wohnen_Auge_Temp.state + "; Korrektur_Ist_Temp_Wohnen.state = " + Korrektur_Ist_Temp_Wohnen.state)
+	logDebug("Heizung","Temperaturkorrekturen: EG_Bianca_Auge_Temp.state = " +  EG_Bianca_Auge_Temp.state + "; Korrektur_Ist_Temp_Bianca.state = " + Korrektur_Ist_Temp_Bianca.state)
+	logDebug("Heizung","Temperaturkorrekturen: OG_Bad_Auge_Temp.state = "    +  OG_Bad_Auge_Temp.state + "; Korrektur_Ist_Temp_Bad.state = " + Korrektur_Ist_Temp_Bad.state)
+	logDebug("Heizung","Temperaturkorrekturen: OG_Markus_Auge_Temp.state = " +  OG_Markus_Auge_Temp.state + "; Korrektur_Ist_Temp_Markus.state = " + Korrektur_Ist_Temp_Markus.state)
+	logDebug("Heizung","Temperaturkorrekturen: OG_Tim_Auge_Temp.state = "    +  OG_Tim_Auge_Temp.state + "; Korrektur_Ist_Temp_Tim.state = " + Korrektur_Ist_Temp_Tim.state)
+	logDebug("Heizung","Temperaturkorrekturen: OG_Lutz_Auge_Temp.state = "   +  OG_Lutz_Auge_Temp.state + "; Korrektur_Ist_Temp_Lutz.state = " + Korrektur_Ist_Temp_Lutz.state)
+	logDebug("Heizung","Temperaturkorrekturen: K_ELW_Thermo_Ist.state = "    +  K_ELW_Thermo_Ist.state + "; Korrektur_Ist_Temp_ELW.state = " + Korrektur_Ist_Temp_ELW.state)
+	logDebug("Heizung","Temperaturkorrekturen: K_WC_Thermo_Ist.state = "     +  K_ELW_Thermo_Ist.state + "; Korrektur_Ist_Temp_ELW_WC.state = " + Korrektur_Ist_Temp_ELW_WC.state)
+
+	if (EG_Diele_Auge_Temp.state == NULL || Korrektur_Ist_Temp_Diele.state == NULL ||
+	    EG_WC_Auge_Temp.state == NULL || Korrektur_Ist_Temp_WC.state == NULL ||
+	    EG_Kueche_Auge_Temp.state == NULL || Korrektur_Ist_Temp_Kueche.state == NULL ||
+            EG_Kueche_Auge_Temp.state == NULL || Korrektur_Ist_Temp_Essen.state == NULL ||
+	    EG_Wohnen_Auge_Temp.state == NULL || Korrektur_Ist_Temp_Wohnen.state == NULL ||
+	    EG_Bianca_Auge_Temp.state == NULL || Korrektur_Ist_Temp_Bianca.state == NULL ||
+	    OG_Bad_Auge_Temp.state == NULL || Korrektur_Ist_Temp_Bad.state == NULL ||
+	    OG_Markus_Auge_Temp.state == NULL || Korrektur_Ist_Temp_Markus.state == NULL ||
+	    OG_Tim_Auge_Temp.state == NULL || Korrektur_Ist_Temp_Tim.state == NULL ||
+	    OG_Lutz_Auge_Temp.state == NULL || Korrektur_Ist_Temp_Lutz.state == NULL ||
+	    K_ELW_Thermo_Ist.state == NULL || Korrektur_Ist_Temp_ELW.state == NULL ||
+	    K_WC_Thermo_Ist.state == NULL || Korrektur_Ist_Temp_ELW_WC.state == NULL) {
+		logDebug("Heizung","Temperaturkorrekturen: Variable nicht initialisiert, beende Routine.")
+	}
+
+	logInfo("Heizung","Temperaturkorrekturenlauf, berechne korrigierte Werte ...")
+
+	validate_or_reinit.apply(Soll_Temp_Diele,static_Soll_Heizung_Tag_Diele)
+	validate_or_reinit.apply(EG_Diele_Auge_Temp,static_Ist_Heizung)
+	validate_or_reinit.apply(Soll_Temp_WC,static_Soll_Heizung_Tag_WC)
+	validate_or_reinit.apply(EG_WC_Auge_Temp,static_Ist_Heizung)
+	validate_or_reinit.apply(Soll_Temp_Kueche,static_Soll_Heizung_Tag_Kueche)
+	validate_or_reinit.apply(Soll_Temp_Essen,static_Soll_Heizung_Tag_Essen)
+	validate_or_reinit.apply(EG_Kueche_Auge_Temp,static_Ist_Heizung)
+	validate_or_reinit.apply(Soll_Temp_Wohnen,static_Soll_Heizung_Tag_Wohnen)
+	validate_or_reinit.apply(EG_Wohnen_Auge_Temp,static_Ist_Heizung)
+	validate_or_reinit.apply(Soll_Temp_Bianca,static_Soll_Heizung_Tag_Bianca)
+	validate_or_reinit.apply(EG_Bianca_Auge_Temp,static_Ist_Heizung)
+	validate_or_reinit.apply(Soll_Temp_Bad,static_Soll_Heizung_Tag_Bad)
+	validate_or_reinit.apply(OG_Bad_Auge_Temp,static_Ist_Heizung)
+	validate_or_reinit.apply(OG_Markus_Thermo_Soll,static_Soll_Heizung_Tag_Markus)
+	validate_or_reinit.apply(OG_Markus_Auge_Temp,static_Ist_Heizung)
+	validate_or_reinit.apply(OG_Tim_Thermo_Soll,static_Soll_Heizung_Tag_Tim)
+	validate_or_reinit.apply(OG_Tim_Auge_Temp,static_Ist_Heizung)
+	validate_or_reinit.apply(OG_Lutz_Thermo_Soll,static_Soll_Heizung_Tag_Lutz)
+	validate_or_reinit.apply(OG_Lutz_Auge_Temp,static_Ist_Heizung)
+	validate_or_reinit.apply(K_ELW_Thermo_Soll,static_Soll_Heizung_Tag_ELW)
+	validate_or_reinit.apply(K_ELW_Thermo_Ist,static_Ist_Heizung)
+	validate_or_reinit.apply(K_WC_Thermo_Soll,static_Soll_Heizung_Tag_ELW_WC)
+	validate_or_reinit.apply(K_WC_Thermo_Ist,static_Ist_Heizung)
+
+	Ist_Diele	= (EG_Diele_Auge_Temp.state as QuantityType<Number>)  + (Korrektur_Ist_Temp_Diele.state as QuantityType<Number>)
+	Ist_WC		= (EG_WC_Auge_Temp.state as QuantityType<Number>)     + (Korrektur_Ist_Temp_WC.state as QuantityType<Number>)
+	Ist_Kueche	= (EG_Kueche_Auge_Temp.state as QuantityType<Number>) + (Korrektur_Ist_Temp_Kueche.state as QuantityType<Number>)
+	Ist_Essen	= (EG_Kueche_Auge_Temp.state as QuantityType<Number>) + (Korrektur_Ist_Temp_Essen.state as QuantityType<Number>)
+	Ist_Wohnen	= (EG_Wohnen_Auge_Temp.state as QuantityType<Number>) + (Korrektur_Ist_Temp_Wohnen.state as QuantityType<Number>)
+	Ist_Bianca	= (EG_Bianca_Auge_Temp.state as QuantityType<Number>) + (Korrektur_Ist_Temp_Bianca.state as QuantityType<Number>)
+	Ist_Bad		= (OG_Bad_Auge_Temp.state as QuantityType<Number>)    + (Korrektur_Ist_Temp_Bad.state as QuantityType<Number>)
+
+	Ist_Markus	= (OG_Markus_Auge_Temp.state as QuantityType<Number>) + (Korrektur_Ist_Temp_Markus.state as QuantityType<Number>)
+	Ist_Tim		= (OG_Tim_Auge_Temp.state as QuantityType<Number>)    + (Korrektur_Ist_Temp_Tim.state as QuantityType<Number>)
+	Ist_Lutz	= (OG_Lutz_Auge_Temp.state as QuantityType<Number>)   + (Korrektur_Ist_Temp_Lutz.state as QuantityType<Number>)
+
+	Ist_ELW		= (K_ELW_Thermo_Ist.state as QuantityType<Number>)    + (Korrektur_Ist_Temp_ELW.state as QuantityType<Number>)
+	Ist_ELW_WC	= (K_WC_Thermo_Ist.state as QuantityType<Number>)     + (Korrektur_Ist_Temp_ELW_WC.state as QuantityType<Number>)
+
+	Ist_Temp_Diele.postUpdate(Ist_Diele as Number)
+	Ist_Temp_WC.postUpdate(Ist_WC as Number)
+	Ist_Temp_Kueche.postUpdate(Ist_Kueche as Number)
+	Ist_Temp_Essen.postUpdate(Ist_Essen as Number)
+	Ist_Temp_Wohnen.postUpdate(Ist_Wohnen as Number)
+	Ist_Temp_Bianca.postUpdate(Ist_Bianca as Number)
+	Ist_Temp_Bad.postUpdate(Ist_Bad as Number)
+
+	Ist_Temp_Markus.postUpdate(Ist_Markus as Number)
+	Ist_Temp_Tim.postUpdate(Ist_Tim as Number)
+	Ist_Temp_Lutz.postUpdate(Ist_Lutz as Number)
+
+	Ist_Temp_ELW.postUpdate(Ist_ELW as Number)
+	Ist_Temp_ELW_WC.postUpdate(Ist_ELW_WC as Number)
+
+//	logDebug("Heizung","Temperaturkorrekturen: Ist_Temp_Diele = " + Ist_Temp_Diele.state + "/" + (Ist_Diele as Number) + "; Ist_Temp_WC = " + Ist_Temp_WC.state + "/" + (Ist_WC as Number) + "; Ist_Temp_Kueche = " + Ist_Temp_Kueche.state + "/" + (Ist_Kueche as Number) + "; Ist_Temp_Essen = " + Ist_Temp_Essen.state + "/" + (Ist_Essen as Number) + "; Ist_Temp_Wohnen = " + Ist_Temp_Wohnen.state + "/" + (Ist_Wohnen as Number) + "; Ist_Temp_Bianca = " + Ist_Temp_Bianca.state + "/" + (Ist_Bianca as Number) + "; Ist_Temp_Bad = " + Ist_Temp_Bad.state + "/" + (Ist_Bad as Number) + "; Ist_Temp_Markus = " + Ist_Temp_Markus.state + "/" + (Ist_Markus as Number) + "; Ist_Temp_Tim = " + Ist_Temp_Tim.state + "/" + (Ist_Tim as Number) + "; Ist_Temp_Lutz = " + Ist_Temp_Lutz.state + "/" + (Ist_Lutz as Number) + "; Ist_Temp_ELW = " + Ist_Temp_ELW.state + "; Ist_Temp_ELW_WC = " + "/" + (Ist_ELW_WC as Number) + Ist_Temp_ELW_WC.state)
+	logDebug("Heizung","Temperaturkorrekturen: Ist_Temp_Diele = " + Ist_Temp_Diele.state + "; Ist_Temp_WC = " + Ist_Temp_WC.state + "; Ist_Temp_Kueche = " + Ist_Temp_Kueche.state + "; Ist_Temp_Essen = " + Ist_Temp_Essen.state + "; Ist_Temp_Wohnen = " + Ist_Temp_Wohnen.state + "; Ist_Temp_Bianca = " + Ist_Temp_Bianca.state + "; Ist_Temp_Bad = " + Ist_Temp_Bad.state + "; Ist_Temp_Markus = " + Ist_Temp_Markus.state + "; Ist_Temp_Tim = " + Ist_Temp_Tim.state + "; Ist_Temp_Lutz = " + Ist_Temp_Lutz.state + "; Ist_Temp_ELW = " + Ist_Temp_ELW.state + "; Ist_Temp_ELW_WC = " + Ist_Temp_ELW_WC.state)
+end
+
+
+rule "Waermecheck"
+when
+	Item SteuerTemp changed
+	or
+	Item SollTempBoden changed
+	or
+	Item SollTempTherm changed
+	or
+	Item KorrekturTemp changed
+	or
+	Item K_Heizung_Pumpe_BK changed to ON
+	or
+	Item K_Heizung_Pumpe_MK1 changed to ON
+then
+	var boolean Pumpbedarf
+
+	
+	if (Anwesenheitsmodus.state == NULL || Anwesenheitsmodus.state == 0)
+		return;
+
+	logDebug("Heizung","Wärmecheck FBH gestartet: K_Heizung_Pumpe_MK1 = " + K_Heizung_Pumpe_MK1.state)
+	if (Ist_Temp_Diele.state != NULL)
+		Ist_Diele = Ist_Temp_Diele.state
+	else {
+		logDebug("Heizung","Sensor Diele liefert keinen (korrigierten) Ist-Wert für die Temperatur !")
+		Ist_Diele = static_Ist_Heizung
+	}
+
+	if (Ist_Temp_WC.state != NULL)
+		Ist_WC = Ist_Temp_WC.state
+	else {
+		logDebug("Heizung","Sensor WC liefert keinen (korrigierten) Ist-Wert für die Temperatur !")
+		Ist_WC = static_Ist_Heizung
+	}
+
+	if (Ist_Temp_Kueche.state != NULL)
+		Ist_Kueche = Ist_Temp_Kueche.state
+	else {
+		logDebug("Heizung","Sensor Küche liefert keinen (korrigierten) Ist-Wert für die Temperatur !")
+		Ist_Kueche = static_Ist_Heizung
+	}
+
+	if (Ist_Temp_Essen.state != NULL)
+		Ist_Essen = Ist_Temp_Essen.state
+	else {
+		logDebug("Heizung","Sensor Essen (Küchensensor !) liefert keinen (korrigierten) Ist-Wert für die Temperatur !")
+		Ist_Essen = static_Ist_Heizung
+
+	}
+
+	if (Ist_Temp_Wohnen.state != NULL)
+		Ist_Wohnen = Ist_Temp_Wohnen.state
+	else {
+		logDebug("Heizung","Sensor Wohnen liefert keinen (korrigierten) Ist-Wert für die Temperatur !")
+		Ist_Wohnen = static_Ist_Heizung
+	}
+
+	if (Ist_Temp_Bianca.state != NULL)
+		Ist_Bianca = Ist_Temp_Bianca.state
+	else {
+		logDebug("Heizung","Sensor Bianca liefert keinen (korrigierten) Ist-Wert für die Temperatur !")
+		Ist_Bianca = static_Ist_Heizung
+	}
+
+	logDebug("Heizung","Waermecheck FBH 2a: vor FBH Waermebedarf-Berechnungen")
+	Waermebedarf_Diele  = (Soll_Temp_Diele.state as Number)  - (Ist_Diele as Number)
+	Waermebedarf_WC     = (Soll_Temp_WC.state as Number)     - (Ist_WC as Number)
+	Waermebedarf_Kueche = (Soll_Temp_Kueche.state as Number) - (Ist_Kueche as Number)
+	Waermebedarf_Essen  = (Soll_Temp_Essen.state as Number)  - (Ist_Essen as Number)
+	Waermebedarf_Wohnen = (Soll_Temp_Wohnen.state as Number) - (Ist_Wohnen as Number)
+	Waermebedarf_Bianca = (Soll_Temp_Bianca.state as Number) - (Ist_Bianca as Number)
+
+
+	logDebug("Heizung","Wärmecheck FBH: Raumtemperatur Diele Soll/Ist[Korrekturwert]/Wärmebedarf "  + Soll_Temp_Diele.state  + "/" + Ist_Diele  + "[" + Korrektur_Ist_Temp_Diele.state  + "]/" + Waermebedarf_Diele)
+	logDebug("Heizung","Wärmecheck FBH: Raumtemperatur WC Soll/Ist[Korrekturwert]/Wärmebedarf "     + Soll_Temp_WC.state     + "/" + Ist_WC     + "[" + Korrektur_Ist_Temp_WC.state     + "]/" + Waermebedarf_WC)
+	logDebug("Heizung","Wärmecheck FBH: Raumtemperatur Küche Soll/Ist[Korrekturwert]/Wärmebedarf "  + Soll_Temp_Kueche.state + "/" + Ist_Kueche + "[" + Korrektur_Ist_Temp_Kueche.state + "]/" + Waermebedarf_Kueche)
+	logDebug("Heizung","Wärmecheck FBH: Raumtemperatur Essen Soll/Ist[Korrekturwert]/Wärmebedarf "  + Soll_Temp_Essen.state  + "/" + Ist_Essen  + "[" + Korrektur_Ist_Temp_Essen.state  + "]/" + Waermebedarf_Essen)
+	logDebug("Heizung","Wärmecheck FBH: Raumtemperatur Wohnen Soll/Ist[Korrekturwert]/Wärmebedarf " + Soll_Temp_Wohnen.state + "/" + Ist_Wohnen + "[" + Korrektur_Ist_Temp_Wohnen.state + "]/" + Waermebedarf_Wohnen)
+	logDebug("Heizung","Wärmecheck FBH: Raumtemperatur Bianca Soll/Ist[Korrekturwert]/Wärmebedarf " + Soll_Temp_Bianca.state + "/" + Ist_Bianca + "[" + Korrektur_Ist_Temp_Bianca.state + "]/" + Waermebedarf_Bianca)
+
+
+	Pumpbedarf = false
+
+	// Check Diele
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventile Diele (VORHER) = " + EG_Diele_FBH.state)
+	logDebug("Heizung","Wärmecheck FBH: Anlassen = (Waermebedarf Diele > FBH_Ueberschwingtoleranz_Diele) = " +  Waermebedarf_Diele + " - " + FBH_Ueberschwingtoleranz_Diele + " = " + (Waermebedarf_Diele > FBH_Ueberschwingtoleranz_Diele).toString)
+
+	if (Waermebedarf_Diele > 0) {	// Wärmebedarf
+		Pumpbedarf = true
+		if (EG_Diele_FBH.state != ON) {
+			EG_Diele_FBH.sendCommand(ON)
+		}
+	} else
+		if (Waermebedarf_Diele > FBH_Ueberschwingtoleranz_Diele) {
+			if (EG_Diele_FBH.state != OFF)		// noch an, Ueberschwinger im Rahmen => zulassen, darum pumpen !
+				Pumpbedarf = true
+		} else {
+			if (EG_Diele_FBH.state != OFF)		// noch an, aber Ueberschwinger sprengt Rahmen => abschalten
+				EG_Diele_FBH.sendCommand(OFF)
+		}
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventile Diele (NACHHER) = " + EG_Diele_FBH.state)
+
+	// Check WC
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventile WC (VORHER) = " + EG_WC_FBH.state)
+	if (Waermebedarf_WC > 0) {	// Wärmebedarf
+		Pumpbedarf = true
+		if (EG_WC_FBH.state != ON) {
+			EG_WC_FBH.sendCommand(ON)
+		}
+	} else
+		if (Waermebedarf_WC > FBH_Ueberschwingtoleranz_WC) {
+			if (EG_WC_FBH.state != OFF)		// noch an, Ueberschwinger im Rahmen => zulassen, darum pumpen !
+				Pumpbedarf = true
+		} else {
+			if (EG_WC_FBH.state != OFF)		// noch an, aber Ueberschwinger sprengt Rahmen => abschalten
+				EG_WC_FBH.sendCommand(OFF)
+		}
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventile WC (NACHHER) = " + EG_WC_FBH.state)
+
+	// Check Küche
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventile Küche (VORHER) = " + EG_Kueche_FBH.state)
+	logDebug("Heizung","Wärmecheck FBH: Anlassen = (Waermebedarf Kueche < FBH_Ueberschwingtoleranz_Kueche) = " +  Waermebedarf_Kueche + " - " + FBH_Ueberschwingtoleranz_Kueche + " = " + (Waermebedarf_Kueche > FBH_Ueberschwingtoleranz_Kueche).toString)
+	if (Waermebedarf_Kueche > 0) {	// Wärmebedarf
+		Pumpbedarf = true
+		if (EG_Kueche_FBH.state != ON) {
+			EG_Kueche_FBH.sendCommand(ON)
+		}
+	} else
+		if (Waermebedarf_Kueche > FBH_Ueberschwingtoleranz_Kueche) {
+			if (EG_Kueche_FBH.state != OFF)		// noch an, Ueberschwinger im Rahmen => zulassen, darum pumpen !
+				Pumpbedarf = true
+		} else {
+			if (EG_Kueche_FBH.state != OFF)		// noch an, aber Ueberschwinger sprengt Rahmen => abschalten
+				EG_Kueche_FBH.sendCommand(OFF)
+		}
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventile Küche (NACHHER) = " + EG_Kueche_FBH.state)
+
+	// Check Esszimmer 
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventile Essen li/re (VORHER) = " + EG_Essen_FBH_links.state + "/" + EG_Essen_FBH_rechts.state)
+	if (Waermebedarf_Essen > 0) {	// Wärmebedarf
+		Pumpbedarf = true
+		if (EG_Essen_FBH_links.state != ON) {
+			EG_Essen_FBH_links.sendCommand(ON)
+		}
+		if (EG_Essen_FBH_rechts.state != ON) {
+			EG_Essen_FBH_rechts.sendCommand(ON)
+		}
+	} else {
+		if (Waermebedarf_Essen > FBH_Ueberschwingtoleranz_Essen) {
+			if (EG_Essen_FBH_links.state != OFF || EG_Essen_FBH_rechts.state != OFF)		// noch an, Ueberschwinger im Rahmen => zulassen, darum pumpen !
+				Pumpbedarf = true
+		} else {
+			if (EG_Essen_FBH_links.state != OFF)		// noch an, aber Ueberschwinger sprengt Rahmen => abschalten
+				EG_Essen_FBH_links.sendCommand(OFF)
+			if (EG_Essen_FBH_rechts.state != OFF)		// noch an, aber Ueberschwinger sprengt Rahmen => abschalten
+				EG_Essen_FBH_rechts.sendCommand(OFF)
+		}
+	}
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventile Essen li/re (NACHHER) = " + EG_Essen_FBH_links.state + "/" + EG_Essen_FBH_rechts.state)
+
+	// Check Bianca
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventil Bianca (VORHER) = " + EG_Bianca_FBH.state)
+	if (Waermebedarf_Bianca > 0) {
+		Pumpbedarf = true
+		if (EG_Bianca_FBH.state != ON) {
+			EG_Bianca_FBH.sendCommand(ON)
+			logDebug("Heizung","Bianca FBH AN")
+		} else
+			logDebug("Heizung","Bianca FBH AUS")
+	} else {
+		if (Waermebedarf_Bianca > FBH_Ueberschwingtoleranz_Bianca) {
+			logDebug("Heizung","Bianca NEGATIVER Waermebedarf ! Ueberschwinger im Rahmen")
+			if (EG_Bianca_FBH.state != OFF)		// noch an, Ueberschwinger im Rahmen => zulassen, darum pumpen !
+				Pumpbedarf = true
+		} else {
+			logDebug("Heizung","Bianca NEGATIVER Waermebedarf ! Ueberschwinger zu gross !")
+			if (EG_Bianca_FBH.state != OFF)		// noch an, aber Ueberschwinger sprengt Rahmen => abschalten
+				EG_Bianca_FBH.sendCommand(OFF)
+		}
+	}
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventil Bianca (NACHHER) = " + EG_Bianca_FBH.state)
+
+	// Check Wohnen
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventil Wohnen (VORHER) = " + EG_Wohnen_FBH.state)
+	if (Waermebedarf_Wohnen > 0) {
+
+		Pumpbedarf = true
+
+		if (EG_Wohnen_FBH.state != ON) {
+			EG_Wohnen_FBH.sendCommand(ON)
+		}
+	} else {
+		if (Waermebedarf_Wohnen > FBH_Ueberschwingtoleranz_Wohnen) {
+			if (EG_Wohnen_FBH.state != OFF)		// noch an, Ueberschwinger im Rahmen => zulassen, darum pumpen !
+				Pumpbedarf = true
+		} else {
+			if (EG_Wohnen_FBH.state != OFF)		// noch an, aber Ueberschwinger sprengt Rahmen => abschalten
+				EG_Wohnen_FBH.sendCommand(OFF)
+		}
+	}
+	logDebug("Heizung","Wärmecheck FBH: FBH-Ventil Wohnen (NACHHER) = " + EG_Wohnen_FBH.state)
+
+
+	// Routine läuft +/- alle 2 Minuten, dahinzu kommt mögliche Schaltung durch die Heizung selbst
+	if (Pumpbedarf) {
+		if (K_Heizung_Pumpe_MK1.state != ON) {
+			logInfo("Heizung","Wärmecheck FBH (Heizkreis MK1): Wärmebedarf, aktiviere Pumpe MK1")
+			K_Heizung_Pumpe_MK1.sendCommand(ON)
+		} else {
+			logInfo("Heizung","Wärmecheck FBH (Heizkreis MK1): Wärmebedarf, Pumpe MK1 läuft bereits.")
+		}
+	} else {
+		if (K_Heizung_Pumpe_MK1.state != OFF) {
+			logInfo("Heizung","Wärmecheck FBH (Heizkreis MK1): KEIN Wärmebedarf, deaktiviere Pumpe MK1.")
+			K_Heizung_Pumpe_MK1.sendCommand(OFF)
+		} else {
+			logInfo("Heizung","Wärmecheck FBH (Heizkreis MK1): KEIN Wärmebedarf, Pumpe MK1 ist bereits abgestellt.")
+		}
+	}
+
+
+	//
+	// Waermecheck Radiatoren und Bad
+	//
+
+	logDebug("Heizung","Wärmecheck Radiatoren gestartet: K_Heizung_Pumpe_BK = " + K_Heizung_Pumpe_BK.state + "; OG_Bad_Auge_Temp = " + OG_Bad_Auge_Temp.state)
+	if (OG_Bad_Auge_Temp.state == NULL) {
+		logDebug("Heizung","Sensor Bad liefert keinen Ist-Wert für die Temperatur !")
+		Ist_Bad = static_Ist_Heizung
+	} else {
+		Ist_Bad = OG_Bad_Auge_Temp.state
+	}
+	if (OG_Markus_Auge_Temp.state == NULL) {
+		logDebug("Heizung","Sensor Markus liefert keinen Ist-Wert für die Temperatur !")
+		Ist_Markus = static_Ist_Heizung
+	} else {
+		Ist_Markus = OG_Markus_Auge_Temp.state
+	}
+//	if (OG_Tim_Thermo_Ist.state == NULL) {
+	if (OG_Tim_Auge_Temp.state == NULL) {
+		logDebug("Heizung","Sensor Tim liefert keinen Ist-Wert für die Temperatur !")
+		Ist_Tim = static_Ist_Heizung
+	} else {
+//		Ist_Tim = OG_Tim_Thermo_Ist.state
+		Ist_Tim = OG_Tim_Auge_Temp.state
+	}
+//	if (OG_Lutz_Thermo_Ist.state == NULL) {
+	if (OG_Lutz_Auge_Temp.state == NULL) {
+		logDebug("Heizung","Sensor Lutz liefert keinen Ist-Wert für die Temperatur !")
+		Ist_Lutz = static_Ist_Heizung
+	} else {
+//		Ist_Lutz = OG_Lutz_Thermo_Ist.state
+		Ist_Lutz = OG_Lutz_Auge_Temp.state
+	}
+	if (K_ELW_Thermo_Ist.state == NULL) {
+		logDebug("Heizung","Sensor ELW liefert keinen Ist-Wert für die Temperatur !")
+		Ist_ELW = static_Ist_Heizung
+	} else {
+		Ist_ELW = K_ELW_Thermo_Ist.state
+	}
+	if (K_WC_Thermo_Ist.state == NULL) {
+		logDebug("Heizung","Sensor ELW-WC liefert keinen Ist-Wert für die Temperatur !")
+		Ist_ELW_WC = static_Ist_Heizung
+	} else {
+		Ist_ELW_WC = K_WC_Thermo_Ist.state
+	}
+
+	Waermebedarf_Bad	= (Soll_Temp_Bad.state as Number)		- (Ist_Bad as Number)
+	Waermebedarf_Markus	= (OG_Markus_Thermo_Soll.state as Number)	- (Ist_Markus as Number)
+	Waermebedarf_Tim	= (OG_Tim_Thermo_Soll.state as Number)		- (Ist_Tim as Number)
+	Waermebedarf_Lutz	= (OG_Lutz_Thermo_Soll.state as Number)		- (Ist_Lutz as Number)
+	Waermebedarf_ELW	= (K_ELW_Thermo_Soll.state as Number)		- (Ist_ELW as Number)
+	Waermebedarf_ELW_WC	= (K_WC_Thermo_Soll.state as Number)		- (Ist_ELW_WC as Number)
+
+	logDebug("Heizung","Wärmecheck Radiatoren: Bad Soll/Ist[Korrektur]/Wärmebedarf " + (Soll_Temp_Bad.state as Number) + "/" + (Ist_Bad as Number)   + "[" + (Korrektur_Ist_Temp_Bad.state as Number)   + "]/" + Waermebedarf_Bad)
+	logDebug("Heizung","Wärmecheck Radiatoren: Markus Soll/Ist[Korrektur]/Wärmebedarf " + (OG_Markus_Thermo_Soll.state as Number) + "/" + (Ist_Markus as Number) + "[" + (Korrektur_Ist_Temp_Markus.state as Number) + "]/" + Waermebedarf_Markus)
+	logDebug("Heizung","Wärmecheck Radiatoren: Tim Soll/Ist[Korrektur]/Wärmebedarf " + (OG_Tim_Thermo_Soll.state as Number) + "/" + (Ist_Tim as Number) + "[" + (Korrektur_Ist_Temp_Tim.state as Number) + "]/" + Waermebedarf_Tim)
+	logDebug("Heizung","Wärmecheck Radiatoren: Lutz Soll/Ist[Korrektur]/Wärmebedarf " + (OG_Lutz_Thermo_Soll.state as Number) + "/" + (Ist_Lutz as Number) + "[" + (Korrektur_Ist_Temp_Lutz.state as Number) + "]/" + Waermebedarf_Lutz)
+	logDebug("Heizung","Wärmecheck Radiatoren: ELW Soll/Ist[Korrektur]/Wärmebedarf " + (K_ELW_Thermo_Soll.state as Number) + "/" + (Ist_ELW as Number) + "[" + (Korrektur_Ist_Temp_ELW.state as Number) + "]/" + Waermebedarf_ELW)
+	logDebug("Heizung","Wärmecheck Radiatoren: ELW-WC Soll/Ist[Korrektur]/Wärmebedarf " + (K_WC_Thermo_Soll.state as Number) + "/" + (Ist_ELW_WC as Number) + "[" + (Korrektur_Ist_Temp_ELW_WC.state as Number) + "]/" + Waermebedarf_ELW_WC)
+
+	Pumpbedarf = false
+
+	logDebug("Heizung","Wärmecheck Radiatoren (Heizkreis BK): überprüfe Wärmebedarf ...")
+	logDebug("Heizung","Wärmecheck ELW: erwartete Aussentemperatur = " + (Temp_max.state as Number) + "; Schwellwert = " + ELW_Schwellwert_Heizbedarf)
+
+	if (Waermebedarf_Bad > 0 || Waermebedarf_Markus > 0 || Waermebedarf_Tim > 0 || Waermebedarf_Lutz > 0 ||
+		(aktuell_Temp.state <= ELW_Schwellwert_Heizbedarf && (Waermebedarf_ELW > 0 || Waermebedarf_ELW_WC > 0))) {
+		Pumpbedarf = true
+	}
+
+	logDebug("Heizung","Wärmecheck Radiatoren: FBH-Ventile Bad (VORHER) = " + OG_Bad_FBH.state)
+//	logInfo("Heizung","Wärmecheck Radiatoren: Anlassen = (Waermebedarf_Bad > FBH_Ueberschwingtoleranz_Bad) = " +  Waermebedarf_Bad + " - " + FBH_Ueberschwingtoleranz_Bad + " = " + (Waermebedarf_Bad > FBH_Ueberschwingtoleranz_Bad).toString)
+
+	if (Waermebedarf_Bad > 0) {	// Wärmebedarf
+		Pumpbedarf = true
+		if (OG_Bad_FBH.state != ON) {
+			logDebug("Heizung","Aktiviere FBH-Ventil Bad.")
+			OG_Bad_FBH.sendCommand(ON)
+		}
+	} else
+		if (Waermebedarf_Bad > FBH_Ueberschwingtoleranz_Bad) {
+			if (OG_Bad_FBH.state != OFF) {		// noch an, Ueberschwinger im Rahmen => zulassen, darum pumpen !
+				logDebug("Heizung","Ueberschwinger FBH-Ventil Bad.")
+				Pumpbedarf = true
+			}
+		} else {
+			if (OG_Bad_FBH.state != OFF) {		// noch an, aber Ueberschwinger sprengt Rahmen => abschalten
+				logDebug("Heizung","Deaktiviere FBH-Ventil Bad.")
+				OG_Bad_FBH.sendCommand(OFF)
+			}
+		}
+	logDebug("Heizung","Wärmecheck Radiatoren: FBH-Ventile Bad (NACHHER) = " + OG_Bad_FBH.state)
+
+	// keine Hysterese einbauen, da Routine sowieso alle +/- 2 Minuten läuft, dahinzu kommt mögliche Schaltung durch Heizung
+	if (Pumpbedarf) {
+		if (K_Heizung_Pumpe_BK.state != ON) {
+			logInfo("Heizung","Wärmecheck Radiatoren (Heizkreis BK): Wärmebedarf, aktiviere Pumpe BK")
+			K_Heizung_Pumpe_BK.sendCommand(ON)
+		} else {
+			logInfo("Heizung","Wärmecheck Radiatoren (Heizkreis BK): Wärmebedarf, Pumpe BK läuft bereits.")
+		}
+	} else {
+		if (K_Heizung_Pumpe_BK.state != OFF) {
+			logInfo("Heizung","Wärmecheck Radiatoren (Heizkreis BK): KEIN Wärmebedarf, deaktiviere Pumpe BK.")
+			K_Heizung_Pumpe_BK.sendCommand(OFF)
+		} else {
+			logInfo("Heizung","Wärmecheck Radiatoren (Heizkreis BK): KEIN Wärmebedarf, Pumpe BK ist bereits abgestellt.")
+		}
+	}
+end
+
+
+rule "Pumpenzustandswechsel Radiatoren"
+when
+	Item K_Heizung_Pumpe_BK changed
+then
+	if (K_Heizung_Pumpe_BK.state == ON)
+		logInfo("Heizung","Heizungspumpe Radiatoren (Heizkreis BK) AN.")
+	else
+		logInfo("Heizung","Heizungspumpe Radiatoren (Heizkreis BK) AUS.")
+end
+
+
+rule "Pumpenzustandswechsel FBH"
+when
+	Item K_Heizung_Pumpe_MK1 changed
+then
+	if (K_Heizung_Pumpe_MK1.state == ON)
+		logInfo("Heizung","Heizungspumpe FBH (Heizkreise MK1/MK2) AN.")
+	else
+		logInfo("Heizung","Heizungspumpe FBH (Heizkreise MK1/MK2) AUS.")
+end
+
+
+
+rule "Heizungstagschaltung gesetzt"
+when
+	Item Anwesenheitsmodus received command 1
+then
+	logInfo("Heizung","Setze Heizungs-Sollwerte auf 'anwesend'. Ferienschaltung = " + Ferienschaltung.state  + "; Nachtschaltung = " + Nachtschaltung.state + "; Wochentag/Stunde = " + now.getDayOfWeek + "/" + now.getHourOfDay)
+
+	logDebug("Heizung","Anwesenheitsmodus daheim: EG_Diele_Auge_Temp.state = "  +  EG_Diele_Auge_Temp.state  + "; setze Soll_Temp_Diele = "		+ Soll_Temp_Diele.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: EG_WC_Auge_Temp.state = "     +  EG_WC_Auge_Temp.state     + "; setze Soll_Temp_WC = "		+ Soll_Temp_WC.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: EG_Kueche_Auge_Temp.state = " +  EG_Kueche_Auge_Temp.state + "; setze Soll_Temp_Kueche = "	+ Soll_Temp_Kueche.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: EG_Kueche_Auge_Temp.state = " +  EG_Kueche_Auge_Temp.state + "; setze Soll_Temp_Essen = "		+ Soll_Temp_Essen.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: EG_Wohnen_Auge_Temp.state = " +  EG_Wohnen_Auge_Temp.state + "; setze Soll_Temp_Wohnen = "	+ Soll_Temp_Wohnen.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: EG_Bianca_Auge_Temp.state = " +  EG_Bianca_Auge_Temp.state + "; setze Soll_Temp_Bianca = "	+ Soll_Temp_Bianca.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: OG_Bad_Auge_Temp.state = "    +  OG_Bad_Auge_Temp.state    + "; setze Soll_Temp_Bad = "		+ Soll_Temp_Bad.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: OG_Markus_Auge_Temp.state = " +  OG_Markus_Auge_Temp.state + "; setze OG_Markus_Thermo_Soll = "	+ OG_Markus_Thermo_Soll.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: OG_Tim_Auge_Temp.state = "    +  OG_Tim_Auge_Temp.state    + "; setze OG_Tim_Thermo_Soll = "	+ OG_Tim_Thermo_Soll.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: OG_Lutz_Auge_Temp.state = "   +  OG_Lutz_Auge_Temp.state   + "; setze OG_Lutz_Thermo_Soll = "	+ OG_Lutz_Thermo_Soll.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: K_ELW_Thermo_Ist.state = "    +  K_ELW_Thermo_Ist.state    + "; setze K_ELW_Thermo_Soll = "	+ K_ELW_Thermo_Soll.state)
+	logDebug("Heizung","Anwesenheitsmodus daheim: K_WC_Thermo_Ist.state = "     +  K_WC_Thermo_Ist.state     + "; setze K_WC_Thermo_Soll = "	+ K_WC_Thermo_Soll.state)
+
+	OG_Markus_Thermo_Soll.sendCommand(static_Soll_Heizung_Tag_Markus)
+	OG_Tim_Thermo_Soll.sendCommand(static_Soll_Heizung_Tag_Tim)
+	OG_Lutz_Thermo_Soll.sendCommand(static_Soll_Heizung_Tag_Lutz)
+
+	Soll_Temp_Bad.postUpdate(static_Soll_Heizung_Tag_Bad)
+	Soll_Temp_Diele.postUpdate(static_Soll_Heizung_Tag_Diele)
+	Soll_Temp_WC.postUpdate(static_Soll_Heizung_Tag_WC)
+	Soll_Temp_Kueche.postUpdate(static_Soll_Heizung_Tag_Kueche)
+	Soll_Temp_Essen.postUpdate(static_Soll_Heizung_Tag_Essen)
+	Soll_Temp_Bianca.postUpdate(static_Soll_Heizung_Tag_Bianca)
+	Soll_Temp_Wohnen.postUpdate(static_Soll_Heizung_Tag_Wohnen)
+
+	K_Buero_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+	K_WC_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+end
+
+
+rule "Heizungsnachtschaltung gesetzt"
+when
+	Item Anwesenheitsmodus received command 2
+then
+	logInfo("Heizung","Setze Heizungs-Sollwerte auf 'Nacht/abwesend'. Ferienschaltung = " + Ferienschaltung.state + "; Nachtschaltung = " + Nachtschaltung.state + "; Wochentag/Stunde = " + now.getDayOfWeek + "/" + now.getHourOfDay)
+
+	logDebug("Heizung","Anwesenheitsmodus abwesend: EG_Diele_Auge_Temp.state = "  +  EG_Diele_Auge_Temp.state  + "; Soll_Temp_Diele.state = "		+ Soll_Temp_Diele.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: EG_WC_Auge_Temp.state = "     +  EG_WC_Auge_Temp.state     + "; Soll_Temp_WC.state = "		+ Soll_Temp_WC.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: EG_Kueche_Auge_Temp.state = " +  EG_Kueche_Auge_Temp.state + "; Soll_Temp_Kueche.state = "	+ Soll_Temp_Kueche.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: EG_Kueche_Auge_Temp.state = " +  EG_Kueche_Auge_Temp.state + "; Soll_Temp_Essen.state = "		+ Soll_Temp_Essen.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: EG_Wohnen_Auge_Temp.state = " +  EG_Wohnen_Auge_Temp.state + "; Soll_Temp_Wohnen.state = "	+ Soll_Temp_Wohnen.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: EG_Bianca_Auge_Temp.state = " +  EG_Bianca_Auge_Temp.state + "; Soll_Temp_Bianca.state = "	+ Soll_Temp_Bianca.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: OG_Bad_Auge_Temp.state = "    +  OG_Bad_Auge_Temp.state    + "; Soll_Temp_Bad.state = "		+ Soll_Temp_Bad.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: OG_Markus_Auge_Temp.state = " +  OG_Markus_Auge_Temp.state + "; OG_Markus_Thermo_Soll.state = "	+ OG_Markus_Thermo_Soll.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: OG_Tim_Auge_Temp.state = "    +  OG_Tim_Auge_Temp.state    + "; OG_Tim_Thermo_Soll.state = "	+ OG_Tim_Thermo_Soll.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: OG_Lutz_Auge_Temp.state = "   +  OG_Lutz_Auge_Temp.state   + "; OG_Lutz_Thermo_Soll.state = "	+ OG_Lutz_Thermo_Soll.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: K_ELW_Thermo_Ist.state = "    +  K_ELW_Thermo_Ist.state    + "; K_ELW_Thermo_Soll.state = "	+ K_ELW_Thermo_Soll.state)
+	logDebug("Heizung","Anwesenheitsmodus abwesend: K_WC_Thermo_Ist.state = "     +  K_ELW_Thermo_Ist.state    + "; K_WC_Thermo_Soll.state = "	+ K_WC_Thermo_Soll.state)
+
+	OG_Markus_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+	OG_Tim_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+	OG_Lutz_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+
+	Soll_Temp_Bad.postUpdate(static_Soll_Heizung_Nacht_Bad)
+	Soll_Temp_WC.postUpdate(static_Soll_Heizung_Nacht_Bad)
+	Soll_Temp_Diele.postUpdate(static_Soll_Heizung_Nacht)
+	Soll_Temp_Kueche.postUpdate(static_Soll_Heizung_Nacht)
+	Soll_Temp_Essen.postUpdate(static_Soll_Heizung_Nacht)
+	Soll_Temp_Bianca.postUpdate(static_Soll_Heizung_Nacht)
+	Soll_Temp_Wohnen.postUpdate(static_Soll_Heizung_Nacht)
+
+	K_Buero_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+	K_WC_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+end
+
+
+rule "Heizungsurlaubsschaltung aktiviert"
+when
+	Item Anwesenheitsmodus received command 0
+then
+	logInfo("Heizung","Setze Heizung auf Urlaubsschaltung.")
+
+	Soll_Temp_Bad.postUpdate(static_Soll_Heizung_Urlaub)
+	Soll_Temp_Diele.postUpdate(static_Soll_Heizung_Urlaub)
+	Soll_Temp_WC.postUpdate(static_Soll_Heizung_Urlaub)
+	Soll_Temp_Kueche.postUpdate(static_Soll_Heizung_Urlaub)
+	Soll_Temp_Essen.postUpdate(static_Soll_Heizung_Urlaub)
+	Soll_Temp_Bianca.postUpdate(static_Soll_Heizung_Urlaub)
+	Soll_Temp_Wohnen.postUpdate(static_Soll_Heizung_Urlaub)
+
+	K_Buero_Thermo_Modus.sendCommand("MANU-MODE")
+	K_ELW_Thermo_Modus.sendCommand("MANU-MODE")
+	K_WC_Thermo_Modus.sendCommand("MANU-MODE")
+	K_Waschkeller_Thermo_Modus.sendCommand("MANU-MODE")
+	OG_Markus_Thermo_Modus.sendCommand("MANU-MODE")
+	OG_Tim_Thermo_Modus.sendCommand("MANU-MODE")
+	OG_Lutz_Thermo_Modus.sendCommand("MANU-MODE")
+
+	K_Buero_Thermo_Soll.sendCommand(static_Soll_Heizung_Urlaub)
+//	K_ELW_Thermo_Soll.sendCommand(static_Soll_Heizung_Urlaub)
+	K_WC_Thermo_Soll.sendCommand(static_Soll_Heizung_Urlaub)
+	K_Waschkeller_Thermo_Soll.sendCommand(static_Soll_Heizung_Urlaub)
+
+	OG_Markus_Thermo_Soll.sendCommand(static_Soll_Heizung_Urlaub)
+	OG_Tim_Thermo_Soll.sendCommand(static_Soll_Heizung_Urlaub)
+	OG_Lutz_Thermo_Soll.sendCommand(static_Soll_Heizung_Urlaub)
+end
+
+
+rule "Heizungsurlaubsschaltung beendet"
+when
+	Item Anwesenheitsmodus changed from 0
+then
+	K_Buero_Thermo_Modus.sendCommand("MANU-MODE")	// diese & nächste Zeile waren auskommentiert da Thermostate zusammenhängen
+	K_ELW_Thermo_Modus.sendCommand("MANU-MODE")
+	K_WC_Thermo_Modus.sendCommand("MANU-MODE")
+	K_Waschkeller_Thermo_Modus.sendCommand("MANU-MODE")
+	OG_Markus_Thermo_Modus.sendCommand("MANU-MODE")
+	OG_Tim_Thermo_Modus.sendCommand("MANU-MODE")
+	OG_Lutz_Thermo_Modus.sendCommand("MANU-MODE")
+end
+
+
+rule "Heizungsautomatik FBH morgens vorwaermen"
+when
+	Time cron "0 31 5 ? * MON-SUN"
+then
+	if (Anwesenheitsmodus.state == 0)	// falls nicht Urlaubsmodus
+		return;
+	logInfo("Heizung","FBH wird morgens hochgefahren.")
+
+	if (FBH_morgens_vorwaermen_Einstellung.state > 0) {
+		OG_Bad_FBH.sendCommand(ON)
+		EG_WC_FBH.sendCommand(ON)
+	}
+	if (FBH_morgens_vorwaermen_Einstellung.state > 1) {
+
+		EG_Diele_FBH.sendCommand(ON)
+		EG_Kueche_FBH.sendCommand(ON)
+		EG_Essen_FBH_links.sendCommand(ON)
+		EG_Essen_FBH_rechts.sendCommand(ON)
+
+		EG_Bianca_FBH.sendCommand(ON)
+		if (Ferienschaltung.state == ON)
+			EG_Wohnen_FBH.sendCommand(ON)
+	}
+end
+
+
+rule "Heizungsautomatik morgens an wochentags"
+when
+	Time cron "0 0 6 ? * MON-FRI"
+then
+	logInfo("Heizung","Heizungs-Check AN: arbeitsfreier Tag = " + arbeitsfreierTag.state + "; Ferienschaltung = " + Ferienschaltung.state + "; Anwesenheitsmodus = " + Anwesenheitsmodus.state)
+
+
+	if (Anwesenheitsmodus.state == 0)
+		return;
+
+	Anwesenheitsmodus.sendCommand(1)
+end
+
+
+rule "Heizungsautomatik morgens an wochenends und Ferien"
+when
+	Time cron "0 0 7 ? * SAT,SUN"
+	or
+	Item arbeitsfreierTag changed from OFF to ON
+then
+	logInfo("Heizung","Heizungs-Check AN: arbeitsfreier Tag = " + arbeitsfreierTag.state + "; Ferienschaltung = " + Ferienschaltung.state + "; Anwesenheitsmodus = " + Anwesenheitsmodus.state)
+
+
+	if (Anwesenheitsmodus.state == 0)
+		return;
+
+	Anwesenheitsmodus.sendCommand(1)
+
+	logInfo("Heizung","Heizung wird morgens hochgefahren.")
+end
+
+
+/* deaktivierbar damit es winters warm bleibt */
+rule "Heizungsautomatik morgens aus oder an arbeitsfreien Tagen und in den Ferien anlassen"
+when
+	Time cron "30 0 7 ? * MON-FRI"
+	or
+	Item arbeitsfreierTag changed
+then
+	if (CoronaRegiert.state == ON) {
+		logInfo("Heizung","Heizungs-Check AUS: Corona regiert leider noch, die Heizung wird angelassen.")
+		return;
+	}
+
+	logInfo("Heizung","Heizungs-Check AUS: arbeitsfreier Tag = " + arbeitsfreierTag.state + "; Ferienschaltung = " + Ferienschaltung.state + "; Anwesenheitsmodus = " + Anwesenheitsmodus.state)
+	if (Anwesenheitsmodus.state == 0)
+		return;
+
+	if (Ferienschaltung.state == ON || arbeitsfreierTag.state == ON) {
+		Anwesenheitsmodus.sendCommand(1)
+		logInfo("Heizung","Frei ! Heizung wird während des Tages angelassen.")
+	} else {
+		Anwesenheitsmodus.sendCommand(2)
+		logInfo("Heizung","Heizung wird während des Tages wieder heruntergeregelt.")
+	}
+end
+
+
+rule "Heizungsautomatik nachmittags an"
+when
+	Time cron "0 0 16 ? * MON-FRI"
+then
+	// nur wenn abwesend, damit nicht bei Abwesenheit im Urlaub geheizt wird
+	if (Anwesenheitsmodus.state == 0)
+		return;
+	Anwesenheitsmodus.sendCommand(1)
+
+	logInfo("Heizung","Heizung wird nachmittags wieder hochgefahren.")
+end
+
+
+rule "Heizungsautomatik morgens an Buero ELW und Bianca (Homeoffice)"
+when
+	Time cron "0 45 7 ? * MON-FRI"
+	or
+	Item Markus_owntracks_daheim changed to ON
+	or
+	Item Bianca_owntracks_daheim changed to ON
+	or
+	Item Anwesenheitsmodus received command 2
+then
+        logDebug("Heizung","Heizungsschaltung ELW; arbeitsfreier Tag = " + arbeitsfreierTag.state + "; Ferienschaltung = " + Ferienschaltung.state)
+	if (arbeitsfreierTag.state == ON || Ferienschaltung.state == ON) {
+                K_Buero_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+//                K_ELW_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+                K_WC_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+
+		Soll_Temp_Bianca.postUpdate(default_Soll_Heizung_Nacht_Bianca)
+
+                logInfo("Heizung","Heizungsnachtschaltung ELW für Nicht-Arbeits-Zeiten (AUS auf " + static_Soll_Heizung_Nacht + ").")
+        } else {
+                K_Buero_Thermo_Soll.sendCommand(static_Soll_Heizung_Tag_ELW)
+//                K_ELW_Thermo_Soll.sendCommand(static_Soll_Heizung_Tag_ELW)
+                K_WC_Thermo_Soll.sendCommand(static_Soll_Heizung_Tag_ELW_WC)
+
+		Soll_Temp_Bianca.postUpdate(default_Soll_Heizung_Tag_Bianca)
+
+                logInfo("Heizung","Heizungstagschaltung ELW für Arbeitszeiten (EIN auf " + static_Soll_Heizung_Tag_ELW + ").")
+	}
+end
+
+
+rule "Heizungsautomatik nachmittags aus Buero ELW"
+when
+	Time cron "0 30 16 ? * MON-SUN"		// sicherheitshalber auch wochenends
+then
+	K_Buero_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+//	K_ELW_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+	K_WC_Thermo_Soll.sendCommand(static_Soll_Heizung_Nacht)
+	logInfo("Heizung","Heizungsnachtschaltung ELW für Nicht-Arbeits-Zeiten (AUS).")
+end
+
+
+rule "Heizungsautomatik nachmittags an Lutz"
+when
+	Time cron "0 45 15 ? * MON,FRI"
+	or
+	Time cron "0 0 14 ? * TUE,THU"
+	or
+	Item Lutz_owntracks_daheim changed to ON
+	or
+	Item Lutz_owntracks_Schule changed to OFF
+then
+	if (triggeringItem !== null && triggeringItem.name == "Lutz_owntracks_Schule" && now.getHourOfDay <= 12)
+		return;
+	if (triggeringItem !== null && triggeringItem.name == "Lutz_owntracks_daheim" && Nachtschaltung.state == false)
+		return;
+
+	// nur wenn abwesend, damit nicht bei Abwesenheit im Urlaub geheizt wird
+	// aber gegen != "Urlaub" (=0) testen, da die Variable auch NULL sein kann!!!
+	if (Anwesenheitsmodus.state != 0) {
+		OG_Lutz_Thermo_Soll.sendCommand(static_Soll_Heizung_Tag_Lutz)
+		logInfo("Heizung","Heizung bei Lutz wird nachmittags wieder hochgefahren.")
+	}
+end
+
+rule "Heizungsautomatik nachmittags an Tim"
+when
+	Time cron "0 0 12 ? * FRI"
+	or
+//	Time cron "0 0 16 ? * MON-THU"
+//	or
+	Time cron "0 15 14 ? * WED"
+//	or
+//	Time cron "0 0 18 ? * MON"	// wird generell 1700 hochgefahren
+	or
+	Item Tim_owntracks_daheim changed to ON
+	or
+	Item Tim_owntracks_Uni changed to OFF
+then
+	if (triggeringItem !== null && triggeringItem.name == "Tim_owntracks_Uni" && now.getHourOfDay <= 12)
+		return;
+	if (triggeringItem !== null && triggeringItem.name == "Tim_owntracks_daheim" && Nachtschaltung.state == false)
+		return;
+// getWeekOfYear gibt es nicht
+//	if (now.getDayOfWeek == 3 && now.getHourOfDay == 14 && now.getWeekOfYear % 2 == 1)
+//		return;
+
+	// nur wenn abwesend, damit nicht bei Abwesenheit im Urlaub geheizt wird
+	// aber gegen != "Urlaub" (=0) testen, da die Variable auch NULL sein kann!!!
+	if (Anwesenheitsmodus.state != 0) {
+		OG_Tim_Thermo_Soll.sendCommand(static_Soll_Heizung_Tag_Tim)
+		logInfo("Heizung","Heizung bei Tim wird nachmittags wieder hochgefahren.")
+	}
+end
+
+rule "Heizungsautomatik nachmittags an Markus"
+when
+	Item Markus_owntracks_daheim changed to ON
+	or
+	Item Markus_owntracks_Arbeit_BI changed to OFF
+then
+	if (triggeringItem !== null && triggeringItem.name == "Markus_owntracks_Arbeit_BI" && now.getHourOfDay <= 15)
+		return;
+	if (triggeringItem !== null && triggeringItem.name == "Markus_owntracks_daheim" && Nachtschaltung.state == false)
+		return;
+
+	// nur wenn abwesend, damit nicht bei Abwesenheit im Urlaub geheizt wird
+	// aber gegen != "Urlaub" (=0) testen, da die Variable auch NULL sein kann!!!
+	if (Anwesenheitsmodus.state != 0) {
+		OG_Markus_Thermo_Soll.sendCommand(static_Soll_Heizung_Tag_Markus)
+		logInfo("Heizung","Heizung bei Markus wird nachmittags wieder hochgefahren.")
+	}
+end
+
+
+rule "Heizungsnachtschaltung an 1"
+when
+	Time cron "0 0 21 ? * MON-THU,SUN"
+then
+	if (Anwesenheitsmodus.state != 0) {
+		Anwesenheitsmodus.sendCommand(2)
+		logInfo("Heizung","Heizung wird zur Nacht heruntergefahren.")
+	}
+end
+
+rule "Heizungsnachtschaltung an 2"
+when
+	Time cron "0 0 22 ? * FRI,SAT"
+then
+	if (Anwesenheitsmodus.state != 0) {
+		Anwesenheitsmodus.sendCommand(2)
+		logInfo("Heizung","Heizung wird zur Nacht heruntergefahren, alter Modus = " + Anwesenheitsmodus.state)
+	}
+end
+
+
+rule "Biancas Heizung einzeln an"
+when
+	Item Bianca_owntracks_Elsener changed to OFF
+	or
+	Item Bianca_owntracks_Talle changed to OFF
+then
+	var String msg = "Liebe Bianca, deine Heizung daheim wird hochgefahren ..."
+
+
+	Bianca_bei_Arbeit = false
+
+	logInfo("Heizung","Bianca hat ihre Arbeitsstätte verlassen, heize vor ...")
+	if ((now.getHourOfDay >= 15) && (Soll_Temp_Bianca.state < static_Soll_Heizung_Tag_Bianca)) {		// nicht aktivieren, wenn sie einfach nur tagsüber zwischen Standorten hin- und herfährt
+		logDebug("Heizung","Setze Biancas Raumtemperatur von " + Soll_Temp_Bianca.state + " °C auf " + static_Soll_Heizung_Tag_Bianca + " °C .")
+		Soll_Temp_Bianca.postUpdate(static_Soll_Heizung_Tag_Bianca)
+		
+		telegramAction.sendTelegram(msg)
+	}
+end
+
+
+rule "Biancas Heizung aus"
+when
+	Item Bianca_owntracks_Elsener changed to ON
+	or
+	Item Bianca_owntracks_Talle changed to ON
+then
+	var String msg = "Hallo Bianca, viel Erfolg bei der Arbeit. Deine Heizung wird heruntergefahren."
+
+
+	Bianca_bei_Arbeit = true
+
+	logInfo("Heizung","Bianca ist bei ihrer Arbeitsstätte angekommen.")
+	if (Soll_Temp_Bianca.state > static_Soll_Heizung_Nacht) {
+		logDebug("Heizung","Setze Biancas Raumtemperatur von " + Soll_Temp_Bianca.state + " auf " + static_Soll_Heizung_Nacht + " °C." )
+		Soll_Temp_Bianca.postUpdate(static_Soll_Heizung_Nacht)
+
+		telegramAction.sendTelegram(msg)
+	}
+end
+

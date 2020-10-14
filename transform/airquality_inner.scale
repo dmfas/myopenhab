@@ -1,0 +1,5 @@
+[450..1000]=gut
+[1000..1500]=maessig
+[1500..25000]=schlecht
+NULL=keine Daten
+-=keine Daten

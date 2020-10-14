@@ -1,0 +1,14 @@
+Number Lueftung_Modus                   	"Modus [MAP(ventilation.map):%s]"		{ channel="valloxmv:valloxmv:dc1106b2:state" }
+Number Lueftung_AnAus                   	"KWL An/Aus [MAP(onoffauto.map):%s]"		{ channel="valloxmv:valloxmv:dc1106b2:onoff", alexa="PowerController.powerState" }
+Number Lueftung_Waermetauscher_Modus    	"Modus Wärmetauscher [MAP(cellstate.map):%s]"	{ channel="valloxmv:valloxmv:dc1106b2:cellstate" }
+Number Lueftung_FanSpeed                	"Ventilator [%d %%]"				{ channel="valloxmv:valloxmv:dc1106b2:fanspeed" }
+Number Lueftung_Ventilator_Zuluft      		"Zuluft-Ventilator [%d U/min]"			{ channel="valloxmv:valloxmv:dc1106b2:fanspeedsupply" }
+Number Lueftung_Ventilator_Abluft      		"Abluft-Ventilator [%d U/min]"			{ channel="valloxmv:valloxmv:dc1106b2:fanspeedextract" }
+
+Number Lueftung_TempInside       		"Temp inside [%.1f °C]"		<temperature>	{ channel="valloxmv:valloxmv:dc1106b2:tempinside" }
+Number Lueftung_TempOutside     		"Temp outside [%.1f °C]"	<temperature>	{ channel="valloxmv:valloxmv:dc1106b2:tempoutside" }
+Number Lueftung_TempExhaust    			"Temp outgoing [%.1f °C]"	<temperature>	{ channel="valloxmv:valloxmv:dc1106b2:tempexhaust" }
+Number Lueftung_TempIncoming   			"Temp incoming [%.1f °C]"	<temperature>	{ channel="valloxmv:valloxmv:dc1106b2:tempincoming" }
+Number Lueftung_TempIncomingBeforeHeating	"Temp incoming [%.1f °C]"	<temperature>	{ channel="valloxmv:valloxmv:dc1106b2:tempincomingbeforeheating" }
+
+Number Lueftung_Humidity                "Humidity [%d %%]"  {channel="valloxmv:valloxmv:dc1106b2:humidity"}

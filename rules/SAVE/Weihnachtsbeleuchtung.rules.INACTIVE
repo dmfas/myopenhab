@@ -1,0 +1,40 @@
+val Number Landroid_Karenzzeit = 60		// sec
+val Number Lux_Durchschnitt_Nachlauf = 10
+
+
+
+rule "Weihnachtsbeleuchtung Init virtual Items"
+when
+	System started
+then
+	logInfo("rules", "Weihnachtsbeleuchtung Initialisierung.")
+end
+
+
+
+rule "Weihnachtsbeleuchtung einschalten"
+when
+	Time cron "0 30 6 * 12,1 ?"
+	or
+	Item Tageslicht changed to OFF
+then
+        logDebug("rules", "Schalte Weihnachtsbeleuchtung AN")
+	mobil_Zwischenstecker7.sendCommand(ON)
+	Terrasse_Bewegung_Timer.sendCommand(ON)
+end
+
+rule "Weihnachtsbeleuchtung wieder aus"
+when
+	Item Tageslicht changed to ON
+	or
+	Time cron "0 30 8 * 12,1 ?"
+	or
+	Time cron "0 30 22 * 12,1 ?"
+	or
+	Item Nachtschaltung changed to ON
+then
+	logDebug("rules", "Schalte Weihnachtsbeleuchtung AUS.")
+	mobil_Zwischenstecker7.sendCommand(OFF)
+	mobil_Zwischenstecker66.sendCommand(OFF)		// nur zur Sicherheit
+end
+

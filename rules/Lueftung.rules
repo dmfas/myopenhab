@@ -1,0 +1,390 @@
+var Timer waitTimer1
+var Timer waitTimer2
+var Timer waitTimer3
+
+val Number EXEC_TIMEOUT = 20000
+
+val Number static_Stummschaltung_Lueftung = 15
+val Number static_Stosslueftung = 15
+val Number static_Stummschaltung_Minimum = 10.0
+val Number static_Aussentemperatur = 20.0
+val Number Dauer_Anfeuer_Stummschaltung = 60
+
+val Number EWT_Schaltabstand = 0.5
+val Number EWT_default_kuehlen = 21.0	// EWT kuehlt, wenn Aussentemperatur oder Tagesminimum über diesem Wert liegt
+
+var Number EWT_Heizung_statisch
+var Number EWT_Kuehlung_statisch
+var Number Erdtemperatur
+
+var boolean Feuchtigkeitscheck = false
+
+
+
+/* ------------------------------------------------------------------------------------------------------ 
+ * 
+ * Berechnung des Taupunktes für eine gegebene Temperatur und Luftfeuchtigkeit
+ * 
+ * Beschreibung:
+ * Die Luft ist ein Gemisch verschiedener Gase. Eines dieser Gase ist der Wasserdampf. Die Menge an 
+ * Wasserdampf, die in der Luft enthalten sein kann, ist allerdings begrenzt. Je wärmer die Luft ist, 
+ * desto mehr Wasserdampf kann in ihr enthalten sein.
+ * 
+ * Die relative Luftfeuchtigkeit gibt an, wie viel Prozent des maximalen Wasserdampfgehaltes die Luft 
+ * im Augenblick enthält. Da der maximale Wasserdampfgehalt mit steigender Temperatur ansteigt, 
+ * fällt die relative Luftfeuchtigkeit mit steigender Temperatur (und umgekehrt).
+ * 
+ * Die Taupunkttemperatur ist definiert als die Temperatur, bei der der aktuelle Wasserdampfgehalt in 
+ * der Luft der maximale (100% relative Luftfeuchtigkeit) ist. Die Taupunkttemperatur ist damit eine von 
+ * der aktuellen Temperatur unabhängige Größe. Eine Möglichkeit die Taupunkttemperatur zu messen 
+ * ist das Abkühlen von Metall bis sich die Oberfläche mit Wasserdampf beschlägt. Dann ist die 
+ * Temperatur des Metalls die Taupunkttemperatur.
+ * 
+ * Es gibt keine exakte Formel zur Umrechnung der Taupunkttemperatur in die relative Luftfeuchtigkeit. 
+ * Zur Erstellung des Taupunktrechners habe ich eine einfache Näherungsformel benutzt. Eine exakte 
+ * Umrechnung ist nur mit experimentell ermittelten Tabellen möglich.
+ * 
+ * Aus Temperatur und relativer Luftfeuchte bzw. Temperatur und Taupunkt lässt sich auch der 
+ * absolute Feuchtegehalt der Luft in Gramm Wasserdampf pro Kubikmeter ausrechnen.
+ * 
+ * Formeln:
+ * Die Grundlage der Berechnungen ist die Näherungsformel für den Sättigungsdampfdruck ( Gleichung 1 ), 
+ * die sogenannte Magnusformel. Die relative Luftfeuchtigkeit ist definiert als das Verhältnis vom 
+ * augenblicklichen Dampfdruck zum Sättigungsdampfdruck (umgeformte Gleichung 2). Bei der 
+ * Taupunkttemperatur ist definitionsgemäß der Sättigungsdampfdruck gleich dem aktuellen Dampfdruck. 
+ * Aus diesen beiden Definitionen folgt unmittelbar Gleichung 3, die Formel zur Berechnung der 
+ * relativen Luftfeuchtigkeit aus der Taupunkttemperatur. Die 4. Gleichung beschreibt umgekehrt die 
+ * Berechnung der Taupunkttemperatur aus der relativen Luftfeuchtigkeit und der aktuellen Temperatur. 
+ * Diese 4. Gleichung ist im Grunde nichts anderes als die nach T aufgelöste 1. Gleichung , wobei für 
+ * den Sättigungsdampfdruck der aktuelle Dampfdruck (und nicht der aktuelle Sättigungsdampfdruck) 
+ * eingesetzt wird, so dass die Taupunkttemperatur und nicht die normale Temperatur als Ergebnis 
+ * herauskommt. Aus der allgemeinen Gasgleichung ergibt sich die 5. Gleichung .
+ * 
+ * Bezeichnungen:
+ * r = relative Luftfeuchte
+ * T = Temperatur in °C
+ * TK = Temperatur in Kelvin (TK = T + 273.15)
+ * TD = Taupunkttemperatur in °C
+ * DD = Dampfdruck in hPa
+ * SDD = Sättigungsdampfdruck in hPa
+ * 
+ * Parameter:
+ * a = 7.5, b = 237.3 für T >= 0
+ * a = 7.6, b = 240.7 für T < 0 über Wasser (Taupunkt)
+ * a = 9.5, b = 265.5 für T < 0 über Eis (Frostpunkt)
+ * 
+ * R* = 8314.3 J/(kmol*K) (universelle Gaskonstante)
+ * mw = 18.016 kg/kmol (Molekulargewicht des Wasserdampfes)
+ * AF = absolute Feuchte in g Wasserdampf pro m3 Luft
+ * 
+ * Formeln:
+ * SDD(T) = 6.1078 * 10^((a*T)/(b+T))
+ * DD(r,T) = r/100 * SDD(T)
+ * r(T,TD) = 100 * SDD(TD) / SDD(T)
+ * TD(r,T) = b*v/(a-v) mit v(r,T) = log10(DD(r,T)/6.1078)
+ * AF(r,TK) = 10^5 * mw/R* * DD(r,T)/TK; AF(TD,TK) = 10^5 * mw/R* * SDD(TD)/TK
+ * 
+ * Quelle: http://www.wetterochs.de/wetter/feuchte.html
+ * 
+ * Danke an Stefan Ochs von www.wetterochs.de
+ * 
+ * ------------------------------------------------------------------------------------------------------ */
+val Functions$Function2 <Number,Number,Number> calculateDewPoint = [ temperature, humidity |
+//val Functions$Function2 <double,double,double> calculateDewPoint = [ temperature, humidity |
+    var double a
+    var double b
+    var double SDD
+    var double DD
+    var double v
+    var double TD
+    
+
+//    logDebug("Lueftung","calculateDewPoint debug 0: temperature = " + temperature + "; humidity = " + humidity)
+    if (temperature >= 0.0){ // T >= 0 °C
+        a = 7.5
+        b = 237.3
+    } else { // T < 0 °C über Wasser
+        a = 7.6
+        b = 240.7
+    }
+    SDD=(6.1078 * Math::pow(10.0, ((a*temperature)/(b+temperature))))
+//    logDebug("Lueftung","calculateDewPoint debug 1: SDD = " + SDD)
+    DD = (humidity/100*SDD).doubleValue
+    v = Math::log10((DD/6.107))
+//    logDebug("Lueftung","calculateDewPoint debug 2: DD = " + DD + "; v = " + v)
+    TD = ((b*v)/(a-v))
+//    logDebug("Lueftung","calculateDewPoint debug 3: TD = " + TD)
+
+    // Return Value is TD
+    TD
+]
+
+
+rule "Lueftung Init virtual Items"
+when
+	System started
+then
+	Stummschaltung_Lueftung.postUpdate(static_Stummschaltung_Lueftung)
+	Stummschaltung_Lueftung_Bianca.postUpdate(static_Stummschaltung_Lueftung)
+	Stosslueftung_Dauer.postUpdate(static_Stosslueftung)
+end
+
+
+rule "Lueftung Init EWT"
+when
+	System started
+	or
+	Time is midnight
+then
+	// gemaess https://www.lanuv.nrw.de/fileadmin/lanuv/boden/bodenschutz_nrw/klima/pdf/Langzeit-Entwicklung_der_Bodentemperaturen_in_verschiedenen_Naturraeumen_Nordrhein-Westfalens.pdf
+	val Erdtemperaturen = newArrayList(5.0,4.5,5.0,7.5,12.0,15.0,17.0,18.0,16.0,13.0,9.0,6.0)
+
+
+	logDebug("Lueftung","debug Lüftung Initialisierung: Erdtemperatur=" + Erdtemperatur + "; EWT_Schaltabstand=" + EWT_Schaltabstand + "; EWT_Kuehlung_statisch=" + EWT_Kuehlung_statisch + "; EWT_Heizung_statisch=" + EWT_Heizung_statisch + "; temp_min=" + Temp_min)
+
+	Erdtemperatur = Erdtemperaturen.get(now.getMonthOfYear - 1)
+	if (Temp_min !== null && Temp_min.state > Erdtemperatur) {
+//		logDebug("Lueftung","debug a")
+		EWT_Heizung_statisch = (Temp_min.state as Number) - EWT_Schaltabstand
+	} else {
+//		logDebug("Lueftung","debug b")
+		EWT_Heizung_statisch = Erdtemperatur - EWT_Schaltabstand
+	}
+
+//	logDebug("Lueftung","debug c")
+	EWT_Kuehlung_statisch = EWT_default_kuehlen + EWT_Schaltabstand
+
+	logDebug("Lueftung","Lüftung Initialisierung. Wir haben Monat " + transform("MAP","months.map",now.getMonthOfYear.toString) + "; EWT heizt/kühlt, wenn Tagesminimum < " + Erdtemperatur + "°C oder (Minimum > " + EWT_Kuehlung_statisch + "°C und Minimum > vorhergesagten " + Temp_min.state + "°C).")
+
+	EWT_Zuheizung.postUpdate(EWT_Heizung_statisch)
+	EWT_Kuehlung.postUpdate(EWT_Kuehlung_statisch)
+end
+
+
+/*
+rule "Lueftung temporaer abschalten"
+when
+	Item D_Lueftung_DigitalEingang1 received command ON
+then
+	var Number Dauer = (Stummschaltung_Lueftung.state as Number)
+
+
+	logInfo("Lueftung","Deaktiviere Lüftung vorübergehend für " + Dauer + " Minuten.")
+	D_Lueftung_DigitalEingang1.sendCommand(OFF)
+end
+*/
+
+
+rule "Erdwaermetauscherpumpe Check"
+when
+	Item Temp_min changed
+	or
+	Item Temp_max changed
+	or
+	Item EWT_Zuheizung changed
+	or
+	Item EWT_Kuehlung changed
+	or
+	Time cron "0 2/15 * * * ?"
+then
+	var boolean Heizbedarf = aktuell_Temp.state < EWT_Zuheizung.state || Temp_min.state < EWT_Zuheizung.state || morgen_Temp_min.state < EWT_Zuheizung.state
+	var boolean Kuehlbedarf = (Temp_min.state > EWT_Kuehlung.state || morgen_Temp_min.state > EWT_Kuehlung.state) && aktuell_Temp.state > Erdtemperatur
+
+	if (Heizbedarf)
+		logInfo("Lueftung","EWT-Check: Aussentemperatur " + aktuell_Temp.state + " oder erwartete Tagesminimumtemperatur heute/morgen = " + Temp_min.state + "/" + morgen_Temp_min.state + " liegen unterhalb EWT-Schwellwert = " + EWT_Zuheizung.state.toString + "°C, aktiviere Erdwärmetauscher.")
+	if (Kuehlbedarf)
+		logInfo("Lueftung","EWT-Check: Aussentemperatur " + aktuell_Temp.state + " oder erwartete Tageshöchsttemperatur heute/morgen = " + Temp_max.state + "/" + morgen_Temp_max.state + " liegen oberhalb " + EWT_Kuehlung.state.toString + "°C, aktiviere Erdwärmetauscher.")
+
+	if (Kuehlbedarf || Heizbedarf) {
+		D_Lueftung_EWT_Pumpe.sendCommand(ON)
+	} else {
+		D_Lueftung_EWT_Pumpe.sendCommand(OFF)
+		logDebug("Lueftung","EWT-Check: Aussentemperatur " + aktuell_Temp.state + " oder erwartete Tagesmaximaltemperaturen heute = " + Temp_minMax.state + "°C oder morgen = " + morgen_Temp_minMax.state + "°C liegen zwischen " + EWT_Zuheizung.state.toString + " und " + EWT_Kuehlung.state.toString + "°C, deaktiviere Erdwärmetauscher.")
+	}
+end
+
+
+rule "Lueftung Bianca temporaer abstellen"
+when
+	Item EG_Bianca_Auge changed to ON
+then
+	var Number Luft = Lueftung_TempIncoming.state
+
+	if ((Luft < static_Stummschaltung_Minimum) && (D_Lueftung_Ventil_Bianca.state == OFF)) {
+		logDebug("Lueftung","debug Absperrventil: Bianca ist im Zimmer, Lueftung wird deaktiviert.")
+		D_Lueftung_Ventil_Bianca.sendCommand(ON)
+	}
+end
+
+
+rule "Lueftung Bianca wieder anstellen"
+when
+	Item EG_Bianca_Auge changed to OFF
+then
+	var Number Dauer = (Stummschaltung_Lueftung_Bianca.state as Number)
+
+
+	if (waitTimer2 !== null) {
+		waitTimer2.cancel
+		waitTimer2 = null
+        }
+
+//	logDebug("Lueftung","debug Absperrventil: Auge in Biancas Zimmer wieder CLOSED, Absperrventilstatus = " + D_Lueftung_Ventil_Bianca.state)
+        waitTimer2 = createTimer(now.plusMinutes((Dauer + 1).intValue)) [|
+		if ((EG_Bianca_Auge.state == OFF) && (D_Lueftung_Ventil_Bianca.state == ON) && (! EG_Bianca_Auge.changedSince(now.minusMinutes(Dauer.intValue)))) {
+			D_Lueftung_Ventil_Bianca.sendCommand(OFF)
+//			logDebug("Lueftung","debug Absperrventil: Biancas Zimmer seit " + Dauer + " Minuten unbenutzt, Lueftung wird wieder aktiviert.")
+		}
+	]
+end
+
+
+rule "Lueftung temporaer drosseln"
+when
+	Item OG_Markus_Auge changed to ON
+then
+	if ((Nachtschaltung.state == ON) && (Lueftung_Modus.state != 2)) {
+		logDebug("Lueftung","Bewegung in Markus Raum registriert, drossele Lüftungsanlagenleistung von " + transform("MAP","ventilation.map", Lueftung_Modus.state.toString) + " auf " + transform("MAP", "ventilation.map", "2") + ".")
+		Lueftung_Modus.sendCommand(2)
+	}
+end
+
+
+rule "Lueftung temporaer abstellen um Geruchsbelaestigung durch Kamine vorzubeugen"
+when
+	Channel 'astro:sun:local:set#event' triggered START
+then
+	val month = now.getMonthOfYear
+
+	logDebug("Lueftung","Lüftung Trigger month = " + month)
+	// nur im Winter
+	if (month > 3 && month < 10 || Lueftung_Modus.state == 2)
+		return;
+
+	logInfo("Lueftung","Lüftung wird temporär niedriger gestellt um Geruchsbelästigung durch Kamine vorzubeugen.")
+	Lueftung_Modus.sendCommand(2)
+
+	if (waitTimer1 !== null) {
+		waitTimer1.cancel
+		waitTimer1 = null
+        }
+
+        waitTimer1 = createTimer(now.plusMinutes(Dauer_Anfeuer_Stummschaltung.intValue)) [ |
+		Lueftung_Modus.sendCommand(2)
+		logInfo("Lueftung","Lüftungsdrosselungs-Ende: Kamin-Anfeuerzeit ist (hoffentlich) vorbei, Lüftung wird wieder auf Normalniveau hochgefahren.")
+	]
+end
+
+
+rule "Lueftung wieder hochfahren"
+when
+	Item OG_Markus_Auge changed to OFF
+then
+	var Number Dauer = (Stummschaltung_Lueftung.state as Number)
+
+
+	if (Nachtschaltung.state == OFF)
+		return;
+
+	if (waitTimer3 !== null) {
+		waitTimer3.cancel
+		waitTimer3 = null
+        }
+
+        waitTimer3 = createTimer(now.plusMinutes((Dauer + 1).intValue)) [ |
+		if ((Nachtschaltung.state == ON) && OG_Markus_Auge.state == OFF && Lueftung_Modus.state == 2 && (! OG_Markus_Auge.changedSince(now.minusMinutes(Dauer.intValue)))) {
+			Lueftung_Modus.sendCommand(3)
+			logDebug("Lueftung","Lüftungsdrosselungs-Ende: keine Bewegung in Markus' Zimmer seit " + Dauer + " Minuten, Lüftung wird wieder auf Normalniveau hochgefahren (Modus " + transform("MAP","ventilation.map",Lueftung_Modus.state.toString) + ").")
+		}
+	]
+end
+
+
+// siehe aqicn.org
+// Werte siehe https://en.wikipedia.org/wiki/Air_quality_index#The_hourly_and_daily_common_indices
+rule "Get AirQualityIndex"
+when
+	Time cron "0 2/15 * * * ?"
+then
+	var String coordinates = "51.6898199;8.6889056"
+	var String token = "d40b82b6fcc25270797ce493454714f6a8a559f8"
+	var response = sendHttpGetRequest("http://api.waqi.info/feed/geo:" + coordinates + "/?token=" + token, 3000)
+	logDebug("Lueftung","LuftqualitätsWebantwort: " + response + ".")
+
+	var aqi = transform("JSONPATH","$.data.aqi", response.toString)
+
+	if (aqi !== null) {
+		AirQualityIndex.postUpdate(aqi)
+		AirQuality.postUpdate(aqi)
+		logInfo("Lueftung","Luftqualitäts-Index AQI/Rohwert = " + aqi + "/" + response + ".")
+	}
+end
+
+
+
+/* ORIGINAL aus https://knx-user-forum.de/forum/supportforen/openhab/835446-taupunktberechnung-f%C3%BCr-l%C3%BCftungssteuerung (mit Hysterese-Ergaenzung) */
+rule "Lueftung Waschkeller"
+when 
+	Item K_Waschkeller_Feuchtigkeit changed
+	or
+	Item Garten_Auge_Feuche changed
+	or
+	Item K_Waschkeller_Temp changed
+	or
+	Item Garten_Auge2_Temp changed
+then
+	var double TPinnen
+	var double TPaussen
+	val double Taupunkt_Temperaturdifferenz = 5.0
+    
+
+        if (Waschkeller_Lueftung.state == OFF)
+		return;
+
+	if (Feuchtigkeitscheck)
+                return;
+
+        Feuchtigkeitscheck = true
+
+//	TPaussen = calculateDewPoint.apply((Garten_Auge2_Temp.state as Number).doubleValue, (Garten_Auge_Feuchte.state as Number).doubleValue) as Double
+	TPaussen = calculateDewPoint.apply(Garten_Auge2_Temp.state, Garten_Auge_Feuchte.state)
+//	TPinnen = calculateDewPoint.apply((K_Waschkeller_Temp.state as Number).doubleValue, (K_Waschkeller_Feuchtigkeit.state as Number).doubleValue) as Double
+	TPinnen = calculateDewPoint.apply(K_Waschkeller_Temp.state as Number, K_Waschkeller_Feuchtigkeit.state as Number) as Double
+
+	// ACHTUNG ich benutze Switch statt im Original Contact, und im Original bedeutet CLOSED Lueftungsbedarf,
+	// bei mir ist es andersherum, das Gruppen-Item heisst Waschkeller_Lueftungsbedarf ist in diesem Fall ON statt OFF
+	// daher: CLOSED durch ON und OPEN durch OFF ersetzen, das ist umgekehrt als bei der Beziehung Switch - Contact
+	if ((TPaussen + Taupunkt_Temperaturdifferenz <= TPinnen) && (Waschkeller_Lueftungsbedarf.state != ON)) {
+		if ((K_Waschkeller_Feuchtigkeit.state > Schwellwert_max_Luftfeuchte_Waschkeller.state) ||
+			(K_Waschkeller_Feuchtigkeit.state > Schwellwert_min_Luftfeuchte_Waschkeller.state && K_Waschkeller_Feuchtigkeit.state > Garten_Auge_Feuchte.state &&
+			K_Waschkeller_Temp.state > Schwellwert_min_Temperatur_Waschkeller.state)) {
+
+			Waschkeller_Lueftungsbedarf.sendCommand(ON)
+                	logInfo("Lueftung","Lüftungsbedarf im Waschkeller: TPaussen + mind. Differenz = " + TPaussen + " + " + Taupunkt_Temperaturdifferenz + " <= TPinnen = " + TPinnen)
+		}
+	} else 
+		Waschkeller_Lueftungsbedarf.sendCommand(OFF)
+
+        Feuchtigkeitscheck = false
+end
+
+
+rule "Feuchtigkeitscheck Reset"
+when
+	Time cron "0 * * * * ?"
+then
+	Feuchtigkeitscheck = false
+end
+
+
+rule "Luftguete-Sensor-Stick auslesen"
+when
+	Time cron "0 1/2 * * * ?"
+then
+	val String rawout = executeCommandLine("/usr/sbin/airsensor -o", EXEC_TIMEOUT)
+	val String value = transform("REGEX", ".*?VOC: (.*?), .*", rawout)
+	logDebug("Lueftung", "airsensor running resulted in " + rawout + "; transformed: " + value + "\n")
+	Luftguete.postUpdate(value)
+end
+
+// vim: syntax=Xtend

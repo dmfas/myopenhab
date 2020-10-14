@@ -1,0 +1,335 @@
+val Number geschlossen = 99
+val Number Rolladen_lichtdurchlaessig = 72 	// war 70
+val Number Lamellen_lichtdurchlaessig = 29	// war 29
+val Number Rolladen_lichtundurchlaessig = 87
+val Number Lamellen_lichtundurchlaessig = 55	// war 55
+val Number offen = 0
+val Number Bewoelkung_Grenzwert = 30.0
+val Number Modus_Auto = 1
+val Number Modus_Ein = 2
+val Number Modus_Hoch = 3
+val Number Modus_Aus = 0
+val Number Lux_Rueckwaertsfenster = 15		// Rueckwaertsfenster in Minuten fuer gleitenden Durchschnitt
+val Number Aktionsfenster = 5			// keine mehrfache Aenderung innerhalb dieser Zeitspanne in Minuten
+
+val long Verschattung_Anfang_morgens_statisch = (7 * 3600) * 1000			// Start 7:00
+val long Verschattung_Ende_morgens_statisch = (13 * 3600) * 1000			// Ende 13:00
+val long Verschattung_Anfang_mittags_statisch = (10 * 3600) * 1000			// Start 10:00
+val long Verschattung_Ende_mittags_statisch = (18 * 3600 + 30 * 60) * 1000		// Ende 18:30
+
+
+val Number Lux_Grenzwert_Sonnenschutz_morgens_niedrig_statisch = 16000.0
+val Number Lux_Grenzwert_Sonnenschutz_morgens_hoch_statisch = 30000.0
+// z.Zt. wird ein- und der selbe Sensor an der Hausecke benutzt
+val Number Lux_Grenzwert_Sonnenschutz_mittags_niedrig_statisch = 20000.0
+val Number Lux_Grenzwert_Sonnenschutz_mittags_hoch_statisch = 32000.0
+val Number Aussentemp_Grenzwert_Sonnenschutz_statisch = 21.0
+val Number Innentemp_Grenzwert_Sonnenschutz_statisch = 21.0
+val Number Aussentemp_Hysterese_Sonnenschutz_statisch = 2.0
+val Number Innentemp_Hysterese_Sonnenschutz_statisch = 2.0
+// manche Rollaeden fahren von 100% auf 97% zurück
+val Number Hysterese_Rollaeden_statisch = 4
+
+
+// ACHTUNG Absolutwert muss daher taeglich neu via cron-getriggerte rule initialisiert werden !
+var long Verschattung_Anfang_morgens
+var long Verschattung_Ende_morgens
+var long Verschattung_Anfang_mittags
+var long Verschattung_Ende_mittags
+
+var boolean SB_alt_morgens = false
+var boolean SB_alt_hoch_morgens = false
+var boolean SB_alt_mittags = false
+var boolean SB_alt_hoch_mittags = false
+var boolean SB_Aenderung_mittags = true
+var boolean SB_Aenderung_morgens = true
+var boolean SB_Reset = true
+var Number letzte_Aenderung_morgens = Verschattung_Anfang_morgens
+var Number letzte_Aenderung_mittags = Verschattung_Anfang_mittags
+
+
+val Functions$Function3 <RollershutterItem,ContactItem,NumberItem,Boolean> check_close_shutter = [ shutter, door, percentage |
+//	logDebug("Sonnenschutz","Sonnenschutz close_shutter shutter=" + shutter + "; door=" + door + "; %= " + percentage)
+	if (door.state != OPEN) {
+		logDebug("Sonnenschutz", shutter.label + "(" + shutter.name + ") wird auf " + percentage + " gefahren, shutter = " + shutter)
+		// warum auch immer das nötig ist ...
+		var Number p = percentage
+		shutter.sendCommand(p)
+	} else
+		logDebug("Sonnenschutz", shutter.label + " wird nicht geschlossen, da " + door.label + " geöffnet ist.")
+
+	logDebug("Sonnenschutz", shutter.label + "(" + shutter.name + ") erledigt")
+	true
+]
+
+
+val Functions$Function4 <RollershutterItem,ContactItem,ContactItem,NumberItem,Boolean> check_close_blinds = [ blinds, door1, door2, percentage |
+//	logDebug("Sonnenschutz","Sonnenschutz close_blinds blinds=" + blinds + "; door1=" + door1 + "; door2=" + door2 + "; %= " + percentage)
+	if (door1.state != OPEN && door2.state != OPEN) {
+		var Number p = percentage
+		var Number a = p - Hysterese_Rollaeden.state
+		var Number b = p + Hysterese_Rollaeden.state
+		var boolean ausserhalb = (blinds.state < a) || (blinds.state > b)
+		logDebug("Sonnenschutz","Jalousie=" + blinds.state + " außerhalb [" + a + ";" + b + "] ? = " + ausserhalb.toString)
+		if (blinds.state < (p - Hysterese_Rollaeden.state) || blinds.state > (p + Hysterese_Rollaeden.state)) {
+//		if (blinds.state < a || blinds.state > b) {
+//		if (ausserhalb) {
+			logDebug("Sonnenschutz", blinds.label + "(" + blinds.name + ") wird auf " + percentage + " gefahren, blinds = " + blinds)
+			blinds.sendCommand(p)
+		} else logDebug("Sonnenschutz", blinds.label + "(" + blinds.name + ") wird nicht bewegt da im Toleranzbereich.")
+	} else
+		logDebug("Sonnenschutz", blinds.label + " wird nicht geschlossen, da " + door1.label + " oder " + door2.label + " noch geöffnet ist.")
+
+	logDebug("Sonnenschutz", blinds.label + "(" + blinds.name + ") erledigt")
+	true
+]
+
+
+rule "Sonnenschutz Init virtual Items"
+when
+	System started
+	or
+	Item Nachtschaltung received command OFF
+	or
+	Item Sonnenschutzschaltung changed
+then
+	Lux_Grenzwert_Sonnenschutz_morgens_niedrig.postUpdate(Lux_Grenzwert_Sonnenschutz_morgens_niedrig_statisch)
+	Lux_Grenzwert_Sonnenschutz_morgens_hoch.postUpdate(Lux_Grenzwert_Sonnenschutz_morgens_hoch_statisch)
+	Lux_Grenzwert_Sonnenschutz_mittags_niedrig.postUpdate(Lux_Grenzwert_Sonnenschutz_mittags_niedrig_statisch)
+	Lux_Grenzwert_Sonnenschutz_mittags_hoch.postUpdate(Lux_Grenzwert_Sonnenschutz_mittags_hoch_statisch)
+	Aussentemp_Grenzwert_Sonnenschutz.postUpdate(Aussentemp_Grenzwert_Sonnenschutz_statisch)
+	Aussentemp_Hysterese_Sonnenschutz.postUpdate(Aussentemp_Hysterese_Sonnenschutz_statisch)
+	Innentemp_Grenzwert_Sonnenschutz.postUpdate(Innentemp_Grenzwert_Sonnenschutz_statisch)
+	Innentemp_Hysterese_Sonnenschutz.postUpdate(Innentemp_Hysterese_Sonnenschutz_statisch)
+	Hysterese_Rollaeden.postUpdate(Hysterese_Rollaeden_statisch)
+
+        Verschattung_Anfang_morgens = (now.withTimeAtStartOfDay).millis + Verschattung_Anfang_morgens_statisch
+        Verschattung_Ende_morgens   = (now.withTimeAtStartOfDay).millis + Verschattung_Ende_morgens_statisch
+        Verschattung_Anfang_mittags = (now.withTimeAtStartOfDay).millis + Verschattung_Anfang_mittags_statisch
+        Verschattung_Ende_mittags   = (now.withTimeAtStartOfDay).millis + Verschattung_Ende_mittags_statisch
+
+	SB_Aenderung_mittags = true
+	SB_Aenderung_morgens = true
+	SB_Reset = true
+
+	letzte_Aenderung_morgens = Verschattung_Anfang_morgens
+	letzte_Aenderung_mittags = Verschattung_Anfang_mittags
+
+	logInfo("Sonnenschutz", "Sonnenschutz Initialisierung.")
+
+	Sonnenschutz.postUpdate(Sonnenschutzschaltung.state)
+end
+
+/*
+rule "Sonnenschutz Tuer geoeffnet"
+when
+	Member of WohnraumTueren changed to CLOSED
+then
+	logDebug("Sonnenschutz", "Sonnenschutzcheck: Anzahl offener Türen hat sich auf " + WohnraumTueren.state + " geändert.")
+
+	//SB_Reset = true
+	Sonnenschutz.postUpdate(Sonnenschutzschaltung.state)
+end
+*/
+
+rule "Sonnenschutzcheck"
+when
+//	Time cron "0 1/5 7-18 ? * MON-SUN"
+//	or
+//	Item Sonnenschutzschaltung received update
+//	or
+//	Item Sonnenschutzschaltung received command
+//	or
+	Member of LuxAussen changed
+	or
+	// würde man auf OPEN triggern, könnten Rolladen noch dabei sein hochzufahren und dadurch nicht 0% ehe sie schon wieder den Befehl kriegen runterzufahren,
+	// den bekommen sie dann aber wegen der "Trägheits"funktion in check_...() nicht und der Trigger verpufft
+	Member of AussenTueren changed to CLOSED
+	or
+	Member of WohnraumTueren changed to CLOSED
+then
+	Garten_Auge_Lux.persist
+
+	logDebug("Sonnenschutz", "Sonnenschutzcheck: Sonnenschutzschaltung = " + Sonnenschutzschaltung.state + "; Nachtschaltung = " + Nachtschaltung.state + "; Szene = " + Szene.state)
+
+	var Number a = (Soll_Temp_Wohnen.state as Number) - (Aussentemp_Hysterese_Sonnenschutz.state as Number)
+	var Number i = (Soll_Temp_Wohnen.state as Number) - (Innentemp_Hysterese_Sonnenschutz.state as Number)
+
+	logDebug("Sonnenschutz", "Sonnenschutzcheck: Soll_Temp_Wohnen = " + Soll_Temp_Wohnen.state + "; Hysterese innen/aussen = " + Innentemp_Hysterese_Sonnenschutz.state + "/" + Aussentemp_Hysterese_Sonnenschutz.state + "; aussen = " + a + "; innen = " + i)
+
+	Aussentemp_Grenzwert_Sonnenschutz.postUpdate(a)
+	Innentemp_Grenzwert_Sonnenschutz.postUpdate(i)
+
+	if (Nachtschaltung.state != ON && Szene.state <= 2) {
+		Sonnenschutz.postUpdate(Sonnenschutzschaltung.state)
+	}
+end
+
+
+rule "Sonnenschutz implementieren"
+when
+	Item Sonnenschutz received update
+then
+	var Number Temp_morgens = (TempTerrasseRohwerte.state as Number)
+	var Number Temp_mittags = (TempTerrasseRohwerte.state as Number)
+
+	if (Tageslicht.state == OFF || (Szene.state == 101 && Sonnenschutz.state != Modus_Hoch))
+		return;
+
+//	logDebug("Sonnenschutz", "Sonnenschutz debug: receivedCommand = " + receivedCommand)
+	logDebug("Sonnenschutz", "Sonnenschutz: Durchschnittshelligkeit morgens/mittags = " + Lux_Durchschnitt_morgens.state + "/" + Lux_Durchschnitt_mittags.state)
+	var boolean hell_genug_morgens = (Lux_Durchschnitt_morgens.state >= (Lux_Grenzwert_Sonnenschutz_morgens_niedrig.state as Number))
+
+	var boolean zu_hell_morgens = Lux_Durchschnitt_morgens.state >= (Lux_Grenzwert_Sonnenschutz_morgens_hoch.state as Number) || (Lux_Durchschnitt_morgens.state >= (Lux_Grenzwert_Sonnenschutz_morgens_niedrig.state as Number) && aktuell_Bewoelkung.state >= Bewoelkung_Grenzwert)
+//	var boolean hell_genug_mittags = (Lux_Durchschnitt_mittags.state >= (Lux_Grenzwert_Sonnenschutz_mittags_niedrig.state as Number) && aktuell_Bewoelkung.state >= Bewoelkung_Grenzwert)
+	var boolean hell_genug_mittags = (Lux_Durchschnitt_mittags.state >= Lux_Grenzwert_Sonnenschutz_mittags_niedrig.state as Number)
+	// Halb-Verschattung reduziert Innenhelligkeit, darum stark verschatten, wenn trotzdem (SB_alt_mittags) der Grenzwert erreicht
+//	var boolean zu_hell_mittags = Lux_Durchschnitt_mittags.state > (Lux_Grenzwert_Sonnenschutz_mittags_hoch.state as Number) || (hell_genug_mittags && SB_alt_mittags)
+	var boolean zu_hell_mittags = Lux_Durchschnitt_mittags.state > (Lux_Grenzwert_Sonnenschutz_mittags_hoch.state as Number)
+	var boolean zu_warm_morgens = Temp_morgens >= (Aussentemp_Grenzwert_Sonnenschutz.state as Number) || Temp_max.state >= Aussentemp_Grenzwert_Sonnenschutz.state
+	var boolean zu_warm_mittags = Temp_mittags >= (Aussentemp_Grenzwert_Sonnenschutz.state as Number) || (zu_hell_mittags && Temp_max.state >= Aussentemp_Grenzwert_Sonnenschutz.state)
+
+	logDebug("Sonnenschutz", "Sonnenschutz: hell genug/zu hell/zu warm morgens = " + hell_genug_morgens + "/" + zu_hell_morgens + "/" + zu_warm_morgens)
+	logDebug("Sonnenschutz", "Sonnenschutz: hell genug/zu hell/zu warm mittags = " + hell_genug_mittags + "/" + zu_hell_mittags + "/" + zu_warm_mittags)
+
+	logDebug("Sonnenschutz", "Sonnenschutz: SB_Reset = " + SB_Reset + "; (Sonnenschutz == Modus_Auto) = " + (Sonnenschutz.state == Modus_Auto) + "; (Sonnenschutz == Modus_Ein) = " + (Sonnenschutz.state == Modus_Ein) + "; (Sonnenschutz == Modus_Hoch) = " + (Sonnenschutz.state == Modus_Hoch) + "; (Sonnenschutz == Modus_Aus) = " + (Sonnenschutz.state == Modus_Aus))
+	var boolean Schutzbedarf_morgens = (Sonnenschutz.state == Modus_Ein) || (Sonnenschutz.state == Modus_Hoch) || (Sonnenschutz.state == Modus_Auto &&(now.millis > Verschattung_Anfang_morgens && now.millis < Verschattung_Ende_morgens && hell_genug_morgens && zu_warm_morgens))
+	var boolean Schutzbedarf_mittags = (Sonnenschutz.state == Modus_Ein) || (Sonnenschutz.state == Modus_Hoch) || (Sonnenschutz.state == Modus_Auto && (now.millis > Verschattung_Anfang_mittags && now.millis < Verschattung_Ende_mittags && hell_genug_mittags && zu_warm_mittags))
+
+	var boolean Schutzbedarf_hoch_morgens = (Sonnenschutz.state == Modus_Hoch) || (Schutzbedarf_morgens && zu_hell_morgens && zu_warm_morgens)
+	var boolean Schutzbedarf_hoch_mittags = (Sonnenschutz.state == Modus_Hoch) || (Schutzbedarf_mittags && zu_hell_mittags && zu_warm_mittags)
+
+	logDebug("Sonnenschutz", "Sonnenschutz: Schutzbedarf morgens[hoch]/mittags[hoch] = " + Schutzbedarf_morgens + "[" + Schutzbedarf_hoch_morgens + "]/" + Schutzbedarf_mittags + "[" + Schutzbedarf_hoch_mittags + "]")
+
+	SB_Aenderung_morgens = (SB_Reset || SB_alt_hoch_morgens != Schutzbedarf_hoch_morgens || SB_alt_morgens != Schutzbedarf_morgens)
+	SB_Aenderung_mittags = (SB_Reset || SB_alt_hoch_mittags != Schutzbedarf_hoch_mittags || SB_alt_mittags != Schutzbedarf_mittags)
+
+	logDebug("Sonnenschutz", "Sonnenschutz: Schutzbedarf Alt-Speicher morgens[hoch][Aenderung]/mittags[hoch][Aenderung] = " + SB_alt_morgens + "[" + SB_alt_hoch_morgens + "][" + SB_Aenderung_morgens + "]/" + SB_alt_mittags + "[" + SB_alt_hoch_mittags + "][" + SB_Aenderung_mittags + "]")
+
+	logDebug("Sonnenschutz", "Sonnenschutz Morgen-Check: Schaltung = " + Sonnenschutzschaltung.state + "; Lichtstärke (" + Lux_Rueckwaertsfenster + "-min-Durchschnitt/Grenzwert[hoch]) = " + Lux_Durchschnitt_morgens.state + "/" + Lux_Grenzwert_Sonnenschutz_morgens_niedrig.state + "[" + Lux_Grenzwert_Sonnenschutz_morgens_hoch.state + "] lux; Bewölkung (aktuell/Grenzwert) = " + aktuell_Bewoelkung.state + "/" + Bewoelkung_Grenzwert + " %; Temperatur(Sensor/max. heute/Grenzwert) = " + Temp_morgens + "/" + Temp_max.state + "/" + Aussentemp_Grenzwert_Sonnenschutz.state + " °C; Schutzbedarf morgens (aktuell[hoch]/alt[hoch]/Änderung) = " + Schutzbedarf_morgens + "[" + Schutzbedarf_hoch_morgens + "]/" + SB_alt_morgens + "[" + SB_alt_hoch_morgens + "]/" + SB_Aenderung_morgens)
+
+	var Number c = now.millis - Aktionsfenster * 60 * 1000
+	var Number Schliessgrad = if (Schutzbedarf_hoch_morgens) Rolladen_lichtundurchlaessig else Rolladen_lichtdurchlaessig
+	var Number Lamellen = if (Schutzbedarf_hoch_morgens) Lamellen_lichtundurchlaessig else Lamellen_lichtdurchlaessig
+
+//	logDebug("Sonnenschutz", "Sonnenschutz debug 3a: SB_Reset = " + SB_Reset +"; SB_Aenderung_morgens = " + SB_Aenderung_morgens)
+//	logDebug("Sonnenschutz", "Sonnenschutz debug 3b: now > Anfang_morgens = " + if (now.millis > Verschattung_Anfang_morgens) "true" else "false")
+//	logDebug("Sonnenschutz", "Sonnenschutz debug 3c: now < Ende_morgens = " + if (now.millis < Verschattung_Ende_morgens) "true" else "false")
+//	logDebug("Sonnenschutz", "Sonnenschutz debug 3d: c = " + c + " > letzte_Aenderung_morgens = " + letzte_Aenderung_morgens + " = " + if (c > letzte_Aenderung_morgens) "true" else "false")
+
+	if (SB_Reset || (now.millis < Verschattung_Ende_morgens && SB_Aenderung_morgens && c > letzte_Aenderung_morgens)) {
+		if (Schutzbedarf_morgens) {
+			logInfo("Sonnenschutz", "Sonnenschutz: Verschatte vormittags beschienene Fensterflächen ...")
+
+			check_close_shutter.apply(EG_Kueche_Rolladen_Tuer,EG_Kueche_Tuer_Kontakt,Schliessgrad)
+			check_close_shutter.apply(EG_Kueche_Rolladen_Fenster,EG_Kueche_Fenster_Kontakt,Schliessgrad)
+			check_close_shutter.apply(EG_Essen_Rolladen,EG_Essen_Fenster_Kontakt,Schliessgrad)
+	
+			check_close_blinds.apply(EG_Wohnen_Jalousie_links,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+			check_close_blinds.apply(EG_Wohnen_Jalousie_Mitte,EG_Wohnen_Mitte_li_Kontakt,EG_Wohnen_Mitte_re_Kontakt,geschlossen)
+			check_close_blinds.apply(EG_Wohnen_Jalousie_links_Lamellen,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,Lamellen)
+			check_close_blinds.apply(EG_Wohnen_Jalousie_Mitte_Lamellen,EG_Wohnen_Mitte_li_Kontakt,EG_Wohnen_Mitte_re_Kontakt,Lamellen)
+
+		} else {
+			logInfo("Sonnenschutz", "Sonnenschutz: keine Verschattung nötig, öffne vormittags beschienene Fensterflächen ...")
+
+			EG_Kueche_Rolladen_Tuer.sendCommand(offen)
+			EG_Kueche_Rolladen_Fenster.sendCommand(offen)
+			EG_Essen_Rolladen.sendCommand(offen)
+			EG_Wohnen_Jalousie_links.sendCommand(offen)
+			EG_Wohnen_Jalousie_Mitte.sendCommand(offen)
+
+			logDebug("Sonnenschutz", "Sonnenschutz: Rolläden/Jalousien vormittags fertig heraufgefahren.") 
+		}
+
+	} else
+		logDebug("Sonnenschutz", "Sonnenschutz: keine Anpassung der Verschattung auf den vormittags beschienenen Fensterflächen nötig.")
+
+
+	logDebug("Sonnenschutz", "Sonnenschutz Mittags-Check : Schaltung = " + Sonnenschutzschaltung.state + "; Lichtstärke (" + Lux_Rueckwaertsfenster + "-min-Durchschnitt/Grenzwert[hoch]) = " + Lux_Durchschnitt_mittags.state + "/" + Lux_Grenzwert_Sonnenschutz_mittags_niedrig.state + "[" + Lux_Grenzwert_Sonnenschutz_mittags_hoch.state + "] lux; Bewölkung (aktuell/Grenzwert) = " + aktuell_Bewoelkung.state + "/" + Bewoelkung_Grenzwert + " %; Temperatur(Sensor/max. heute/Grenzwert) = " + Temp_mittags + "/" + Temp_max.state + "/" + Aussentemp_Grenzwert_Sonnenschutz.state + " °C; Schutzbedarf mittags (aktuell[hoch]/alt[hoch]/Änderung) = " + Schutzbedarf_mittags + "[" + Schutzbedarf_hoch_mittags + "]/" + SB_alt_mittags + "[" + SB_alt_hoch_mittags + "]/" + SB_Aenderung_mittags)
+
+	Schliessgrad = if (Schutzbedarf_hoch_mittags) Rolladen_lichtundurchlaessig else Rolladen_lichtdurchlaessig
+	Lamellen = if (Schutzbedarf_hoch_mittags) Lamellen_lichtundurchlaessig else Lamellen_lichtdurchlaessig
+
+//	logDebug("Sonnenschutz", "Sonnenschutz debug 3a: SB_Reset = " + SB_Reset +"; SB_Aenderung_mittags = " + SB_Aenderung_mittags)
+//	logDebug("Sonnenschutz", "Sonnenschutz debug 3b: now > Anfang_mittags = " + if (now.millis > Verschattung_Anfang_mittags) "true" else "false")
+//	logDebug("Sonnenschutz", "Sonnenschutz debug 3c: now < Ende_mittags = " + if (now.millis < Verschattung_Ende_mittags) "true" else "false")
+//	logDebug("Sonnenschutz", "Sonnenschutz debug 3d: c = " + c + " > letzte_Aenderung_mittags = " + letzte_Aenderung_mittags + " = " + if (c > letzte_Aenderung_mittags) "true" else "false")
+
+	if (SB_Reset || (now.millis > Verschattung_Anfang_mittags && now.millis < Verschattung_Ende_mittags && SB_Aenderung_morgens && c > letzte_Aenderung_morgens)) {
+		if (Schutzbedarf_mittags) {
+			logDebug("Sonnenschutz", "Sonnenschutz: Verschatte (nach)mittags beschienene Fensterflächen ...")
+
+			check_close_blinds.apply(EG_Wohnen_Jalousie_rechts,EG_Wohnen_re1_Kontakt,EG_Wohnen_re2_Kontakt,geschlossen)
+			check_close_blinds.apply(EG_Wohnen_Jalousie_rechts_Lamellen,EG_Wohnen_re1_Kontakt,EG_Wohnen_re2_Kontakt,Lamellen)
+
+			if (Sonnenschutz_Bianca.state == ON)
+				check_close_shutter.apply(EG_Bianca_Rolladen,EG_Bianca_Tuer_Kontakt,Schliessgrad)
+			
+			check_close_shutter.apply(EG_Wohnen_Rolladen,EG_Wohnen_alt_Kontakt,Schliessgrad)
+		} else {
+			logDebug("Sonnenschutz", "Sonnenschutz: keine Verschattung nötig, öffne (nach)mittags beschienene Fensterflächen ...")
+
+			EG_Wohnen_Jalousie_rechts.sendCommand(offen)
+			if (Sonnenschutz_Bianca.state == ON)
+				EG_Bianca_Rolladen.sendCommand(offen)
+			EG_Wohnen_Rolladen.sendCommand(offen)
+
+			logDebug("Sonnenschutz", "Sonnenschutz: nachmittags fertig heraufgefahren.") 
+		}
+	} else
+		logDebug("Sonnenschutz", "Sonnenschutz: keine Anpassung der Verschattung auf den nachmittags beschienenen Fensterflächen nötig.")
+
+	if (SB_Aenderung_morgens) {
+		SB_Aenderung_morgens = false
+		letzte_Aenderung_morgens = now.millis
+	}
+	if (SB_Aenderung_mittags) {
+		SB_Aenderung_mittags = false
+		letzte_Aenderung_mittags = now.millis
+	}
+
+	SB_alt_morgens = Schutzbedarf_morgens
+	SB_alt_hoch_morgens = Schutzbedarf_hoch_morgens
+	SB_alt_mittags = Schutzbedarf_mittags
+	SB_alt_hoch_mittags = Schutzbedarf_hoch_mittags
+ 	SB_Reset = false
+
+// wird dieser Code noch gebraucht ?
+	if (now.isAfter(Verschattung_Ende_mittags) && now.minusMinutes(Aktionsfenster).isBefore(Verschattung_Ende_mittags)) {
+/*
+                EG_Wohnen_Jalousie_rechts.sendCommand(Rolladen_offen)
+                EG_Wohnen_Rolladen.sendCommand(Rolladen_offen)
+                if (Sonnenschutz_Bianca.state == ON)
+                        EG_Bianca_Rolladen.sendCommand(Rolladen_offen)
+*/
+
+		check_close_blinds.apply(EG_Wohnen_Jalousie_rechts,EG_Wohnen_re1_Kontakt,EG_Wohnen_re2_Kontakt,offen)
+		check_close_shutter.apply(EG_Wohnen_Rolladen,EG_Wohnen_alt_Kontakt,offen)
+		if (Sonnenschutz_Bianca.state == ON)
+			check_close_shutter.apply(EG_Bianca_Rolladen,EG_Wohnen_alt_Kontakt,offen)
+
+		SB_Aenderung_mittags = true
+		logDebug("Sonnenschutz", "Sonnenschutz Mittagseite beendet, Jalousien werden wieder hochgefahren.")
+	}
+	if (now.isAfter(Verschattung_Ende_morgens) && now.minusMinutes(Aktionsfenster).isBefore(Verschattung_Ende_morgens)) {
+/*
+		EG_Kueche_Rolladen_Tuer.sendCommand(offen)
+		EG_Kueche_Rolladen_Fenster.sendCommand(offen)
+		EG_Essen_Rolladen.sendCommand(offen)
+		EG_Wohnen_Jalousie_links.sendCommand(offen)
+		EG_Wohnen_Jalousie_Mitte.sendCommand(offen)
+*/
+		check_close_shutter.apply(EG_Kueche_Rolladen_Tuer,EG_Kueche_Tuer_Kontakt,offen)
+		check_close_shutter.apply(EG_Kueche_Rolladen_Fenster,EG_Kueche_Fenster_Kontakt,offen)
+		check_close_shutter.apply(EG_Essen_Rolladen,EG_Essen_Fenster_Kontakt,offen)
+		check_close_blinds.apply(EG_Wohnen_Jalousie_links,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,offen)
+		check_close_blinds.apply(EG_Wohnen_Jalousie_Mitte,EG_Wohnen_Mitte_li_Kontakt,EG_Wohnen_Mitte_re_Kontakt,offen)
+
+		SB_Aenderung_morgens = true
+		logDebug("Sonnenschutz", "Sonnenschutz Morgenseite beendet, Jalousien werden wieder hochgefahren.")
+	}
+
+	logDebug("Sonnenschutz", "Sonnenschutz: Verschattungs-Check ausgeführt.")
+end
+

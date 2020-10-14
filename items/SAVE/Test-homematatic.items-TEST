@@ -1,0 +1,17 @@
+Contact OG_Markus_Fenster_Kontakt "Fensterkontakt [MAP(contacts.map):%s]"	<contact> (OG_Markus,Fenster)		{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4008071:1#STATE" }
+Switch OG_Markus_Fenster_Signal "Signalstärke [%s]" 				<network> 				{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4008071:0#SIGNAL_STRENGTH" }
+Switch OG_Markus_Fenster_Batterie "Batteriestärke [MAP(batterylow.map):%s]" 	<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4008071:0#LOWBAT" }
+
+Group OG_Markus_Thermo "Markus Zimmer"						<temperature> (OG_Markus,Heizung)       { alexa="Endpoint.Thermostat" }
+String OG_Markus_Thermo_Modus "Modus [%s]"					<calendar> (OG_Markus_Thermo,Heizung)   { channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:1#CONTROL_MODE" }
+Switch OG_Markus_Thermo_Modus_Auto "AUTO-Modus aktivieren [%s]"			<calendar> (OG_Markus_Thermo,Heizung)   { channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:1#AUTO_MODE" }
+Switch OG_Markus_Thermo_Modus_Boost "BOOST-Modus aktivieren [%s]"		<calendar> (OG_Markus_Thermo,Heizung)   { channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:1#BOOST_MODE" }
+Number:Temperature OG_Markus_Thermo_Manual_Temp "MANU Temp. [%.1f °C]"		<calendar> (OG_Markus_Thermo,Heizung)   { channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:1#MANU_MODE" }
+Number:Temperature OG_Markus_Thermo_Ist "Temperatur [%.1f °C]"                  <temperature> (OG_Markus_Thermo,OG_Markus,SteuerTemp,Heizung)
+										{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:1#ACTUAL_TEMPERATURE" [itemSensor="OG_Markus_Auge_Temp"] }
+Number:Temperature OG_Markus_Thermo_Soll "Solltemperatur [%.1f °C]"             <temperature> (OG_Markus_Thermo,OG_Markus,SollTempTherm,Heizung)
+										{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:1#SET_TEMPERATURE" [itemSensor="OG_Markus_Auge_Temp"] }
+Number OG_Markus_Thermo_Ventil "Ventilöffnung [%d %%]"				<sani_valve> (OG_Markus_Thermo)		{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:1#VALVE_STATE" }
+Number OG_Markus_Thermo_Signal "Signalstärke [%d]"				<network> (OG_Markus_Thermo)		{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:0#SIGNAL_STRENGTH" }
+Switch OG_Markus_Thermo_Batterie "Batteriewarnung [MAP(batterylow.map):%s]"	<battery> (Batterien)			{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:0#LOWBAT" }
+

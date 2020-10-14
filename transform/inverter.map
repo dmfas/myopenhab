@@ -1,0 +1,12 @@
+2=Stop
+8=Standby
+16=Initial Standby
+32=Startup
+64=Running
+256=Fault
+1024=Running in maintain mode
+2048=Running in forced mode
+4096=Running in off-grid mode
+9217=Restarting
+NULL=keine Daten
+-=keine Daten

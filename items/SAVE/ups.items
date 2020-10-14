@@ -1,0 +1,18 @@
+// Basis Parameter laut binding docs
+String USV_Status "USV Status [%s]" 							{ channel="networkupstools:ups:USV:upsStatus" }
+String USV_Alarm "USV Alarm [%s]" 							{ channel="networkupstools:ups:USV:upsAlarm" }
+Number:Dimensionless USV_Batterie_Ladezustand "Batterie Ladezustand [%d %%]" 		{ channel="networkupstools:ups:USV:batteryCharge" }
+Number:Time USV_Batterie_Laufzeit "Batterie Laufzeit [%d sec.]"		 		{ channel="networkupstools:ups:USV:batteryRuntime" }
+Number:Power USV_Leistung "USV Leistung [%f W]"		 				{ channel="networkupstools:ups:USV:upsRealpower" }
+Number:Dimensionless USV_Eingang_Last "USV Eingang Last [%d %%]" 			{ channel="networkupstools:ups:USV:inputLoad" }
+
+// Advanced Parameter laut binding docs
+Number:ElectricCurrent USV_Eingang_Stromstaerke "USV Eingang Stromstärke [%d mA]"	{ channel="networkupstools:ups:USV:inputCurrent" }
+String USV_Eingang_Stromstaerke_Status "USV Eingang Stromstärke Status [%s]"		{ channel="networkupstools:ups:USV:inputCurrentStatus" }
+Number:ElectricCurrent USV_Ausgaenge_Stromstaerke "USV Ausgänge Stromstärke [%d mA]"	{ channel="networkupstools:ups:USV:outputCurrent" }
+String USV_Eingang_Qualitaet "USV Versorgungsqualität [%s]"				{ channel="networkupstools:ups:USV:inputQuality" }
+String USV_Testergebnis "USV Testergebnis [%s]" 					{ channel="networkupstools:ups:USV:upsTestResult" }
+Number:Dimensionless USV_Last "USV Last [%d %%]" 					{ channel="networkupstools:ups:USV:upsLoad" }
+// geht nicht?
+//Number:Temperature USV_Testergebnis "USV Temperatur [%s]" 				{ channel="networkupstools:ups:USV:upsTemperature" }
+

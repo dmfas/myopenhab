@@ -1,0 +1,42 @@
+rule "Init virtual Items"
+when
+	System started
+then
+	markus_telegram_chatid.postUpdate(525972057L)
+	bianca_telegram_chatid.postUpdate(939156578L)
+
+
+	// aus Garten.rules
+	Garten_Drainagepumpe.sendCommand(OFF)
+
+	// aus Keller.rules
+	K_Waschkeller_Ventilator.sendCommand(OFF)
+	K_Sauna_Ventilator.sendCommand(OFF)
+
+
+
+	// aus Praesenz.rules
+	daheim.sendCommand(OFF) // assume no one is home on startup
+	// aus Steuerung.rules
+	if (Anwesenheitsmodus.state == NULL) {
+		Anwesenheitsmodus.postUpdate(1)
+	}
+	if (Ferienschaltung.state == NULL) {
+		Ferienschaltung.postUpdate(OFF)
+	}
+	if (Fensteroeffnung_ueberpruefen.state == NULL) {
+		Fensteroeffnung_ueberpruefen.sendCommand(ON)
+	}
+	if (Fensteroeffnung_maxDauer.state == NULL) {
+		Fensteroeffnung_maxDauer.postUpdate(10)
+	}
+	// aus Szenen.rules
+	if (Szene.state == NULL)
+		Szene.postUpdate(2)
+	if (Durchsagen_Lautstaerke.state == NULL)
+		Durchsagen_Lautstaerke.postUpdate(30)
+
+	// aus Bianca.rules
+	Bianca_Tuer_oeffnen.postUpdate(OFF)
+end
+

@@ -1,0 +1,17 @@
+Group TV "Fernseher"		<screen>		(EG_Wohnen,All) { alexa="Endpoint.Speaker" }
+Switch TV_alive "Fernseher WakeOnLAN"			(TV)		{ wol="192.168.178.255#d8:e0:e1:61:e3:b6", alexa="PowerController.powerState" }
+Switch TV_alive_WLAN "Fernseher WakeOnWLAN"		(TV)		{ wol="192.168.178.255#e4:7d:bd:27:a7:4c" }
+Dimmer TV_Volume "Fernseher Lautstärke [%.0f %%]"	(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:volume", alexa="PowerController.powerState,PowerLevelController.powerLevel" }
+Switch TV_Mute "Fernseher Stumm"			(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:mute", alexa="PowerController.powerState,PowerLevelController.powerLevel" }
+
+String TV_Source_Name "Quelle"				(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:sourceName" }
+Number TV_Channel "Kanalnummer" 			(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:channel" }
+String TV_Channel_Name "Kanalname"			(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:channelName" }
+String TV_Program_Title "Programmtitel"			(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:programTitle" }
+Dimmer TV_Brightness "Helligkeit"			(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:brightness" }
+Dimmer TV_Sharpness "Schärfe"				(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:sharpness" }
+Dimmer TV_Contrast "Kontrast"				(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:contrast" }
+Number TV_Color_Temp "Farbtemperatur"			(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:colorTemperature" }
+String TV_Key_Code "Funktion aufrufen"			(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:keyCode" }
+Switch TV_Power "Fernseher Power"			(TV)		{ channel="samsungtv:tv:69166696_9325_4504_b659_af4fe77d4843:power", alexa="Switchable" [category="TV"] }
+

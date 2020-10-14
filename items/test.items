@@ -1,0 +1,60 @@
+Switch Testschalter "Testschalter"				<switch>	(Test)	{ alexa="PowerController.powerState" }
+Switch Testschalter2 "Testschalter2"				<switch>	(Test)	{ alexa="PowerController.powerState" }
+Switch Testschalter3 "Testschalter3"				<switch>	(Test)	{ alexa="PowerController.powerState" }
+
+//Number:Dimensionless itemtest "itemtest homeDistance [%0.f]"	<distance>	(Test)	{channel="gpstracker:tracker:f88a9bc7:homeDistance"}
+//Number OG_Markus_Plug_Alarm "Alarm Wallplug [%d]"		<exclamation>	(Test)	{ channel="zwave:device:ddd23e6c:node2:notification_send" }
+
+Number testnumber
+Group Blinktest
+Group Blinktest2
+Dimmer Markus_Decke "Test Deckenlicht Markus"                                 	<whites> (Blinktest)			{ channel="zwave:device:ddd23e6c:node59:switch_dimmer" }
+Switch ELW_Lampe "Test Zwischenstecker Sieben"                         		<whites> (Blinktest2)			{ channel="zwave:device:ddd23e6c:node7:switch_binary" }
+
+/*
+// Test für UoM-Temperatur-items
+Number:Temperature Ist_Temp_Test "korr. Temperatur Test [%.1f °C]"		<temperature>	(Test)
+Number:Temperature Test_Auge_Temp "Temperatur Test [%.1f °C]"			<temperature>	(EG_Diele,SteuerTemp,TempInnen)
+Number:Temperature Soll_Temp_Test  "SOLL Test [%.1f °C]"			<temperature>	(Heizung,SollTempBoden)
+Number:Temperature default_Soll_Heizung_Tag_Test   "Default Test [%.1f °C]"	<temperature>	(Heizung)
+Number:Temperature Korrektur_Ist_Temp_Test         "Korrektur Test [%.1f °C]"	<temperature>	(Heizung,KorrekturTemp)
+*/
+
+Group Thermotest "Testhansel" 					<temperature>              	        { alexa="Endpoint.Thermostat" }
+String Thermotest_Modus "Modus [%s]"					<calendar> (Thermotest,Heizung)		{ channel="max:thermostat:KMD1023108:KMD3024277:mode",
+								alexa="ThermostatController.thermostatMode" [binding="max"] }
+Number:Temperature Thermotest_Ist "Temperatur [%.1f °C]"	<temperature> (Thermotest,Heizung)	{ channel="max:thermostat:KMD1023108:KMD3024277:actual_temp",
+								alexa="TemperatureSensor.temperature" [itemSensor="OG_Markus_Auge_Temp"] }
+Number:Temperature Thermotest_Soll "Solltemperatur [%.1f °C]"	<temperature> (Thermotest,Heizung)	{ channel="max:thermostat:KMD1023108:KMD3024277:set_temp",
+								alexa="ThermostatController.targetSetpoint" }
+
+/*
+Number yiBewegungstest "Bewegung yitest ONVIF [MAP(motion.map):%s]"	<motion>	(Test)		{ channel="ipcamera:ONVIF:e6c2af7d:motionAlarm" }
+Number yiGeraeuschtest "Geraeusch yitest ONVIF [MAP(loud.map):%s]"	<soundvolume>	(Test)		{ channel="ipcamera:ONVIF:e6c2af7d:audioAlarm" }
+String yiRTSPStreamUrl "yitest RTSP Stream"				<camera>	(Test)		{ channel="ipcamera:ONVIF:e6c2af7d:rtspUrl" }
+String yiImageUrl "yitest Image Url"					<camera>	(Test)		{ channel="ipcamera:ONVIF:e6c2af7d:imageUrl" }
+Number yiBewegungstest "Bewegung yitest HTTP [MAP(motion.map):%s]"	<motion>	(Test)		{ channel="ipcamera:HTTPONLY:e6c2af7d:motionAlarm" }
+Number yiGeraeuschtest "Geraeusch yitest HTTP [MAP(loud.map):%s]"	<soundvolume>	(Test)		{ channel="ipcamera:HTTPONLY:e6c2af7d:audioAlarm" }
+*/
+
+Number yiLetztesVideo "yitest HTTP [%s]"				<motion>	(Test)		{ channel="http:url:b8d3fe47:987654322" }
+
+Switch XGarage_Auge "Garage Auge [MAP(motion.map):%s]"			<present>	{ channel="zwave:device:ddd23e6c:node21:alarm_motion" }
+Number:Temperature XGarage_Auge_Temp "Garage [%.1f °C]"			<temperature>	{ channel="zwave:device:ddd23e6c:node21:sensor_temperature" }
+Number XGarage_Auge_Lux "Garage Auge [%.1f %%]"				<sun>		{ channel="zwave:device:ddd23e6c:node21:sensor_luminance" }
+Contact XGarage_Auffahrt_Kontakt "Garagentür vorn [MAP(contacts.map):%s]"	<frontdoor>	{ channel="zwave:device:ddd23e6c:node21:sensor_door" }
+Switch XGarage_Auge_Tamper "Garage Auge Tamper"				<exclamation>	{ channel="zwave:device:ddd23e6c:node21:alarm_tamper" }
+Switch XGarage_Auge_Access "Garage Auge Access"				<present>	{ channel="zwave:device:ddd23e6c:node21:alarm_access" }
+Switch XGarage_Auge_Burglar "Garage Auge Burglar"			<exclamation>	{ channel="zwave:device:ddd23e6c:node21:alarm_burglar" }
+
+// Sungrow Wechselrichter Test statt via PaperUI
+//Number val13000 "WR system state"			{ channel="modbus:data:sungrow:inputRegisters:reg13000:number" }
+//Number val13001 "WR running state"			{ channel="modbus:data:sungrow:inputRegisters:reg13001:number" } 
+//Number val13002 "daily PV generation"			{ channel="modbus:data:sungrow:inputRegisters:reg13002:number" } 
+//Number:Energy val13003 "total PV generation"		{ channel="modbus:data:sungrow:inputRegisters:reg13003:number" } 
+//Number:Energy val13005 "daily export power from PV"	{ channel="modbus:data:sungrow:inputRegisters:reg13005:number" } 
+//Number:Energy val13006 "total export energy from PV"	{ channel="modbus:data:sungrow:inputRegisters:reg13006:number" } 
+//Number:Power  val13008 "load power"			{ channel="modbus:data:sungrow:inputRegisters:reg13008:number" } 
+//Number testBatteryLevel "Batterie Level test"				<battery>	(PV)	{ channel="modbus:data:eebc81a5:number" }
+Switch testBatteryIsCharging "Batterie wird geladen"			<battery>	(PV)
+

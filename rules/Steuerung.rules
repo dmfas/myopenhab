@@ -1,0 +1,531 @@
+val telegramAction = getActions("telegram","telegram:telegramBot:openhab")
+
+
+val Number Ausschlafen_Karenzzeit_statisch = 60		// um soviele Minuten später wird in den Ferien die Morgenroutine gestartet
+
+val Number lowBatteryThreshold = 12
+
+val Number geschlossen = 99
+val Number Rolladen_lichtundurchlaessig = 75
+val Number Rolladen_offen = 0
+val Number Lamellen_offen = 1
+
+
+var String GutenMorgenAnsage
+var String normaleGutenMorgenAnsage = "Guten Morgen."
+//val String BiancaGutenMorgenAnsage = "Guten Morgen. Bianca, bleib noch liegen, Kaffee kommt."
+//val String MarkusGutenMorgenAnsage = "Guten Morgen. Markus ist auch schon wach und würde sich über einen Kaffee freuen."
+//val String ElternGutenMorgenAnsage = "Guten Morgen, lieber Sohn. Würdest Du uns bitte beiden einen Kaffee bringen ?"
+var String ZimmerAufraeumenAnsage = "Heute kommt Frau Weihrich, ist das Zimmer aufgeräumt ?"
+var String BiancaGutenMorgenAnsage = "Kaffee_fuer_Bianca.mp3"
+var String MarkusGutenMorgenAnsage = "Kaffee_fuer_Markus.mp3"
+var String ElternGutenMorgenAnsage = "Kaffee_fuer_Eltern.mp3"
+
+val Number Ansage_Anfang_wochentags_statisch = ((6 * 3600) + 30 * 60) * 1000		// Start 06:30 
+val Number Ansage_Ende_wochentags_statisch   = (8 * 3600) * 1000		// Ende  08:00
+val Number Ansage_Anfang_Wochenende_statisch = (8 * 3600) * 1000		// Start 08:00
+val Number Ansage_Ende_Wochenende_statisch   = (10 * 3600) * 1000		// Ende  10:00
+
+val Number Bewegung_Rueckschau = 15
+
+
+var Number Ansage_Anfang_wochentags
+var Number Ansage_Ende_wochentags
+var Number Ansage_Anfang_Wochenende
+var Number Ansage_Ende_Wochenende
+
+var Timer RestschaltungTimer
+
+
+var Number maxKaffeeAnsagen = 2
+var Number KaffeeAnsagen
+
+
+val Functions$Function3 <RollershutterItem,ContactItem,Number,Boolean> check_close_shutter = [ shutter, door, closure |
+	if (door.state != OPEN) {
+		logDebug("Steuerung", shutter.label + " wird auf " + closure + " gefahren.")
+		shutter.sendCommand(closure)
+	} else
+		logDebug("Steuerung", shutter.label + " wird nicht geschlossen, da " + door.label + " geöffnet ist.")
+
+	logDebug("Steuerung", "check_close_shutter: shutter = " + shutter)
+	true
+]
+
+
+val Functions$Function4 <RollershutterItem,ContactItem,ContactItem,Number,Boolean> check_close_blinds = [ blinds, door1, door2, closure |
+	if (door1.state != OPEN && door2.state != OPEN) {
+		logDebug("Steuerung", blinds.label + " wird auf " + closure + " gefahren.")
+		blinds.sendCommand(closure)
+	} else
+		logDebug("Steuerung", blinds.label + " wird nicht geschlossen, da " + door1.label + " oder " + door2.label + " noch geöffnet ist.")
+
+	logDebug("Steuerung", "check_close_blinds: blinds = " + blinds)
+	true
+]
+
+
+rule "Steuerung Init virtual Items"
+when
+	System started
+	or
+	Time is midnight
+	or
+	Item Guten_Morgen_Ansage received command
+then
+	KaffeeAnsagen=maxKaffeeAnsagen
+	GutenMorgenAnsage=normaleGutenMorgenAnsage
+	Kaffeeansage.sendCommand(OFF)
+
+        if (now.getDayOfWeek >= 6)
+		arbeitsfreierTag.postUpdate(ON)
+	else
+		arbeitsfreierTag.postUpdate(OFF)
+
+        Ansage_Anfang_wochentags = (now.withTimeAtStartOfDay).millis + Ansage_Anfang_wochentags_statisch
+        Ansage_Ende_wochentags   = (now.withTimeAtStartOfDay).millis + Ansage_Ende_wochentags_statisch
+        Ansage_Anfang_Wochenende = (now.withTimeAtStartOfDay).millis + Ansage_Anfang_Wochenende_statisch
+        Ansage_Ende_Wochenende   = (now.withTimeAtStartOfDay).millis + Ansage_Ende_Wochenende_statisch
+
+	logInfo("Steuerung", "Steuerung Initialisierung.")
+end
+
+
+// sunrise -15min, in astro thing earliest 06:15, latest 8:30
+rule "Morgenschaltung Sonnenaufgang wochentags"
+when
+	Channel 'astro:sun:local:rise#event' triggered END 
+then
+	logInfo("Steuerung", "Sonnenaufgang! Mach die Sonne an !")
+	Tageslicht.postUpdate(ON)
+
+	
+	if (Anwesenheitsmodus.state != 0 && Ferienschaltung.state == OFF && arbeitsfreierTag.state == OFF && now.getDayOfWeek <=5) {
+		logDebug("Steuerung", "Morgenschaltungs-Check Sonnenaufgang wochentags: Nachtschaltung = " + Nachtschaltung.state + "; Ferienschaltung = " + Ferienschaltung.state + "; arbeitsfreier Tag = " + arbeitsfreierTag.state + "; Tageslicht = " + Tageslicht.state + "; Tag/Stunde = " + now.getDayOfWeek + "/" + now.getHourOfDay)
+		if (Nachtschaltung.state == OFF)
+			Szene.sendCommand(2)
+		if (Rolladenautomatik.state == ON)
+			Rollaedenstatus.sendCommand(2)
+	}
+end
+
+
+// sunrise -5min, in astro thing earliest 08:30, latest 9:30
+rule "Morgenschaltung Sonnenaufgang Wochenende"
+when
+	Channel 'astro:sun:wochenende:rise#event' triggered START 
+then
+	if ((Anwesenheitsmodus.state != 0) && ((now.getDayOfWeek >= 6) || ((Ferienschaltung.state == ON || arbeitsfreierTag.state == ON) && now.getDayOfWeek <= 5))) {
+		logDebug("Steuerung", "Morgenschaltungs-Check Sonnenaufgang wochenends: Nachtschaltung = " + Nachtschaltung.state + "; Ferienschaltung = " + Ferienschaltung.state + "; arbeitsfreier Tag = " + arbeitsfreierTag.state + "; Tageslicht = " + Tageslicht.state + "; Tag/Stunde = " + now.getDayOfWeek + "/" + now.getHourOfDay)
+		if (Nachtschaltung.state == OFF)
+			Szene.sendCommand(2)
+		if (Rolladenautomatik.state == ON)
+			Rollaedenstatus.sendCommand(2)
+	}
+end
+
+
+rule "Rollaeden schalten"
+when
+	Item Rollaedenstatus received command
+then
+	logDebug("Steuerung", "Rolladenbefehl erhalten: " + receivedCommand.toString)
+    	Rollaeden_setzen.sendCommand(receivedCommand)
+end
+
+
+rule "Rolladenschaltung"
+when
+	Item Rollaeden_setzen received command
+then
+	logInfo("Steuerung", "Setze alle Rolläden auf Szene " + receivedCommand)
+
+	switch (receivedCommand) {
+		case 1,
+		case 2: {
+			EG_Wohnen_Jalousie_links.sendCommand(UP)
+			EG_Wohnen_Jalousie_Mitte.sendCommand(UP)
+			EG_Wohnen_Jalousie_rechts.sendCommand(UP)
+			EG_Kueche_Rolladen_Tuer.sendCommand(UP)
+			EG_Kueche_Rolladen_Fenster.sendCommand(UP)
+			EG_Essen_Rolladen.sendCommand(UP)
+			EG_WC_Rolladen.sendCommand(UP)
+
+			// Bianca nicht wecken
+			if (receivedCommand == 2) {
+				EG_Bianca_Rolladen.sendCommand(UP)
+				EG_Wohnen_Rolladen.sendCommand(UP)
+			}
+			logDebug("Steuerung", "Rolladen_setzen: alle Rolläden geöffnet, starte (z.Zt. ignoriere) Befehl für Sonnenschutz ...")
+//			logDebug("Steuerung", "Sonnenschutzschaltung = " + Sonnenschutzschaltung.state)
+		}
+
+		case 3,
+		case 4: { 
+       			check_close_blinds.apply(EG_Wohnen_Jalousie_links,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+       			check_close_blinds.apply(EG_Wohnen_Jalousie_links_Lamellen,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+       			check_close_blinds.apply(EG_Wohnen_Jalousie_Mitte,EG_Wohnen_Mitte_li_Kontakt,EG_Wohnen_Mitte_re_Kontakt,geschlossen)
+			check_close_blinds.apply(EG_Wohnen_Jalousie_Mitte_Lamellen,EG_Wohnen_Mitte_li_Kontakt,EG_Wohnen_Mitte_re_Kontakt,geschlossen)
+      			check_close_blinds.apply(EG_Wohnen_Jalousie_rechts,EG_Wohnen_re1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+     	  		check_close_blinds.apply(EG_Wohnen_Jalousie_rechts_Lamellen,EG_Wohnen_re1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+        		check_close_shutter.apply(EG_Kueche_Rolladen_Tuer,EG_Kueche_Tuer_Kontakt,geschlossen)
+        		// sie möchte das so
+			EG_Bianca_Rolladen.sendCommand(Rolladen_lichtundurchlaessig)
+        		check_close_shutter.apply(EG_Bianca_Rolladen,EG_Bianca_Tuer_Kontakt,Rolladen_lichtundurchlaessig)
+       			check_close_shutter.apply(EG_Wohnen_Rolladen,EG_Wohnen_alt_Kontakt,geschlossen)
+			EG_Kueche_Rolladen_Fenster.sendCommand(geschlossen)
+			EG_Essen_Rolladen.sendCommand(geschlossen)
+			EG_WC_Rolladen.sendCommand(geschlossen)
+		}
+		case 100: {
+       			check_close_blinds.apply(EG_Wohnen_Jalousie_links,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+       			check_close_blinds.apply(EG_Wohnen_Jalousie_links_Lamellen,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+		}
+		case 101: {
+       			check_close_blinds.apply(EG_Wohnen_Jalousie_links,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+       			check_close_blinds.apply(EG_Wohnen_Jalousie_links_Lamellen,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+       			check_close_blinds.apply(EG_Wohnen_Jalousie_Mitte,EG_Wohnen_Mitte_li_Kontakt,EG_Wohnen_Mitte_re_Kontakt,geschlossen)
+       			check_close_blinds.apply(EG_Wohnen_Jalousie_Mitte_Lamellen,EG_Wohnen_Mitte_li_Kontakt,EG_Wohnen_Mitte_re_Kontakt,geschlossen)
+      			check_close_blinds.apply(EG_Wohnen_Jalousie_rechts,EG_Wohnen_re1_Kontakt,EG_Wohnen_re2_Kontakt,geschlossen)
+     	  		check_close_blinds.apply(EG_Wohnen_Jalousie_rechts_Lamellen,EG_Wohnen_re1_Kontakt,EG_Wohnen_re2_Kontakt,geschlossen)
+        		check_close_shutter.apply(EG_Kueche_Rolladen_Tuer,EG_Kueche_Tuer_Kontakt,geschlossen)
+			EG_Kueche_Rolladen_Fenster.sendCommand(geschlossen)
+			EG_Essen_Rolladen.sendCommand(geschlossen)
+       			check_close_shutter.apply(EG_Wohnen_Rolladen,EG_Wohnen_alt_Kontakt,geschlossen)
+
+			logDebug("Steuerung", "Sonnenschutzschaltung = " + Sonnenschutzschaltung.state)
+		}
+
+	}
+end
+
+
+// nicht Time ... "or" Time ... verwenden, funktioniert nicht verlaesslich ! Daher 2 Regeln.
+rule "Morgenschaltung wochentags"
+when
+	Time cron "30 1 6 ? * MON-FRI"
+then
+	logDebug("Steuerung", "Morgenschaltungs-Check wochentags: Nachtschaltung = " + Nachtschaltung.state + "; Ferienschaltung = " + Ferienschaltung.state + "; arbeitsfreier Tag = " + arbeitsfreierTag.state + "; Tageslicht = " + Tageslicht.state + "; Day/Hour = " + now.getDayOfWeek + "/" + now.getHourOfDay)
+
+	if (Anwesenheitsmodus.state == 0 || Ferienschaltung.state == ON || arbeitsfreierTag.state == ON) 
+		return;
+
+	if (Nachtschaltung.state != OFF) {
+		logInfo("Steuerung", "Setze Morgenschaltung ...")
+		Nachtschaltung.sendCommand(OFF)
+		gesaugt.sendCommand(OFF)
+		if (Tageslicht.state == ON)
+			Szene.sendCommand(2)
+		else
+			Szene.sendCommand(1)
+		logInfo("Steuerung", "Nachtschaltung deaktiviert.")
+	}
+end
+
+
+rule "Morgenschaltung wochenends und Ferien"
+when
+	Time cron "0 35 8 ? * MON-SUN"
+then
+	if (Anwesenheitsmodus.state == 0 || (Ferienschaltung.state == OFF && arbeitsfreierTag.state == OFF)) {
+		return;
+	}
+
+	logDebug("Steuerung", "Morgenschaltungs-Check wochenends/ferientags: Nachtschaltung = " + Nachtschaltung.state + "; arbeitsfreierTag = " + arbeitsfreierTag.state + "; Tageslicht = " + Tageslicht.state + "; Hour = " + now.getHourOfDay)
+	
+	logInfo("Steuerung", "Setze Morgenschaltung ...")
+	if (Tageslicht.state == ON)
+		Szene.sendCommand(2)
+	else
+		Szene.sendCommand(1)
+	if (Nachtschaltung.state != OFF) {
+		Nachtschaltung.sendCommand(OFF)
+		gesaugt.sendCommand(OFF)
+		logInfo("Steuerung", "Nachtschaltung deaktiviert.")
+	}
+end
+
+
+rule "Tagschaltung"
+when
+	Time cron "10 0 8 ? * MON-SUN"
+then
+	var Number Karenzzeit = 0
+
+
+	if (Anwesenheitsmodus.state == 0 || Rolladenautomatik.state != ON)
+		return;
+
+	if (Ferienschaltung.state == ON || arbeitsfreierTag.state == ON || now.getDayOfWeek >=6)
+		Karenzzeit = Ausschlafen_Karenzzeit_statisch
+
+	logDebug("Steuerung", "debug Restschaltung: Ferienschaltung = " + Ferienschaltung.state + "; arbeitsfreier Tag = " + arbeitsfreierTag.state + "; Tageslicht = " + Tageslicht.state + "; Karenzzeit = " + Karenzzeit)
+
+	RestschaltungTimer = createTimer(now.plusMinutes(Karenzzeit.intValue)) [|
+		if (Szene.state != 2)
+			Szene.sendCommand(2)
+
+		if (EG_Essen_Decke.state != OFF) {
+			OG_Tim_Decke.sendCommand(OFF)
+			OG_Lutz_Decke.sendCommand(OFF)
+			OG_Markus_Decke.sendCommand(OFF)
+			OG_Bad_Decke.sendCommand(OFF)
+		}
+		logInfo("Steuerung", "Setze Tagschaltung, Rolladenautomatik = " + Rolladenautomatik.state)
+
+		EG_Bianca_Rolladen.sendCommand(UP)
+		EG_Wohnen_Rolladen.sendCommand(UP)
+	]
+end
+
+
+// sunset +10min, earliest 17:15 latest 22:00
+rule "Sonnenuntergang"
+when
+//	Channel 'astro:sun:local:daylight#event' triggered END 
+	Channel 'astro:sun:local:set#event' triggered END 
+then
+	if (Anwesenheitsmodus.state != 0 && Szene.state != 100 && Szene.state != 101) {
+		Szene.sendCommand(3)
+		logInfo("Steuerung", "Sonnenuntergang, setze Abendschaltung ...")
+	}
+
+	Tageslicht.postUpdate(OFF)
+	if (Rolladenautomatik.state == ON)
+		Rollaedenstatus.sendCommand(3)
+end
+
+rule "Rolladen passend zur Szene setzen"
+when
+	Item Rolladenautomatik changed to ON
+then
+	Rollaedenstatus.sendCommand(Szene.state)
+end
+
+
+rule "Nachtschaltung aktiviert"
+when
+	Item Nachtschaltung received command ON
+then
+	logInfo("Steuerung", "Setze Nachtschaltung; Szene = " + Szene.state + "; Dreambox = " + Dreambox.state)
+	Szene.sendCommand(4)
+	Rollaedenstatus.sendCommand(4)
+end
+
+
+rule "Ferien Status setzen"
+when
+	Item FerienICAL received update
+	or
+	Item FeiertagICAL received update
+then
+	logDebug("Steuerung", "Ferienstatus-Prüfung: arbeitsfreier Tag = " + FeiertagICAL.state + "; Schulferien = " + FerienICAL.state)
+   	// Prüfen ob ein Feiertag ist
+	if (FeiertagICAL.state != "false" && FeiertagICAL.state != "NULL") {
+		Schulferien.postUpdate(ON)
+		SchulferienName.postUpdate(FeiertagICAL.state)
+		Feiertag.postUpdate(ON)
+		arbeitsfreierTag.postUpdate(ON)
+		logInfo("Steuerung", "FeiertagICAL hat sich geändert, Feiertags Status aktualisiert: " + Schulferien.state + " (" + SchulferienName.state + ")")
+	}
+	// Prüfen ob Ferien sind
+	else {
+		Feiertag.postUpdate(OFF)
+		if (FerienICAL.state != "false" && FerienICAL.state != "NULL"){
+			Schulferien.postUpdate(ON)
+			SchulferienName.postUpdate(FerienICAL.state)
+			logInfo("Steuerung", "FerienICAL hat sich geändert, Ferien Status aktualisiert: " + Schulferien.state + " (" + SchulferienName.state + ")")
+		} else {
+			Schulferien.postUpdate(OFF)
+			SchulferienName.postUpdate("keine")
+			logDebug("Steuerung", "Updated Ferien Status: " + Schulferien.state + " (keine)")
+		}
+	}
+end
+
+
+rule VoiceControl
+when
+    Item VoiceCommand received command
+then
+	logInfo("Steuerung","Sprachbefehl " + receivedCommand + " erhalten")
+	switch(receivedCommand.toString.lowerCase) {
+        	case "alles aus" : { Szene.sendCommand(0) }
+		case "außenlampe" : {
+			logInfo("Steuerung","Außenlampe Befehl erhalten, schalte Außenlampe ein ...")
+			if (Garage_Aussenlampe.state == 0) Garage_Aussenlampe.sendCommand(ON) else Garage_Aussenlampe.sendCommand(OFF)
+		}
+		case "zimmer tim an" : { OG_Tim_Decke.sendCommand(ON) }
+		case "zimmer tim aus" : { OG_Tim_Decke.sendCommand(OFF) }
+		case "zimmer bianca an",
+		case "queen mum" : { EG_Bianca_Decke.sendCommand(ON) }
+		case "zimmer bianca aus" : { EG_Bianca_Decke.sendCommand(OFF) }
+	}
+end
+
+
+// max 3x prüfen ob kein Bewegungsmelder anschlägt
+rule "Saugroboter starten"
+when
+	Time cron "0 30,35,40 10 ? * MON-SUN"
+then
+	logDebug("Steuerung", "Prüfung, ob Saugroboter niemanden störend gestartet werden kann.")
+
+	if ((BewegungsmelderInnen.members.filter(s | s.changedSince(now.minusMinutes(15))).size == 0) && (HomBot_State.state != "WORKING")) {
+
+		logInfo("Steuerung", "Saugroboter stört niemanden und wird gestartet.")
+
+		var String Meldung = "Saugroboter startet.\n\nGrüße,\n\nopenHAB"
+		telegramAction.sendTelegram((markus_telegram_chatid.state as Number).longValue(), Meldung)
+
+		// bei Benutzung des HTTP bindings
+		//HomBot.sendCommand(1)
+		// bei Benutzung des lghombot bindings
+		//HomBot_Clean.sendCommand(ON)
+		HomBot_Start.sendCommand(ON)
+	}
+end
+
+rule "Saugroboter Job"
+when
+	Item HomBot_Job received command
+then
+//	logInfo("Steuerung", "Saugroboter hat einen Job erhalten: " + transform("MAP", "vacuum.map", HomBot_Job.state))
+//	logDebug("Steuerung", "Saugroboter hat einen Job erhalten: " + transform("MAP", "vacuum.map", receivedCommand))
+
+	switch (receivedCommand) {
+//		case 0: {
+//			logDebug("Steuerung", "Saugroboter halt die Klappe ...")
+//			HomBot_Pause.sendCommand(ON)
+//		}
+		case 1: {
+			logDebug("Steuerung", "Saugroboter startet seine Arbeit ...")
+			HomBot_Start.sendCommand(ON)
+		}
+		case 2: {
+			logDebug("Steuerung", "Saugroboter fährt heim zum Laden.")
+			HomBot_Home.sendCommand(ON)
+		}
+	}
+end
+
+rule "Saugroboter ist zurueck"
+when
+	Item HomBot_Charge changed to ON
+	or
+	Item HomBot_State changed to "CHARGING"
+then
+	logInfo("Steuerung", "Saugroboter ist zurück.")
+	gesaugt.sendCommand(ON)
+	HomBot_Job.postUpdate(0)
+end
+
+
+rule "Bianca aufgestanden"
+when
+        Item EG_Bianca_Auge changed to ON
+then
+	if (Guten_Morgen_Ansage.state == ON) {
+//		logDebug("Steuerung", "Setze Markus-Kaffee-Ansage")
+		GutenMorgenAnsage = MarkusGutenMorgenAnsage
+	}
+end
+
+rule "Markus aufgestanden"
+when
+        Item OG_Markus_Auge changed to ON
+then
+	if (Guten_Morgen_Ansage.state == ON) {
+		logDebug("Steuerung", "Setze Bianca-Kaffee-Ansage")
+		GutenMorgenAnsage = BiancaGutenMorgenAnsage
+	}
+end
+
+rule "Kinder sind aufgestanden"
+when
+        Item OG_Tim_Auge changed to ON
+        or
+	Item OG_Lutz_Auge changed to ON
+then
+	if (Guten_Morgen_Ansage.state == ON) {
+//     		logDebug("Steuerung", "Setze Eltern-Kaffee-Ansage")
+		GutenMorgenAnsage = ElternGutenMorgenAnsage
+	}
+end
+
+rule "Guten Morgen Kaffee 1"
+when
+        Item EG_Kueche_Auge changed to ON
+then
+	if (Guten_Morgen_Ansage.state == ON && Kaffeeansage.state == OFF)
+		Kaffeeansage.sendCommand(ON)
+end
+
+
+rule "Kaffeeansage abspielen"
+when
+        Item Kaffeeansage received command ON
+then
+	logDebug("Steuerung", "Kaffeeansage debug 0: now = " + now.millis + "; Anfang-Ende wochentags/Wochenende = " + Ansage_Anfang_wochentags + "-" + Ansage_Ende_wochentags + "/" + Ansage_Anfang_Wochenende + "-" + Ansage_Ende_Wochenende)
+	var boolean Wochenende_morgens = (now.getDayOfWeek >= 6 && now.millis > Ansage_Anfang_Wochenende && now.millis < Ansage_Ende_Wochenende)
+	var boolean wochentags_morgens = (now.getDayOfWeek <= 5 && now.millis > Ansage_Anfang_wochentags && now.millis < Ansage_Ende_wochentags)
+	logDebug("Steuerung", "Kaffeeansage debug 0b: Morgen-Zeitraum wochentags/Wochenende = " + wochentags_morgens + "/" + Wochenende_morgens)
+//	var boolean Bianca_ist_aufgestanden = (EG_Bianca_Decke.state as PercentType) > 0 || EG_Bianca_Auge.state == ON || EG_Bianca_Auge.changedSince(now.minusMinutes(Bewegung_Rueckschau))
+//	var boolean Markus_ist_aufgestanden = (OG_Markus_Decke.state as PercentType) > 0 || OG_Markus_Auge.state == ON || OG_Markus_Auge.changedSince(now.minusMinutes(Bewegung_Rueckschau))
+	var boolean Bianca_ist_aufgestanden = EG_Bianca_Decke.state > 0 || EG_Bianca_Auge.state == ON || EG_Bianca_Auge.changedSince(now.minusMinutes(Bewegung_Rueckschau))
+	var boolean Markus_ist_aufgestanden = OG_Markus_Decke.state > 0 || OG_Markus_Auge.state == ON || OG_Markus_Auge.changedSince(now.minusMinutes(Bewegung_Rueckschau))
+	var boolean Markus_ist_wach = Markus_ist_aufgestanden
+//	var boolean Tim_ist_aufgestanden = (OG_Tim_Decke.state as PercentType) > 0 || OG_Tim_Auge.state == ON || OG_Tim_Auge.changedSince(now.minusMinutes(Bewegung_Rueckschau))
+//	var boolean Lutz_ist_aufgestanden = (OG_Lutz_Decke.state as PercentType) > 0 || OG_Lutz_Auge.state == ON || OG_Lutz_Auge.changedSince(now.minusMinutes(Bewegung_Rueckschau))
+
+	logDebug("Steuerung", "Kaffeeansage debug 1 : Auge@Bianca = " + EG_Bianca_Auge.state + "; Bianca last Update = " + EG_Bianca_Auge.lastUpdate + "; Änderung in letzten " + Bewegung_Rueckschau + " Minuten = " + EG_Bianca_Auge.changedSince(now.minusMinutes(Bewegung_Rueckschau)) + "; Auge@Markus = " + OG_Markus_Auge.state + "; Markus last Update = " + OG_Markus_Auge.lastUpdate + "; Änderung in letzten " + Bewegung_Rueckschau + " Minuten = " + OG_Markus_Auge.changedSince(now.minusMinutes(Bewegung_Rueckschau)))
+        logDebug("Steuerung", "Kaffeeansage debug 2 : aktiver Zeitraum = " + (wochentags_morgens || Wochenende_morgens) + "; Markus wach = " + Markus_ist_wach.toString + "; Bianca/Markus aufgestanden = " + Bianca_ist_aufgestanden.toString + "/" + Markus_ist_aufgestanden.toString + "; Kaffeeansage = " + Kaffeeansage.state + "; #KaffeeAnsagen = " + KaffeeAnsagen + "; Ansage = " + GutenMorgenAnsage)
+
+
+	if (Wochenende_morgens || wochentags_morgens) {
+		if (Markus_ist_wach && (KaffeeAnsagen == maxKaffeeAnsagen)) {
+			if (!(Markus_ist_aufgestanden || Bianca_ist_aufgestanden))
+				GutenMorgenAnsage = ElternGutenMorgenAnsage
+		}
+
+		if ((GutenMorgenAnsage != normaleGutenMorgenAnsage) && (KaffeeAnsagen > 0)) {
+        		logDebug("Steuerung", "Guten Morgen debug 1a (Kaffee-Ansage)")
+			KaffeeAnsagen = KaffeeAnsagen - 1
+			playSound (GutenMorgenAnsage)
+       	 		logInfo("Steuerung", "Ansage \"" + GutenMorgenAnsage + "\" gesprochen.")
+		
+			if ((now.getDayOfWeek == 2) && (GutenMorgenAnsage == ElternGutenMorgenAnsage)) {
+				say(ZimmerAufraeumenAnsage)
+			}
+		} else {
+			GutenMorgenAnsage = normaleGutenMorgenAnsage
+			say (GutenMorgenAnsage)
+       			logDebug("Steuerung", "Guten Morgen debug 1b (normale Ansage)")
+		}
+	}
+end
+
+
+rule "Corona-Homeoffice-Tage"
+when
+        Time is midnight
+	or
+	Time cron "0 0 5 ? * MON-FRI"
+then
+//        val Kurzarbeit_Mai = newArrayList(OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,ON,ON,OFF,OFF,OFF,OFF,ON,ON,ON,OFF,OFF,OFF,OFF,ON,ON,ON,OFF,OFF)
+//        val Kurzarbeit_Juni = newArrayList(OFF,OFF,OFF,OFF,ON,OFF,OFF,OFF,OFF,OFF,ON,ON,OFF,OFF,OFF,OFF,OFF,ON,ON,OFF,OFF,OFF,OFF,OFF,ON,OFF,OFF,OFF,OFF,OFF)
+        val Urlaub_Juli = newArrayList(OFF,OFF,OFF,ON,ON,OFF,OFF,OFF,OFF,OFF,ON,ON,ON,ON,ON,ON,ON,ON,ON,ON,ON,ON,ON,ON,ON,ON,OFF,OFF,OFF,OFF,OFF)
+        val Kurzarbeit_August = newArrayList(OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,OFF,ON,OFF,OFF,ON)
+
+
+	if (now.getDayOfWeek >= 6) {
+		arbeitsfreierTag.postUpdate(ON)
+		return;
+	}
+
+	if (now.getMonthOfYear == 7)
+		arbeitsfreierTag.postUpdate(Urlaub_Juli.get((now.getDayOfMonth).intValue - 1))
+	else
+		arbeitsfreierTag.postUpdate(Kurzarbeit_August.get((now.getDayOfMonth).intValue - 1))
+end
+

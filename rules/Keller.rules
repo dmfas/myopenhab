@@ -1,0 +1,306 @@
+val telegramAction = getActions("telegram","telegram:telegramBot:openhab")
+
+
+val Number Waschmaschine_Modus_OFF = 0
+val Number Waschmaschine_Modus_STANDBY = 1
+val Number Waschmaschine_Modus_ACTIVE = 2
+val Number Waschmaschine_Modus_FINISHED = 3
+
+var Number Schwellwert_min_Luftfeuchte_Waschkeller_Sommer_statisch = 35.0
+var Number Schwellwert_min_Luftfeuchte_Waschkeller_Winter_statisch = 50.0
+var Number Schwellwert_max_Luftfeuchte_Waschkeller_statisch = 65.0
+var Number Schwellwert_min_Temperatur_Waschkeller_statisch = 10.0
+
+var Number Temp_Kuehlbedarf = 20.0
+
+
+rule "Keller Initialisierung"
+when
+	System started
+then
+    if (Schwellwert_min_Luftfeuchte_Waschkeller.state == NULL) {
+        if (now.getMonthOfYear > 3 && now.getMonthOfYear < 10)
+            Schwellwert_min_Luftfeuchte_Waschkeller.postUpdate(Schwellwert_min_Luftfeuchte_Waschkeller_Sommer_statisch)
+        else
+            Schwellwert_min_Luftfeuchte_Waschkeller.postUpdate(Schwellwert_min_Luftfeuchte_Waschkeller_Winter_statisch)
+    }
+    if (Schwellwert_max_Luftfeuchte_Waschkeller.state == NULL)
+        Schwellwert_max_Luftfeuchte_Waschkeller.postUpdate(Schwellwert_max_Luftfeuchte_Waschkeller_statisch)
+	if (Schwellwert_min_Temperatur_Waschkeller.state == NULL)
+		Schwellwert_min_Temperatur_Waschkeller.postUpdate(Schwellwert_min_Temperatur_Waschkeller_statisch)
+
+   Waschmaschine_Status.postUpdate(Waschmaschine_Modus_STANDBY)
+end
+
+
+rule "Kellerabgangsraum betreten"
+when
+	Item EG_Kabuff_Auge changed to ON
+then
+//	logDebug("Keller", "Kabuff wurde betreten.")
+
+	EG_Kabuff_Decke.sendCommand(ON)
+	K_Treppe.sendCommand(ON)
+//	K_Flur_unten.sendCommand(ON)
+	Kabuff_Nachlauf.sendCommand(ON)
+	Keller_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Kellerabgangsraum verlassen"
+when
+	Item EG_Kabuff_Auge changed to OFF
+then
+	Kabuff_Nachlauf.sendCommand(ON)
+	Keller_Nachlauf.sendCommand(ON)
+	Waschkeller_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Kellerflur betreten"
+when
+	Item K_ELW_Innentuer_Kontakt changed
+then
+//	logDebug("Keller", "Kellerflur wurde betreten.")
+        K_Treppe.sendCommand(ON)
+        K_Flur_unten.sendCommand(ON)
+        Keller_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Kellertreppe (innen) manuell angestellt"
+when
+	Item K_Treppe changed to ON
+then
+        Keller_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Waschkeller Decke manuell angestellt"
+when
+	Item K_Waschkeller_Decke changed to ON
+then
+        Waschkeller_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Waschkeller betreten"
+when
+	Item K_Waschkeller_Auge changed to ON
+then
+//	logDebug("Keller", "Waschkeller wurde betreten.")
+        K_Waschkeller_Decke.sendCommand(ON)
+        Waschkeller_Nachlauf.sendCommand(ON)
+        Keller_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Waschkeller verlassen"
+when
+	Item K_Waschkeller_Auge changed to OFF
+then
+        Waschkeller_Nachlauf.sendCommand(ON)
+        Keller_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Kabuff ausschalten"
+when
+	Item Kabuff_Nachlauf received command OFF
+then
+        EG_Kabuff_Decke.sendCommand(OFF)
+        K_Treppe.sendCommand(OFF)
+end
+
+rule "Keller ausschalten"
+when
+	Item Keller_Nachlauf received command OFF
+then
+//	logDebug("Keller", "und Kellerflur wieder aus !")
+        K_Flur_unten.sendCommand(OFF)
+        K_Treppe.sendCommand(OFF)
+end
+
+rule "Waschkeller ausschalten"
+when
+	Item Waschkeller_Nachlauf received command OFF
+then
+//	logDebug("Keller", "und Waschkeller wieder aus !")
+        K_Waschkeller_Decke.sendCommand(OFF)
+end
+
+
+rule "Kellerkuehlschrank aktivieren"
+when
+	Item morgen_Temp_max changed
+	or
+	Item Kuehlbedarf_Kellerkuehlschrank changed
+then
+	var boolean Kuehlbedarf = (Kuehlbedarf_Kellerkuehlschrank.state == 1)  ||
+				 ((Kuehlbedarf_Kellerkuehlschrank.state == 2) && ((morgen_Temp_max.state as Number) >= Temp_Kuehlbedarf || (Temp_max.state as Number) >= Temp_Kuehlbedarf))
+
+	logDebug("Keller", "Kellerkühlschranks-Check: Kuehlbedarf_Kellerkuehlschrank = " + Kuehlbedarf_Kellerkuehlschrank.state + "; es soll heute bzw. morgen " + Temp_max.state + " bzw. " + morgen_Temp_max.state + "°C werden. Kühlbedarf = " + Kuehlbedarf)
+
+	if ((Kuehlbedarf_Kellerkuehlschrank.state as Number) == 0)
+		return;
+
+	if (Kuehlbedarf) {
+		logInfo("Keller", "Keller-Kühlschrank eingeschaltet.")
+		K_ELW_Kuehlschrank.sendCommand(ON)
+	} else {
+		logInfo("Keller", "Keller-Kühlschrank ausgeschaltet.")
+		K_ELW_Kuehlschrank.sendCommand(OFF)
+	}
+end
+
+
+
+rule "ELW Aussentuer geoeffnet"
+when
+	Item K_ELW_Aussentuer_Kontakt changed to OPEN
+then
+	if (Tageslicht.state == OFF) {
+//		logDebug("Keller","ELW Tür geöffnet; schalte Garageninnenlicht ein.")
+		Garage_Kellertreppe.sendCommand(ON)
+	}
+end
+
+
+rule "ELW Aussentuer geschlossen"
+when
+	Item K_ELW_Aussentuer_Kontakt changed to CLOSED
+then
+//	logDebug("Keller","ELW Tür geschlossen; schalte Garageninnenlicht aus.")
+	Garage_Kellertreppe.sendCommand(OFF)
+end
+
+
+/*
+rule "Kabuff Stecker 6"
+when
+	Item EG_Kabuff_Leiste6 changed to ON
+	or
+	Item EG_Kabuff_Leiste6 received command ON
+then
+	EG_Kabuff_Leiste6_Nachlauf.sendCommand(OFF)
+end
+*/
+
+
+rule "Waschkeller Ventilator"
+when
+	Item K_Waschkeller_Ventilator changed to ON
+then
+	logDebug("Keller","Ventilator im Waschkeller aktiviert.")
+	Waschkeller_Ventilator_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Waschkeller Ventilator wieder aus"
+when
+	Item Waschkeller_Ventilator_Nachlauf received command OFF
+then
+	logDebug("Keller","Ventilator im Waschkeller wieder ausgestellt.")
+	K_Waschkeller_Ventilator.sendCommand(OFF)
+end
+
+
+rule "Sauna Ventilator"
+when
+	Item K_Sauna_Ventilator changed to ON
+then
+	logDebug("Keller","Ventilator in der Sauna aktiviert.")
+	Sauna_Ventilator_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Sauna Ventilator wieder aus"
+when
+	Item Sauna_Ventilator_Nachlauf received command OFF
+then
+	logDebug("Keller","Ventilator in der Sauna wieder ausgestellt.")
+	K_Sauna_Ventilator.sendCommand(OFF)
+end
+
+
+rule "Ventilator fuer Luftfeuchtigkeit"
+when
+	Item Waschkeller_Lueftungsbedarf received command ON
+then
+	K_Waschkeller_Ventilator.sendCommand(ON)
+	logInfo("Keller","Ventilator wird aktiviert (Luftfeuchtigkeit beträgt " + K_Waschkeller_Feuchtigkeit.state + " Prozent; Schwellwerte = " + Schwellwert_min_Luftfeuchte_Waschkeller.state + "/" + Schwellwert_max_Luftfeuchte_Waschkeller.state + ")")
+end
+
+
+rule "Waschmaschine verbrauchsbasierte State Machine"
+when
+	Item K_Waschkeller_Waschmaschine_Power changed
+	or
+	Item Waschmaschine_ausgeraeumt changed
+	or
+	Item Waschmaschine_Ausraeumen_pruefen changed
+then
+//	logDebug("Keller", "debug Waschen: Verbrauchswert/avg = " + K_Waschkeller_Waschmaschine_Power + "/" + K_Waschkeller_Waschmaschine_Power.averageSince(now.minusMinutes(2)))
+	if (K_Waschkeller_Waschmaschine_Power.averageSince(now.minusMinutes(2)) < 0.2)
+		Waschmaschine_Status.postUpdate(Waschmaschine_Modus_OFF)
+	else if (K_Waschkeller_Waschmaschine_Power.averageSince(now.minusMinutes(2))> 10)
+		Waschmaschine_Status.postUpdate(Waschmaschine_Modus_ACTIVE)
+		else if (K_Waschkeller_Waschmaschine_Power.averageSince(now.minusMinutes(2))< 5) {
+			if (Waschmaschine_Status.state == Waschmaschine_Modus_OFF)
+				Waschmaschine_Status.postUpdate(Waschmaschine_Modus_STANDBY)
+			else if (Waschmaschine_Status.state == Waschmaschine_Modus_ACTIVE)
+				Waschmaschine_Status.postUpdate(Waschmaschine_Modus_FINISHED)
+		}
+end
+
+
+rule "Waschmaschine angestellt"
+when
+	Item Waschmaschine_Status changed to 2
+then
+//	Waschmaschine_ausgeraeumt.postUpdate(ON)	// muss ja ausgeräumt worden sein wenn sie wieder läuft
+	Waschmaschine_ausgeraeumt.postUpdate(OFF)
+end
+
+
+rule "Waschmaschine fertig"
+when
+	Item Waschmaschine_Status changed from 2 to 3
+then
+	Waschmaschine_ausgeraeumt.postUpdate(OFF)
+	Waschmaschine_Ausraeumen_pruefen.postUpdate(OFF)
+end
+
+
+rule "Waschmaschine ausgeraeumt ?"
+when
+	Item Waschmaschine_Ausraeumen_pruefen received update OFF
+then
+	val String Meldung = "Die Wäsche ist fertig, bitte Waschmaschine ausräumen."
+
+	if (Waschmaschine_Benachrichtigung.state == OFF)
+		return;
+
+	logDebug("Keller","Benachrichtige Markus via Telegram, daß die Wäsche fertig ist.")
+	if (Waschmaschine_ausgeraeumt.state == OFF && Waschmaschine_Status.state != Waschmaschine_Modus_ACTIVE) {
+		logInfo("Keller", Meldung)
+		telegramAction.sendTelegramQuery((markus_telegram_chatid.state as Number).longValue(), Meldung, "Antwort_Waschmaschine", "Erledigt!","(Ausrede)")
+		Waschmaschine_Ausraeumen_pruefen.postUpdate(ON)
+	}
+end
+
+
+rule "Telegram Antwort Waschmaschine ausgeraeumt"
+when
+	Item Telegram_ReplyID received update Antwort_Waschmaschine
+then
+	logDebug("Keller","Antwort " + Telegram_lastMessageText.toString + " auf Frage " + triggeringItem.state.toString + "\" von Markus via Telegram erhalten.")
+	if (Telegram_lastMessageText.state.toString == "Erledigt!") {
+		Waschmaschine_ausgeraeumt.postUpdate(ON)
+		telegramAction.sendTelegramAnswer("Antwort_Waschmaschine", "Fleissig!")
+	} else {
+		telegramAction.sendTelegramAnswer("Antwort_Waschmaschine", "Muss aber!")
+		telegramAction.sendTelegramQuery((markus_telegram_chatid.state as Number).longValue(), Meldung, "Antwort_Waschmaschine", "Erledigt!","(Ausrede)")
+	}
+end
+

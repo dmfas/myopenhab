@@ -1,0 +1,40 @@
+sitemap bianca label="Biancas Favoriten"
+{
+	Frame {
+		Text item=EG_Bianca_Auge
+//		Switch item=EG_Wohnen_Rolladen
+		Slider item=EG_Bianca_Decke
+		Switch item=KWL_Modus label="KWL" mappings=[3="Daheim",2="Abwesend",4="Stoß"]
+		Switch item=D_Lueftung_Ventil_Bianca icon="fan" label="Lüftung Bianca [MAP(valve.map):%s]" mappings=[ON="AUS",OFF="AN"]
+//		Text item=EG_Bianca_Auge_Bat
+		Switch item=EG_Bianca_Rolladen
+		Text item=EG_Bianca_Tuer_Kontakt
+	}
+	Frame {
+		Text item=Ist_Temp_Bianca label="Temperatur Bianca [%.1f °C]" icon="temperature" valuecolor=[>=27="darkred",>=24="red",>=21="orange",>=20="green",>=19="darkgreen",>=18="lightblue",<=18="blue",<=15="darkblue",<=10="black"]
+		Setpoint item=Soll_Temp_Bianca label="Sollwert Bianca [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+	}
+	Frame {
+		Switch item=Szene label="Szene" icon="colorwheel" mappings=[1="früh",2="Tag",3="Spät",4="Nacht"]
+		Switch item=Szene label="Szene [MAP(scene.map):%s]" icon="colorwheel" mappings=[101="Kino",100="TV",0="Aus"]
+//		Switch item=mobil_Zwischenstecker66 label="unser Fischkopp"
+		Switch item=mobil_Zwischenstecker7 label="Leselampe" icon="switch"
+//		Switch item=EG_Wohnen_TV
+//		Colorpicker item=EG_Wohnen_Decke
+	}
+	Frame {
+	Group item=Einstellungen {
+//		Switch item=Alarmmodus icon="shield" label="Alarm" mappings=[1="Ein", 2="Scharf", 0="Aus"]
+//		Switch item=dynamisches_Treppenlicht
+		Switch item=Sonnenschutz_Bianca label="Sonnenschutzautomatik Bianca" icon="sunprotect"
+		Switch item=Sonnenschutzschaltung label="Sonnenschutzautomatik Haus" icon="sunprotect"
+		Switch item=Fensteroeffnung_ueberpruefen icon="windowcheck"
+		Switch item=Nachtschaltung
+//		Switch item=Fischkopp label="Fischkopp-Automatik"
+		Switch item=Guten_Morgen_Ansage
+		Switch item=FBH_morgens_vorwaermen_Einstellung
+                Setpoint item=Stummschaltung_Lueftung_Bianca label="Abschaltdauer Lüftung Bianca [%.1f]" icon="fan" step=1 minValue=10 maxValue=600
+	}
+	}
+}
+

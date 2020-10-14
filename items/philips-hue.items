@@ -1,0 +1,28 @@
+/* Living Colors via hue bridge */
+
+Group mobil_Iris2 "Kugelleuchte mobil"					<hue>	(K_ELW)						{ alexa="Endpoint.Light" }
+Color mobil_Iris2_Farbe	"Kugelleuchte ELW/mobil"			<hue>	(K_ELW,mobil_Iris2,hue,Blinklicht,Lichter)	{ channel="hue:0200:00178811d1d7:1:color",
+										alexa="PowerController.powerState,BrightnessController.brightness,ColorController.color" }
+
+Group mobil_Iris1 "Kugelleuchte Eingang"				<hue>	(EG_Wohnen)					{ alexa="Endpoint.Light" }
+Color mobil_Iris1_Farbe	"Kugelleuchte Eingang"				<hue>	(EG_Wohnen,mobil_Iris1,hue,Lichter)			{ channel="hue:0200:00178811d1d7:2:color",
+										alexa="PowerController.powerState,BrightnessController.brightness,ColorController.color" }
+
+Group mobil_Iris3 "Kugelleuchte Kamin"					<hue>	(EG_Wohnen)					{ alexa="Endpoint.Light" }
+Color mobil_Iris3_Farbe	"Kugelleuchte Kamin Farbe"			<hue>	(EG_Wohnen,mobil_Iris3,hue,Lichter)			{ channel="hue:0200:00178811d1d7:3:color",
+										alexa="PowerController.powerState,BrightnessController.brightness,ColorController.color" }
+
+/*
+Color EG_Wohnen_Iris3_Farbe "Kugelleuchte Kamin"	<hue>	(EG_Wohnen,hue,Lichter)				{ channel="hue:0200:00178811d1d7:3:color" }
+
+Color EG_Wohnen_Iris1_Farbe "Kugelleuchte Glastür"	<hue>	(EG_Wohnen,hue,Lichter)				{ channel="hue:0200:00178811d1d7:2:color" }
+Switch EG_Wohnen_Iris1 "Kugelleuchte Glastür"	<hue>	(hue,Lichter)					{ channel="hue:0200:00178811d1d7:2:color" }
+
+Dimmer EG_Wohnen_Iris1_Helligkeit "Kugelleuchte Glastür Helligkeit"	<hue>	(hue,Dimmerschalter)	{ channel="hue:0200:00178811d1d7:2:brightness" }
+Dimmer EG_Wohnen_Iris3_Helligkeit "Kugelleuchte Kamin Helligkeit"		<hue>	(hue,Dimmerschalter)	{ channel="hue:0200:00178811d1d7:3:brightness" }
+
+Dimmer EG_Wohnen_Iris1_Farbtemp	 "Kugelleuchte Glastür Farbtemperatur"	<hue>	(hue)			{ channel="hue:0200:00178811d1d7:2:color_temperature" }
+Switch EG_Wohnen_Iris3 "Kugelleuchte Kamin"	<hue>	(hue,Lichter)					{ channel="hue:0200:00178811d1d7:3:color" }
+Dimmer EG_Wohnen_Iris3_Farbtemp	 "Kugelleuchte Kamin Farbtemperatur"	<hue>	(hue)			{ channel="hue:0200:00178811d1d7:3:color_temperature" }
+
+*/

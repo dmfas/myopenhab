@@ -1,0 +1,7 @@
+String Telegram_ChatID "Telegram ChatID [%s]"				<network>	(telegram)	{ channel="telegram:telegramBot:openhab:chatId" }
+String Telegram_ReplyID "Telegram ReplyID [%s]"				<network>	(telegram)	{ channel="telegram:telegramBot:openhab:replyId" }
+String Telegram_lastMessageText "Telegram last message text [%s]"	<network>	(telegram)	{ channel="telegram:telegramBot:openhab:lastMessageText" }
+DateTime Telegram_lastMessageDate "Telegram last message date [%s]"	<network>	(telegram)	{ channel="telegram:telegramBot:openhab:lastMessageDate" }
+String Telegram_lastMessageName "Telegram last message name [%s]"	<network>	(telegram)	{ channel="telegram:telegramBot:openhab:lastMessageName" }
+String Telegram_lastMessageUsername "Telegram last message name [%s]"	<network>	(telegram)	{ channel="telegram:telegramBot:openhab:lastMessageUsername" }
+

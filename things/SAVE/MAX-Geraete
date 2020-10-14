@@ -1,0 +1,45 @@
+Your thing definitions go here.
+All thing files have to have the ".things" file extension and must follow a special syntax.
+
+Check out the openHAB documentation for more details:
+http://docs.openhab.org/configuration/things.html
+
+
+Kontakte
+KMD4059794      Bad links
+KMD4011364      Bad rechts
+KMD4011695      Büro
+LEQ0433928      Dachbodentreppe
+LEQ0433965      ELW Lichtschacht
+LEQ0433943      ELW Garagentür
+MKF0008019      Esszimmer
+LEQ0433798      Garage Fenster
+KMD4007236      Garage Tür
+KMD4010635      Küche Fenster
+LEQ1157309      Küche Tür
+LEQ1157216      Lutz
+KMD4008071      Markus
+LEQ1156818      Tim links
+LEQ1157179      Tim rechts
+JRE0004534      Bianca(neu)
+JRE0004170      Wohnzimmer alt
+KEQ0659789      Wohnzimmer Fluegeltuer li
+JRE0004258      Wohnzimmer Ecktuer li
+JRE0004418	Kaputt/wackelig
+LEQ1108930      Wohnzimmer Fluegeltuer Mitte li
+KEQ0659709      Wohnzimmer Fluegeltuer Mitte re
+KEQ0664463      Wohnzimmer Ecktuer re
+KEQ0465530      Wohnzimmer Fluegeltuer re
+JRE0004450      ELW Innentür
+JRE0004439      Eingangstür
+LEQ1157218      WC
+
+Thermostate
+KMD3040649      Büro
+KMD3023851      WC ELW
+KMD3023848      ELW
+KMD3024428      Bad Boden
+KMD3028850      Lutz
+KMD3024277      Markus
+KMD3039533      Tim
+KMD3025697      Waschkeller

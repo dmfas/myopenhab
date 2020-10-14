@@ -1,0 +1,16 @@
+rule "Dachboden Licht an"
+when
+	Item D_Dachboden_Treppe_Kontakt changed to OPEN
+then
+       	D_Dachboden_Licht.sendCommand(ON)
+        logInfo("Dachboden", "Dachbodentreppe wurde heruntergezogen, schalte Licht ein.")
+end
+
+
+rule "Dachboden Licht aus"
+when
+	Item D_Dachboden_Treppe_Kontakt changed to CLOSED
+then
+       	D_Dachboden_Licht.sendCommand(OFF)
+        logInfo("Dachboden", "Dachbodentreppe wurde geschlossen, schalte Licht wieder aus.")
+end

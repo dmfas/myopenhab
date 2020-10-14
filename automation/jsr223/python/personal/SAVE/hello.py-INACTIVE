@@ -1,0 +1,17 @@
+import time
+from datetime import datetime
+from core.rules import rule
+from core.triggers import when
+from configuration import admin_email
+
+@rule("Jython Hello World (cron decorators)", description="This is an example cron triggered rule using decorators", tags=["Test tag", "Hello World"])# [description and tags are optional]
+# @when("Time cron 0/10 * * * * ?")
+
+def hello_world_cron_decorators(event):
+    namedtuple = time.localtime() # get struct_time
+    time_string = time.strftime("%d.%m.%Y, %H:%M:%S", namedtuple)
+    msg = "Hello World, time is " + time_string
+    hello_world_cron_decorators.log.info(msg)
+    actions.get("mail", "mail:smtp:gmx").sendMail(admin_email, "openHAB Info", msg)
+    telegram = actions.get("telegram", "telegram:telegramBot:dfdefd25")
+    telegram.sendTelegram(msg + u"\U0001F44D")

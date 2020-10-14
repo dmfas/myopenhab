@@ -1,0 +1,16 @@
+OL=Online
+OB=On battery (mains is not present)
+LB=Low battery
+HB=High battery
+RB=The battery needs to be replaced
+CHRG=The battery is charging
+DISCHRG=The battery is discharging (inverter is providing load power)
+BYPASS=UPS bypass circuit is active - no battery protection is available
+CAL=UPS is currently performing runtime calibration (on battery)
+OFF=UPS is offline and is not supplying power to the load
+OVER=UPS is overloaded
+TRIM=UPS is trimming incoming voltage (called "buck" in some hardware)
+BOOST=UPS is boosting incoming voltage
+FSD=Forced Shutdown (restricted use, see notes)
+NULL=keine Daten
+-=keine Daten

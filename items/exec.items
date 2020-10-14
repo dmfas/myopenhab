@@ -1,0 +1,3 @@
+//String Luftguete "Luftguete innen ppm" (Sensoren,Test) { channel="exec:command:airsensor:output" }
+//String Luftguete "Luftguete innen ppm" (Sensoren,Test)
+Number Luftguete "Luftguete innen ppm" (Sensoren,Test)

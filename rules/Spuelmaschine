@@ -1,0 +1,72 @@
+rule "Spuelmaschine Verbrauchsbasierte State Machine"
+when
+	Item EG_Kueche_Spuelmaschine_Power changed
+	or
+	Item Spuelmaschine_ausgeraeumt changed
+	or
+	Item Spuelmaschine_Ausraeumen_pruefen changed
+then
+//	logDebug("Keller", "debug Waschen: Verbrauchswert/avg = " + EG_Kueche_Spuelmaschine_Power + "/" + EG_Kueche_Spuelmaschine_Power.averageSince(now.minusMinutes(2)))
+	if (EG_Kueche_Spuelmaschine_Power.averageSince(now.minusMinutes(2)) < 0.2)
+		Spuelmaschine_Status.postUpdate(Spuelmaschine_Modus_OFF)
+	else if (EG_Kueche_Spuelmaschine_Power.averageSince(now.minusMinutes(2))> 10)
+		Spuelmaschine_Status.postUpdate(Spuelmaschine_Modus_ACTIVE)
+		else if (EG_Kueche_Spuelmaschine_Power.averageSince(now.minusMinutes(2))< 5) {
+			if (Spuelmaschine_Status.state == Spuelmaschine_Modus_OFF)
+				Spuelmaschine_Status.postUpdate(Spuelmaschine_Modus_STANDBY)
+			else if (Spuelmaschine_Status.state == Spuelmaschine_Modus_ACTIVE)
+				Spuelmaschine_Status.postUpdate(Spuelmaschine_Modus_FINISHED)
+		}
+end
+
+
+rule "Spuelmaschine angestellt"
+when
+	Item Spuelmaschine_Status changed to 2
+then
+//	Spuelmaschine_ausgeraeumt.postUpdate(ON)	// muss ja ausgeräumt worden sein wenn sie wieder läuft
+	Spuelmaschine_ausgeraeumt.postUpdate(OFF)
+end
+
+
+rule "Spuelmaschine fertig"
+when
+	Item Spuelmaschine_Status changed from 2 to 3
+then
+	Spuelmaschine_ausgeraeumt.postUpdate(OFF)
+	Spuelmaschine_Ausraeumen_pruefen.postUpdate(OFF)
+end
+
+
+rule "Spuelmaschine ausgeraeumt ?"
+when
+	Item Spuelmaschine_Ausraeumen_pruefen received update OFF
+then
+	val String Meldung = "Die Wäsche ist fertig, bitte Spülmaschine ausräumen."
+
+	if (Spuelmaschine_Benachrichtigung.state == OFF)
+		return;
+
+	logDebug("Keller","Benachrichtige Markus via Telegram, daß die Wäsche fertig ist.")
+	if (Spuelmaschine_ausgeraeumt.state == OFF && Spuelmaschine_Status.state != Spuelmaschine_Modus_ACTIVE) {
+		logInfo("Keller", Meldung)
+		telegramAction.sendTelegramQuery((markus_telegram_chatid.state as Number).longValue(), Meldung, "Antwort_Spuelmaschine", "Erledigt!","(Ausrede)")
+		Spuelmaschine_Ausraeumen_pruefen.postUpdate(ON)
+	}
+end
+
+
+rule "Telegram Antwort Spuemaschine ausgeraeumt"
+when
+	Item Telegram_ReplyID received update Antwort_Spuelmaschine
+then
+	logDebug("Keller","Antwort " + Telegram_lastMessageText.toString + " auf Frage " + triggeringItem.state.toString + "\" von Markus via Telegram erhalten.")
+	if (Telegram_lastMessageText.state.toString == "Erledigt!") {
+		Spuelmaschine_ausgeraeumt.postUpdate(ON)
+		telegramAction.sendTelegramAnswer("Antwort_Spuelmaschine", "Fleissig!")
+	} else {
+		telegramAction.sendTelegramAnswer("Antwort_Spuelmaschine", "Muss aber!")
+		telegramAction.sendTelegramQuery((markus_telegram_chatid.state as Number).longValue(), Meldung, "Antwort_Spuelmaschine", "Erledigt!","(Ausrede)")
+	}
+end
+

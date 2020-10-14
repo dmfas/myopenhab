@@ -1,0 +1,101 @@
+var Number neue_WC_Leuchtstaerke = 0
+var Timer LueftungsTimer
+val Number WC_Leuchtstaerke_nachts = 20
+val Number default_WC_Leuchtstaerke = 80
+
+
+
+rule "WC Licht an"
+when
+	Item EG_WC_Auge changed to ON
+then
+//	logDebug("WC","WC Auge hat angeschlagen, Lux WC aktuell = " + EG_WC_Auge_Lux.state + "; Soll/Ist = " + neue_WC_Leuchtstaerke + "/" + EG_WC_Decke.state)
+
+	if (Tageslicht.state == OFF)
+		neue_WC_Leuchtstaerke = default_WC_Leuchtstaerke
+	if (Nachtschaltung.state == ON)
+		neue_WC_Leuchtstaerke = WC_Leuchtstaerke_nachts
+
+        EG_WC_Decke.sendCommand(neue_WC_Leuchtstaerke)
+	WC_Decke_Nachlauf.sendCommand(ON)
+end
+
+
+rule "WC Licht Nachlauf"
+when
+	Item EG_WC_Auge changed to OFF
+then
+	WC_Decke_Nachlauf.sendCommand(ON)
+end
+
+
+rule "WC Licht aus"
+when
+	Item WC_Decke_Nachlauf received command OFF
+then
+       	EG_WC_Decke.sendCommand(0)
+end
+
+
+rule "WC Helligkeit setzen"
+when
+	Time cron "0 2/10 * ? * MON-SUN"
+	or
+	Item EG_WC_Auge changed
+	or
+	Item EG_WC_Auge_Lux received update 
+	or
+	Item Nachtschaltung changed
+then
+	var Number Lux = 0
+	var Number Ist = 0
+
+	if (EG_WC_Auge_Lux.state != NULL && EG_WC_Decke.state != NULL) {
+		Lux = (EG_WC_Auge_Lux.state as Number)
+		Ist = (EG_WC_Decke.state as Number)
+	}
+
+	if (Ist > 0) return;
+
+	if (Nachtschaltung.state == ON) {
+		neue_WC_Leuchtstaerke = WC_Leuchtstaerke_nachts
+	}
+	else {
+		if (Lux <= 15) {
+			neue_WC_Leuchtstaerke = ((15 - Lux) * 5) + 25
+		}
+		else {
+			if (Ist == 0)
+				neue_WC_Leuchtstaerke = 0
+		}
+	}
+//	logDebug("WC","WC Auge meldet " + Lux + "; WC Deckenlicht ist auf " + Ist + "; neue Leuchtstaerke = " + neue_WC_Leuchtstaerke)
+end
+
+
+rule "Schalter dreifach gedrueckt"
+when
+	Item Szenenschalter_WC_Tuer changed to 16
+then
+	var Number Dauer = (Stosslueftung_Dauer.state as Number)
+	logDebug("WC","WC Tür Taster dreimal gedrückt, aktiviere Stosslüftung der KWL für " + Dauer + " Minuten (alter Modus KWL = " + Lueftung_Modus.state + ").")
+
+        if (LueftungsTimer !== null) {
+                LueftungsTimer.cancel
+                LueftungsTimer = null
+        }
+
+	Lueftung_Modus.sendCommand(4)
+	if (Lueftung_Modus.state < 4) {
+		Lueftungsspeicher = Lueftung_Modus.state as Number
+		Lueftung_Modus.sendCommand(4)
+        	LueftungsTimer = createTimer(now.plusMinutes(Dauer.intValue)) [|
+                	if ((EG_WC_Auge.state == OFF) && (! EG_WC_Auge.changedSince(now.minusMinutes(Dauer.intValue)))) {
+                        	Lueftung_Modus.sendCommand(Lueftungsspeicher)
+	                      	logDebug("WC","Stosslüftung läuft seit " + Dauer + " Minuten, wird wieder deaktiviert.")
+			}
+		]
+	}
+end
+
+

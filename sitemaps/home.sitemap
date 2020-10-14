@@ -1,0 +1,589 @@
+sitemap home label="unser Haus"
+{
+	Frame {
+	Group item=Schnellzugriff label="Schnellzugriff" icon="zoom" {
+		Switch item=Anwesenheitsmodus icon="heating" label="Heizmodus" mappings=[1="daheim", 2="Absenkung", 0="Urlaub"]
+		Switch item=Rollaedenstatus label="Rolläden" icon="rollershutter" mappings=[1="früh",2="Tag",3="Spät",100="TV",101="Kino",4="Nacht"]
+                Group item=PV label="Photovoltaik" icon="sun" {
+			Frame {
+			Text item=PVsystemState label="System Status [MAP(inverter.map):%s]" icon="status"
+//			Text item=PVstatePVpower label="PV generiert Strom [MAP(1on0off.map):%s]" icon="status" visibility=[PVstatePVpower==1]
+//			Text item=PVstateBatteryCharging label="Batterie wird geladen [MAP(1on0off.map):%s]" icon="status" visibility=[PVstateBatteryCharging==1]
+//			Text item=PVstateBatteryDischarging label="Batterie entlädt sich [MAP(1on0off.map):%s]" icon="status" visibility=[PVstateBatteryDischarging==1]
+//			Text item=PVstateFeedInPower label="PV speist ins Netz [MAP(1on0off.map):%s]" icon="status" visibility=[PVstateFeedInpower==1]
+//			Text item=PVstateImportPowerFromGrid label="Haus bezieht aus dem Netz [MAP(1on0off.map):%s]" icon="status" visibility=[PVstateImportPowerFromGrid==1]
+			Text item=PVstatePVpower label="PV generiert Strom [MAP(invis.map):%s]" icon="status" visibility=[PVstatePVpower==1]
+			Text item=PVstateBatteryCharging label="Batterie wird geladen [MAP(invis.map):%s]" icon="status" visibility=[PVstateBatteryCharging==1]
+			Text item=PVstateBatteryDischarging label="Batterie entlädt sich [MAP(invis.map):%s]" icon="status" visibility=[PVstateBatteryDischarging==1]
+//  "Power feed-in the grid" - genaue Bedeutung unklar
+//			Text item=PVstateFeedInPower label="Netzeinspeisung [MAP(invis.map):%s]" icon="status" visibility=[PVstateFeedInpower==1]
+			Text item=PVstateImportPowerFromGrid label="Haus bezieht aus dem Netz [MAP(invis.map):%s]" icon="status" visibility=[PVstateImportPowerFromGrid==1]
+			Text item=PVphaseAcurrent label="Phase A Stromstärke [%.1f A]" icon="energy"
+			Text item=PVphaseBcurrent label="Phase B Stromstärke [%.1f A]" icon="energy"
+			Text item=PVphaseCcurrent label="Phase C Stromstärke [%.1f A]" icon="energy"
+			Text item=PVtotalDCpower label="generierte PV Leistung [%d W]" icon="energy"
+			Text item=PVloadPower label="aktueller Verbrauch [%.0f W]" icon="energy"
+			Text item=PVexportPower label="aktuelle Einspeisung [%.0f W]" icon="energy"
+			Text item=PVtotalActivePower label="Leistungsabgabe PV plus Batterie an Haus plus Netz [%.0f W]" icon="energy"
+//			Text item=PVbatteryPower label="Batterie Leistung absolut [%.0f W]" icon="battery"
+
+			Text item=PVbatteryPower label="Leistungsabgabe Batterie lt. Status-Bit [%.0f W]" icon="battery" visibility=[PVstateBatteryCharging==OFF]
+			Text item=PVbatteryPower label="Ladeleistung Batterie lt. Status-Bit [%.0f W]" icon="battery" visibility=[PVstateBatteryCharging==ON]
+			Text item=PVbatteryPower label="Leistungsabgabe Batterie lt. eigener Berechnung [%.0f W]" icon="battery" visibility=[testBatteryIsCharging==OFF]
+			Text item=PVbatteryPower label="Ladeleistung Batterie lt. eigener Berechnung [%.0f W]" icon="battery" visibility=[testBatteryIsCharging==ON]
+
+			Text item=PVbatteryLevel label="Batterieladestand [%.1f %%]" icon="battery"
+			Text item=PVinsideTemperature label="Wechselrichter Temperatur [%.1f °C]" icon="temperature"
+			Text item=PVbatteryTemperature label="Batterie Temperatur [%.1f °C]" icon="temperature"
+//			Text item=PVtotalDirectConsumption label="aktueller Direktverbrauch [%.0f W]" icon="energy"
+			}
+		}
+		Switch item=Kaffeeansage_auch_einen label="Ansage" mappings=[ON="mir auch einen Kaffee"] icon="scene_coffee_maker_automatic"
+		Text item=aktuell_Temp
+
+//		Switch item=OG_Bad_durchsichtig label="Bad-Fenster" icon="windowtransparent" mappings=[ON="durchsichtig",OFF="sichtgeschützt"]
+		Switch item=Nachtschaltung
+		Switch item=Tageslicht
+		Text item=Luftguete label="Luftgüte innen [%d ppm]" icon="carbondioxide" valuecolor=[>=1500="red", >=1000="orange", >=800="yellow", <800="green"]
+		Switch item=Kuehlbedarf_Kellerkuehlschrank icon="climate" label="Kühlbedarf Kellerkühlschrank [%d]" mappings=[1="AN", 2="AUTO", 0="AUS"]
+		Text item=Waschmaschine_Status label="Betriebszustand Waschmaschine [MAP(washer.map):%s]"
+		Switch item=Rasenmaeher label="Landroid" icon="lawnmower" mappings=[ON="Start", OFF="Laden"]
+		Switch item=mobil_Zwischenstecker7 label="Biancas Leselampe" icon="switch"
+
+		Group item=owntracks label="owntracks/gpstracker" icon="zoom" {
+			Switch item=Markus_owntracks_daheim icon="status_away_1"
+			Switch item=Markus_owntracks_Arbeit_BI icon="status_man"
+			Switch item=Bianca_owntracks_daheim icon="status_woman"
+			Switch item=Bianca_owntracks_Elsener icon="status_woman"
+			Switch item=Tim_owntracks_daheim
+			Switch item=Tim_owntracks_Uni
+			Switch item=Lutz_owntracks_daheim
+			Switch item=Lutz_owntracks_Schule
+			Text item=Markus_Entfernung
+			Text item=lastReport_Markus icon="time_clock"
+			Text item=Bianca_Entfernung
+			Text item=lastReport_Bianca icon="time_clock"
+			Text item=Tim_Entfernung
+			Text item=lastReport_Tim icon="time_clock"
+			Text item=Lutz_Entfernung
+			Text item=lastReport_Lutz icon="time_clock"
+			Text item=Batterie_Markus icon="battery"
+			Text item=Batterie_Tim icon="battery"
+			Mapview item=Ortsdaten_Markus icon="compass" height=500
+			Mapview item=Ortsdaten_Bianca icon="compass" height=500
+			Mapview item=Ortsdaten_Tim icon="compass" height=500
+			Mapview item=Ortsdaten_Lutz icon="compass" height=500
+		}
+		Group item=HomBot label="Luigi, der HomBot" icon="scene_cleaning" {
+//			Image item=HomBot_Map label="Luigis Map" icon="scene_making_love_clean"
+//			Image item=HomBot_Image label="Luigi Cam" icon="it_camera"
+			Text item=Hombot_State label="Status [%s]" icon="scene_robo_vac_cleaner"
+			Text item=HomBot_lastClean label="letzte Reinigung [%s]" icon="clock"
+			Text item=Hombot_Battery label="Batterie [%d %%]" icon="battery"
+			Selection item=Hombot_CleanMode label="Putzmodus [%s]" mappings=[ "ZZ"="Zigzag mode", "SB"="Cell by cell mode", "SPOT"="Spiral spot mode", "MACRO_SECTOR" = "My space mode" ] icon="scene_robo_vac_cleaner"
+			Switch item=HomBot_Job label="Job" icon="scene_cleaning" mappings=[1="Putzen",2="Heimfahren",0="Ruhe"]
+			Switch item=HomBot_Turbo label="Turbo"
+			Switch item=HomBot_Pause mappings=[ON="Pause",OFF="Arbeiten"]
+		}
+		Group item=TV label="TV" icon="screen" {
+			Switch item=TV_Power icon="screen"
+			Slider item=TV_Volume
+			Switch item=TV_Mute mappings=[ON="Mute"] icon="soundvolume_mute" visibility=[TV_Mute == OFF]
+			Switch item=TV_Mute mappings=[ON="Un-Mute"] icon="soundvolume_mute" visibility=[TV_Mute == ON]
+//			Switch item=TV_Mute mappings=[ON="Mute", OFF="Un-Mute"] icon="soundvolume_mute"
+			Text item=TV_Source_Name
+			Text item=TV_Channel
+			Text item=TV_Channel_Name
+			Text item=TV_Program_Title
+			Slider item=TV_Brightness icon="brightness"
+			Slider item=TV_Sharpness
+			Slider item=TV_Contrast
+			Switch item=TV_Color_Temp mappings=[0="0",1="1",2="2",3="3",4="4"] icon="color"
+			Switch item=TV_alive mappings=[ON="Wake on LAN"]
+//		Text item=TV_Key_Code 
+		}
+		Text item=AVR_Status label="AVR [%s]" icon="receiver" {
+			Frame {
+				Text item=AVR_Status label="Anzeige [%s]"
+				Text item=AVR_PlayingListeningMode label="Listening Mode [MAP(avrplayinglisteningmode.map): %d]"
+				Switch item=AVR_Power label="AV Receiver" icon="switch"
+				Switch item=AVR_Mute mappings=[ON="Mute"] icon="soundvolume_mute" visibility=[AVR_Mute == OFF]
+				Switch item=AVR_Mute mappings=[OFF="Un-Mute"] icon="soundvolume_mute" visibility=[AVR_Mute == ON]
+//				Switch item=AVR_Mute mappings=[ON="Mute", OFF="Un-Mute"] icon="soundvolume_mute"
+				Switch item=AVR_Source label="Quelle [%d]" icon="category_group" mappings=[19="TV/HDMI1", 20="Dream/HDMI2", 33="Bluetooth" ]
+				Setpoint item=AVR_Volume_perc label="Lautstärke [%.0f %%]" icon="soundvolume"
+				Selection item=AVR_Source label="Quelle [%d]" icon="receiver" mappings=[00="PHONO", 01="CD",02="CD-R/TAPE", 03="TUNER", 04="DVD", 05="TV/SAT", 10="VIDEO 1", 12="MULTI CHNL IN", 14="VIDEO 2", 15="DVR", 17="USB", 18="XM RADIO", 19="HDMI 1", 20="HDMI 2", 21="HDMI 3", 22="HDMI 4", 23="HDMI 5", 25="BD (BlueRay)", 26="HMG (Inet Radio)", 27="SIRIUS", 31="HDMI (cyclic)", 33="ADAPTER PORT" ] 
+//				Selection item=AVR_ListeningMode label="Listening Mode [MAP(avrlisteningmode.map): %d]" mappings=[ 0001="STEREO (cyclic)", 0010="STANDARD (cyclic)", 0009="STEREO (direct set)", 0011="(2ch source)", 0013="PRO LOGIC2 MOVIE", 0018="PRO LOGIC2x MOVIE", 0014="PRO LOGIC2 MUSIC", 0019="PRO LOGIC2x MUSIC", 0015="PRO LOGIC2 GAME", 0020="PRO LOGIC2x GAME", 0031="PRO LOGIC2z HEIGHT", 0032="WIDE SURROUND MOVIE", 0033="WIDE SURROUND MUSIC", 0012="PRO LOGIC", 0016="Neo:6 CINEMA", 0017="Neo:6 MUSIC", 0037="Neo:X CINEMA", 0038="Neo:X MUSIC", 0039="Neo:X GAME", 0040="Dolby Surround", 0041="EXTENDED STEREO", 0021="(Multi ch source) Channel base straight decode", 0022="(Multi ch source)+DOLBY EX", 0023="(Multi ch source)+PRO LOGIC2x MOVIE", 0024="(Multi ch source)+PRO LOGIC2x MUSIC", 0034="(Multi-ch Source)+PRO LOGIC2z HEIGHT", 0035="(Multi-ch Source)+WIDE SURROUND MOVIE", 0036="(Multi-ch Source)+WIDE SURROUND MUSIC", 0025="(Multi ch source)DTS-ES Neo:6", 0026="(Multi ch source)DTS-ES matrix", 0027="(Multi ch source)DTS-ES discrete", 0030="(Multi ch source)DTS-ES 8ch discrete", 0043="(Multi ch source)+Neo:X CINEMA", 0044="(Multi ch source)+Neo:X MUSIC", 0045="(Multi ch source)+Neo:X GAME", 0050="(Multi ch source)+Dolby Surround", 0100="ADVANCED SURROUND (cyclic)", 0101="ACTION", 0103="DRAMA", 0118="ADVANCED GAME", 0117="SPORTS", 0107="CLASSICAL", 0110="ROCK/POP", 0003="Front Stage Surround Advance", 0200="ECO MODE (cyclic)", 0212="ECO MODE 1", 0213="ECO MODE 2", 0153="RETRIEVER AIR", 0113="PHONES SURROUND", 0005="AUTO SURR/STREAM DIRECT (cyclic)", 0006="AUTO SURROUND", 0151="Auto Level Control (A.L.C.)", 0007="DIRECT", 0008="PURE DIRECT", 0152="OPTIMUM SURROUND" ]
+			}
+		}
+		Group item=Temperaturen label="Temperatursensoren" icon="zoom" {
+			Text item=EG_Wohnen_Auge_Temp
+			Text item=Garten_Auge_Temp
+			Text item=Garten_Auge2_Temp
+			Text item=Garten_Auge_Lux label="Helligkeit Ostseite [%.0f lux]"
+			Text item=Lux_Durchschnitt_morgens label="ø Helligkeit Ostseite [%.0f lux]" icon="sun"
+			Text item=Garten_Auge2_Lux label="Helligkeit Südseite [%.0f lux]"
+			Text item=Lux_Durchschnitt_mittags label="ø Helligkeit Südseite [%.0f lux]" icon="sun"
+			Text item=EG_Wohnen_Auge_Lux
+			Text item=Aussentemperatur_Grenzwert_Sonnenschutz
+		}
+
+		Switch item=mobil_Zwischenstecker66
+		Switch item=mobil_Zwischenstecker7
+	}
+	Group item=Test label="Test" icon="settings" {
+		Switch item=EG_Kueche_Spuelmaschine label="Spülmaschine" //icon="scene_dishwasher"
+		Selection item=OG_Bad_Bodenstrip_Animation label="Programm Bad" icon="colorwheel" mappings=[1="Aus",6="Kamin",7="Sturm",8="Regenbogen",9="Aurora",10="Polizei"]
+		Text item=Garten_Auge_Lux label="akt. Helligkeit Hausecke/Ost [%.0f lux]" icon="sun"
+		Text item=Garten_Auge2_Lux label="akt. Helligkeit Südseite [%.0f lux]" icon="sun"
+		Text item=Garten_Auge_Temp_roh label="Roh-Temperatur Hausecke/Ost [%.1f °C]" icon="temperature"
+		Text item=Garten_Auge2_Temp_roh label="Roh-Temperatur Südseite [%.1f °C]" icon="temperature"
+		Text item=Lux_Durchschnitt_morgens label="ø Lux Hausecke/Ost [%.0f lux]" icon="sun"
+		Text item=Lux_Durchschnitt_mittags label="ø Lux Südseite [%.0f lux]" icon="sun"	// Sensor liefert max 1000 lux
+//		Switch item=TVtest mappings=[1="Prime"]
+//		Text item=yiBewegungstest
+/*		Text item=aktuell_Bewoelkung
+		Text item=Sonneneinstrahlung
+		Text item=maxSonnenscheinRad
+		Text item=maxAugeSonnenkorrekturTemp
+		Text item=maxAuge2SonnenkorrekturTemp
+		Text item=Auge_Korrektur
+		Text item=Auge2_Korrektur
+		Text item=Garten_Auge_Temp_roh
+		Text item=Garten_Auge2_Temp_roh
+		Text item=Garten_Auge_Temp
+		Text item=Garten_Auge2_Temp
+		Text item=Garten_Auge_Lux
+		Text item=Garage_Auge_Temp
+*/
+		Text item=Echo_Wohnen_Title label="Alexa" icon="alexa.svg" {
+		Frame {
+			Default   item=Echo_Wohnen_Player
+			Slider    item=Echo_Wohnen_Volume
+			Setpoint  item=Echo_Wohnen_Volume   minValue=0  maxValue=100 step=5
+			Setpoint  item=Echo_Wohnen_Treble   minValue=-6 maxValue=6   step=1
+			Setpoint  item=Echo_Wohnen_Midrange minValue=-6 maxValue=6   step=1
+			Setpoint  item=Echo_Wohnen_Bass     minValue=-6 maxValue=6   step=1
+			Slider    item=Echo_Wohnen_MediaProgress
+			Text      item=Echo_Wohnen_MediaProgressTime
+			Text      item=Echo_Wohnen_MediaLength
+			Switch    item=Echo_Wohnen_Shuffle
+			Image     item=Echo_Wohnen_ImageUrl      label=""
+			Text      item=Echo_Wohnen_Title
+			Text      item=Echo_Wohnen_Subtitle1
+			Text      item=Echo_Wohnen_Subtitle2
+			Text      item=Echo_Wohnen_ProviderDisplayName
+
+			// The listed providers are only samples, you could have more
+			Selection item=Echo_Wohnen_MusicProviderId mappings=[ 'TUNEIN'='Radio', 'SPOTIFY'='Spotify', 'AMAZON_MUSIC'='Amazon Music', 'CLOUDPLAYER'='Amazon']
+			Text    item=Echo_Wohnen_MusicProviderId
+
+			// To start one of your flashbriefings use Flashbriefing.<YOUR FLASHBRIEFING THING ID>
+			Selection item=Echo_Wohnen_StartCommand mappings=[ 'Weather'='Weather', 'Traffic'='Traffic', 'GoodMorning'='Good Morning', 'SingASong'='Song', 'TellStory'='Story', 'FlashBriefing'='Flash Briefing', 'FlashBriefing.flashbriefing1'='Technical', 'FlashBriefing.flashbriefing2'='Life Style' ]
+
+			Selection item=Echo_Wohnen_RadioStationId mappings=[ ''='Off', 's1139'='Antenne Steiermark', 's8007'='Hitradio Ö3', 's16793'='Radio 10', 's8235'='FM4' ]
+			Text    item=Echo_Wohnen_RadioStationId
+			Switch  item=Echo_Wohnen_Radio
+
+			Text    item=Echo_Wohnen_AmazonMusicTrackId
+			Text    item=Echo_Wohnen_AmazonMusicPlayListId
+			Switch  item=Echo_Wohnen_AmazonMusic
+
+			Text    item=Echo_Wohnen_BluetoothMAC
+			// Change the <YOUR_DEVICE_MAC> Place holder with the MAC address shown, if alexa is connected to the device
+			//Selection item=Echo_Wohnen_BluetoothMAC mappings=[ ''='Disconnected', '74:5E:1C:B1:06:B2'='Bluetooth Device 1', '74:5E:1C:B1:06:B2'='Bluetooth Device 2']
+		}
+		}
+		Switch item=OG_Markus_Thermo_Modus icon=heating label="Markus" mappings=["AUTO-MODE"="Automatik","MANU-MODE"="Manuell","PARTY-MODE"="Party","BOOST"="Boost"]
+//		Text item=OG_Markus_Thermo_Ist
+//		Setpoint item=OG_Markus_Thermo_Soll
+//		Text item=OG_Markus_Thermo_Batterie
+
+/*		Switch item=XGarage_Auge label="PIR Garage #21"
+		Text item=XGarage_Auge_Temp label="Temp. Garage #21"
+		Text item=XGarage_Auge_Lux label="Lux Garage #21"
+		Text item=XGarage_Auffahrt_Kontakt label="Tür Garage #21"
+		Switch item=XGarage_Auge_Tamper label="Tamper Garage #21"
+		Switch item=XGarage_Auge_Access label="Access Garage #21"
+		Switch item=XGarage_Auge_Burglar label="Burglar Garage #21"
+*/
+		Switch item=OG_Markus_Decke
+
+		Text item=Landroid_Status icon="lawnmower" label="Landroid Status [%s]"
+//			Switch item=Landroid_Command_Proxy label="Landroid [MAP(landroid.map):%s]" icon="lawnmower" mappings=[11="Start", 12="Laden"]
+		Switch item=Garten_Landroid_Garage label="Landroid Garagentor [%d]"
+//		Switch item=mobil_Zwischenstecker66 label="unser Fischkopp"
+
+//		Text item=openHABianPi_Memory_Used label="RAM in use"
+		Group item=openhabianpi label="openHABianPi" icon="it_server" {
+/*
+				Text item=openHABianPi_Network_AdapterName
+ }
+*/
+			Frame label="Network Information" {
+				Text item=openHABianPi_Network_AdapterName
+				Text item=openHABianPi_Network_Name
+				Text item=openHABianPi_Network_IP
+				Text item=openHABianPi_Network_Mac
+				Text item=openHABianPi_Network_DataSent
+				Text item=openHABianPi_Network_DataReceived
+				Text item=openHABianPi_Network_PacketsSent
+				Text item=openHABianPi_Network_PacketsReceived
+			} 
+			Frame label="CPU Information" {
+				Text item=openHABianPi_CPU_Name
+				Text item=openHABianPi_CPU_Description
+				Text item=openHABianPi_CPU_Load1
+				Text item=openHABianPi_CPU_Load5
+				Text item=openHABianPi_CPU_Load15
+				Text item=openHABianPi_CPU_Threads
+				Text item=openHABianPi_CPU_Uptime
+			}
+			Frame label="Drive Information" {
+				Text item=openHABianPi_Drive_Name
+				Text item=openHABianPi_Drive_Model
+				Text item=openHABianPi_Drive_Serial
+			}
+			Frame label="Storage Information" {
+				Text item=openHABianPi_Storage_Name
+				Text item=openHABianPi_Storage_Type
+				Text item=openHABianPi_Storage_Description
+				Text item=openHABianPi_Storage_Available
+				Text item=openHABianPi_Storage_Used
+				Text item=openHABianPi_Storage_Total
+				Text item=openHABianPi_Storage_Available_Percent
+				Text item=openHABianPi_Storage_Used_Percent
+			}
+			Frame label="Memory Information" {
+				Text item=openHABianPi_Memory_Available
+				Text item=openHABianPi_Memory_Used
+				Text item=openHABianPi_Memory_Total
+				Text item=openHABianPi_Memory_Available_Percent
+				Text item=openHABianPi_Memory_Used_Percent
+			}
+			Frame label="Swap Memory Information" {
+				Text item=openHABianPi_Swap_Available
+				Text item=openHABianPi_Swap_Used
+				Text item=openHABianPi_Swap_Total
+				Text item=openHABianPi_Swap_Available_Percent
+				Text item=openHABianPi_Swap_Used_Percent
+			}
+			Frame label="Battery, Display and Sensor Information" {
+				Text item=openHABianPi_Sensor_CPUTemp
+				Text item=openHABianPi_Sensor_CPUVoltage
+			}
+			Frame label="Process Information" {
+				Text item=openHABianPi_Process_load
+				Text item=openHABianPi_Process_used
+				Text item=openHABianPi_Process_name
+				Text item=openHABianPi_Process_threads
+				Text item=openHABianPi_Process_path
+			}
+		}
+/*
+		Group item=USV label="USV" icon="it_ups" {
+			Text item=USV_Status label="USV Status [MAP(ups.map):%s]" icon="it_ups"
+			Text item=USV_Alarm 
+			Text item=USV_Batterie_Ladezustand
+			Text item=USV_Batterie_Laufzeit
+			Text item=USV_Leistung 
+			Text item=USV_Eingang_Last
+
+			Text item=USV_Eingang_Stromstaerke
+			Text item=USV_Eingang_Stromstaerke_Status
+			Text item=USV_Eingang_Qualitaet
+			Text item=USV_Ausgaenge_Stromstaerke
+			Text item=USV_Last
+			Text item=USV_Testergebnis
+		}
+*/
+
+//		Text item=Phone_WLAN_Markus label="Markus' Phone in WiFi range [MAP(yesno.map):%s]" icon="network"
+//		Text item=Phone_Markus_lastseen icon="time_clock"
+//		Selection item=EG_Treppe_RGBW label="Test Treppe" mappings=["60,100,1"="gelb","120,100,1"="grün","180,100,1"="türkis","240,100,1"="blau","300,100,1"="lila","360,100,1"="rot","240,50,1"="Test","0,0,0"="Aus"]
+
+		Switch item=Testschalter
+		Switch item=Testschalter2
+		Switch item=Testschalter3
+	}
+	Text item=Heizung label="Heizung" icon="heating" {
+	Frame {
+		Switch item=Anwesenheitsmodus icon="heating" label="_" mappings=[1="daheim", 2="Absenkung", 0="Urlaub"]
+		Text item=TempAussen valuecolor=[>=28="maroon",>=25="red",>=22="orange",>=20="yellow",>=18="lime",>=15="green",>=12="olive",>=8="aqua",>=0="blue",<=0="navy",<=-5="purple"]
+		Text item=aktuell_Temp valuecolor=[>=28="maroon",>=25="red",>=22="orange",>=20="yellow",>=18="lime",>=15="green",>=12="olive",>=8="aqua",>=0="blue",<=0="navy",<=-5="purple"]
+		Text item=Ist_Temp_Diele label="korr. Temperatur Diele [%.1f °C]" icon="temperature" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=15="aqua",<=15="blue",<=12="navy",<10="black"]
+		Text item=Ist_Temp_WC label="korr. Temperatur WC [%.1f °C]" icon="temperature" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=15="aqua",<=15="blue",<=12="navy",<10="black"]
+		Text item=Ist_Temp_Kueche label="korr. Temperatur Küche/Essen [%.1f °C]" icon="temperature" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=15="aqua",<=15="blue",<=12="navy",<10="black"]
+//		Text item=Ist_Temp_Essen label="korr. Temperatur Esszimmer [%.1f °C]" icon="temperature" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=15="aqua",<=15="blue",<=12="navy",<10="black"]
+		Text item=Ist_Temp_Bianca label="korr. Temperatur Bianca [%.1f °C]" icon="temperature" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=15="aqua",<=15="blue",<=12="navy",<10="black"]
+		Text item=Ist_Temp_Wohnen label="korr. Temperatur Wohnen [%.1f °C]" icon="temperature" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=15="aqua",<=15="blue",<=12="navy",<10="black"]
+		Text item=Ist_Temp_Bad label="korr. Temperatur Bad [%.1f °C]" icon="temperature" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=15="aqua",<=15="blue",<=12="navy",<10="black"]
+		Text item=Ist_Temp_Markus label="korr. Temperatur Markus [%.1f °C]" icon="radiator" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=15="aqua",<=15="blue",<=12="navy",<10="black"]
+		Text item=Ist_Temp_Tim label="korr. Temperatur Tim [%.1f °C]" icon="radiator" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=15="aqua",<=15="blue",<=12="navy",<10="black"]
+		Text item=Ist_Temp_Lutz label="korr. Temperatur Lutz [%.1f °C]" icon="radiator" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=15="aqua",<=15="blue",<=12="navy",<10="black"]
+		Text item=Ist_Temp_ELW label="korr. Temperatur ELW [%.1f °C]" icon="radiator" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=16="aqua",<=18="blue",<=10="navy"]
+		Text item=K_Waschkeller_Thermo_Ist label="Temperatur Waschkeller [%.1f °C]" icon="radiator" valuecolor=[>=27="maroon",>=24="red",>=22="orange",>=21="lime",>=20="green",>=18="olive",>=16="aqua",<=18="blue",<=10="navy"]
+
+		Switch item=K_Heizung_Pumpe_BK icon="pump"
+		Switch item=K_Heizung_Pumpe_MK1 icon="pump"
+		Switch item=EG_Diele_FBH
+		Switch item=EG_WC_FBH
+		Switch item=EG_Kueche_FBH
+		Switch item=EG_Essen_FBH_links
+		Switch item=EG_Essen_FBH_rechts
+		Switch item=EG_Bianca_FBH
+		Switch item=EG_Wohnen_FBH
+		Switch item=OG_Bad_FBH
+
+		Setpoint item=Soll_Temp_WC label="Soll WC [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=Soll_Temp_Diele label="Soll Diele [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=Soll_Temp_Kueche label="Soll Küche [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=Soll_Temp_Essen label="Soll Esszimmer [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=Soll_Temp_Bianca label="Soll Bianca [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=Soll_Temp_Wohnen label="Soll Wohnen [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=Soll_Temp_Bad label="Soll Bad [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+//		Setpoint item=OG_Bad_Boden_Soll label="Soll Bad [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=OG_Markus_Thermo_Soll label="Soll Markus [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=OG_Tim_Thermo_Soll label="Soll Tim [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=OG_Lutz_Thermo_Soll label="Soll Lutz [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=K_Waschkeller_Thermo_Soll label="Soll Waschkeller [%.1f °C]" icon="temperature" step=0.5 minValue=12.0 maxValue=20.0
+		Setpoint item=K_ELW_Thermo_Soll label="Soll ELW [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=K_WC_Thermo_Soll label="Soll ELW WC [%.1f °C]" icon="temperature" step=0.5 minValue=17.0 maxValue=25.0
+		Setpoint item=Korrektur_Ist_Temp_WC label="Korr. WC [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_Diele label="Korr. Diele [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_Kueche label="Korr. Küche [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_Essen label="Korr. Esszimmer [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_Bianca label="Korr. Bianca [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_Wohnen label="Korr. Wohnzimmer [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_Bad label="Korr. Bad [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_Markus label="Korr. Markus [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_Tim label="Korr. Tim [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_Lutz label="Korr. Lutz [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_ELW label="Korr. ELW [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+		Setpoint item=Korrektur_Ist_Temp_ELW_WC label="Korr. ELW WC [%.1f °C]" icon="temperature" step=0.1 minValue=-5.0 maxValue=5.0
+	}
+	}
+
+	Text item=Lueftung label="Lüftung" icon="fan" {
+		Frame {
+		Text item=aktuell_Temp valuecolor=[>=28="maroon",>=25="red",>=22="orange",>=20="yellow",>=18="lime",>=15="green",>=12="olive",>=8="aqua",>=0="blue",<=0="navy",<=-5="purple"]
+		Text item=TempAussen label="Aussentemperatur" valuecolor=[>=28="maroon",>=25="red",>=22="orange",>=20="yellow",>=18="lime",>=15="green",>=12="olive",>=8="aqua",>=0="blue",<=0="navy",<=-5="purple"]
+		Text item=K_Waschkeller_Temp label="Waschkeller Temperatur" valuecolor=[>=28="maroon",>=25="red",>=22="orange",>=20="yellow",>=18="lime",>=15="green",>=12="olive",>=8="aqua",>=0="blue",<=0="navy",<=-5="purple"]
+		Text item=Garten_Auge2_Feuchte
+		Text item=K_Waschkeller_Feuchtigkeit label="Waschkeller Luftfeuchte"
+		Text item=OG_Bad_Feuchtigkeit label="Bad Luftfeuchte [%s %%]" icon="humidity"
+		Text item=Luftguete label="Luftgüte innen [%d ppm]" valuecolor=[>=1500="red",>=1000="orange",<=1000="green"] icon="carbondioxide"
+		Text item=AirQualityIndex label="Air Quality Index [%d]" icon="carbondioxide" valuecolor=[<=24="green",<=49="yellow",<=74="orange",<=99="red",>=100="purple"]
+		Setpoint item=EWT_Zuheizung step=0.5
+		Setpoint item=EWT_Kuehlung step=0.5
+// https://github.com/bjoernbrings/openhab2-addons/blob/master/addons/binding/org.openhab.binding.valloxonline/README.md
+		Switch item=Lueftung_AnAus icon="chart" label="KWL An/Aus [MAP(onoffauto.map):%s]" 
+		Switch item=Lueftung_Modus icon="fan" label="KWL Modus" mappings=[3="Daheim",2="Abwesend",4="Stoß",1="Kamin"]
+		Text item=Lueftung_Waermetauscher_Modus icon="radiator" label="Wärmetauscher Modus [MAP(cellstate.map):%s]" 
+		Text item=Lueftung_FanSpeed label="Fanspeed [%d %%]" icon="fan"
+		Text item=Lueftung_TempOutside label="KWL Aussenluft nach EWT [%.1f °C]"
+		Text item=Lueftung_TempInside label="KWL Abluft [%.1f °C]"
+		Text item=Lueftung_TempExhaust label="KWL Fortluft [%.1f °C]"
+		Text item=Lueftung_TempIncomingBeforeHeating label="KWL Zuluft [%.1f °C]"
+		Text item=Lueftung_TempIncoming label="KWL Zuluft nach Wärmetauscher [%.1f °C]"
+		Setpoint item=Stummschaltung_Lueftung label="Dauer heruntergefahrene Lüftung [%.1f]" icon="time_timer" step=1 minValue=10 maxValue=600
+		Setpoint item=Stummschaltung_Lueftung_Bianca label="Dauer Abschaltung Lüftung Bianca [%.1f]" icon="time_timer" step=1 minValue=1 maxValue=600
+		Setpoint item=Stosslueftung_Dauer label="Dauer Stosslüftung [%.1f]" icon="time_timer" step=1 minValue=1 maxValue=600
+		Text item=Lueftung_Ventilator_Zuluft label="KWL Zuluft-Ventilator [%d rpm]" icon="fan"
+		Text item=Lueftung_Ventilator_Abluft label="KWL Abluft-Ventilator [%d rpm]" icon="fan"
+//		Switch item=KWL_Modus icon="chart" label="KWL" mappings=[0="Daheim",1="Abwesend",2="Stoß",3="Kamin",5="AUS"]
+//		Text item=KWL_Ventilator_Zuluft label="KWL Zuluft-Ventilator [%s rpm]"
+//		Text item=KWL_Ventilator_Abluft label="KWL Abluft-Ventilator [%s rpm]"
+//		Text item=KWL_Temp_Aussen label="KWL Temperatur Aussenluft [%s °C]"
+//		Text item=KWL_Temp_Abluft label="KWL Temperatur Abluft [%s °C]"
+//		Text item=KWL_Temp_Zuluft label="KWL Temperatur Zuluft [%s °C]"
+//		Text item=KWL_Temp_Fortluft label="KWL Temperatur Fortluft [%s °C]"
+//		Text item=KWL_Feuchtigkeit label="KWL Feuchtigkeit [%s %%]"
+//		Switch item=D_Lueftung_DigitalEingang1 icon="fan" label="Lüftung" mappings=[ON="Not-Aus", OFF="Normalbetrieb"]
+//		Switch item=KWL_Modus icon="fan" label="NOT-AUS Lüftung" mappings=[5="Not-Aus"]
+                Switch item=D_Lueftung_Ventil_Bianca icon="fan" label="Lüftung Bianca [MAP(valve.map):%s]" mappings=[ON="ZU",OFF="AUF"]
+//                Switch item=D_Lueftung_Ventil_Bianca icon="fan" label="Lüftung Bianca" mappings=[ON="ZU",OFF="AUF"]
+
+
+		Switch item=D_Lueftung_EWT_Pumpe label="Erdwärmetauscher Pumpe [%s]" icon="pump"
+		Switch item=K_Sauna_Ventilator label="Abluftventilator Sauna [%s]" icon="fan"
+		Switch item=K_Waschkeller_Ventilator label="Abluftventilator Waschkeller [%s]" icon="fan"
+             	Webview url="http://192.168.178.26/" height=10
+	}
+	}
+
+	Text item=Einstellungen icon="settings" {
+		Switch item=Schulferien icon="calendar"
+		Switch item=arbeitsfreierTag label="arbeitsfreier Tag [MAP(yesno.map):%s]" icon="calendar"
+		Switch item=Ferienschaltung label="Urlaubsschaltung [MAP(vacation.map):%s]" icon="calendar"
+		Switch item=Alarmmodus icon="shield" label="Alarm" mappings=[1="Ein", 2="Scharf", 0="Aus"]
+		Switch item=Durchsagen
+		Slider item=Durchsagen_Lautstaerke
+		Switch item=dynamisches_Treppenlicht icon="dimmablelight"
+		Switch item=Rolladenautomatik label="Rolladenzeitautomatik"
+//		Switch item=Sonnenschutzschaltung label="Sonnenschutz hausweit [MAP(yesno.map):%s]" icon="blinds"
+//		Switch item=Sonnenschutz label="Sonnenschutzmodus [%d]" mappings=[1="Auto", 2="Ein", 3="Hoch", 0="Aus"] icon="blinds"
+		Switch item=Sonnenschutzschaltung label="Sonnenschutz hausweit [MAP(shading.map):%s]" mappings=[1="Auto", 2="Ein", 3="Hoch", 0="Aus"] icon="blinds"
+		Switch item=Kuehlbedarf_Kellerkuehlschrank icon="climate" label="Kühlbedarf Kellerkühlschrank [%d]" mappings=[1="An", 2="Auto", 0="Aus"]
+		Switch item=Sonnenschutz_Bianca label="Sonnenschutz Bianca [MAP(yesno.map):%s]" icon="blinds"
+		Setpoint item=Aussentemperatur_Hysterese_Sonnenschutz label="Korrektur Sonneneintrag Terrasse [%.1f °C]" icon="temperature" step=1 minValue=0.0 maxValue=40.0
+		Setpoint item=Innentemperatur_Hysterese_Sonnenschutz label="Korrektur Sonneneintrag Wohnen [%.1f °C]" icon="temperature" step=1 minValue=0.0 maxValue=40.0
+		Switch item=Fensteroeffnung_ueberpruefen icon="window-open"
+//		Switch item=Tageslicht label="Tageslicht [MAP(yesno.map):%s]" icon="sun"
+		Switch item=Tageslicht
+		Switch item=Nachtschaltung
+		Switch item=Guten_Morgen_Ansage icon="soundvolume"
+//		Switch item=Fischkopp label="Fischkopp-Automatik"
+		Switch item=Rasenmaeher_aktiviert label="Rasenmäher startet zeitgesteuert [MAP(yesno.map):%s]"
+		Switch item=FBH_morgens_vorwaermen_Einstellung mappings=[1="nur Bäder", 2="An", 0="Aus"]
+		Switch item=Waschkeller_Lueftung label="Waschkeller automatisch lüften [MAP(yesno.map):%s]" icon="fan"
+		Setpoint item=EWT_Zuheizung
+		Setpoint item=EWT_Kuehlung
+		Setpoint item=Schwellwert_unten_Luftfeuchte_Waschkeller label="Schwellwert Luftfeuchte Kellerventilator [%.1f]" icon="humidity" step=1.0 minValue=40.0 maxValue=60.0
+		Setpoint item=Schwellwert_oben_Luftfeuchte_Waschkeller label="Schwellwert Luftfeuchte Kellerventilator [%.1f]" icon="humidity" step=1.0 minValue=40.0 maxValue=60.0
+		Setpoint item=Stummschaltung_Lueftung label="Dauer Abschaltung Lüftung [%.1f]" icon="fan" step=1 minValue=1 maxValue=600
+		Setpoint item=Stummschaltung_Lueftung_Bianca label="Dauer Abschaltung Lüftung Bianca [%.1f]" icon="fan" step=1 minValue=1 maxValue=600
+
+		Setpoint item=Lux_Grenzwert_Sonnenschutz_morgens_niedrig label="untere Schwelle Sonnenschutz morgens [%d]" icon="sun" step=1000 minValue=2000 maxValue=30000
+		Setpoint item=Lux_Grenzwert_Sonnenschutz_morgens_hoch label="obere Schwelle Sonnenschutz morgens [%d]" icon="sun" step=1000 minValue=2000 maxValue=32767
+		Setpoint item=Lux_Grenzwert_Sonnenschutz_mittags_niedrig label="untere Schwelle Sonnenschutz mittags [%d]" icon="sun" step=1000 minValue=2000 maxValue=30000
+		Setpoint item=Lux_Grenzwert_Sonnenschutz_mittags_hoch label="obere Schwelle Sonnenschutz mittags [%d]" icon="sun" step=1000 minValue=200 maxValue=32767
+		Setpoint item=Aussentemperatur_Hysterese_Sonnenschutz label="Hysterese Sonnenschutz aussen [%.1f]" icon="temperature" step=0.1 minValue=15.0 maxValue=25.0
+		Setpoint item=Innentemperatur_Hysterese_Sonnenschutz label="Hysterese Sonnenschutz innen [%.1f]" icon="sun" step=1 minValue=1 maxValue=5
+
+	}
+
+	Group item=Status label="Status" {
+		Text item=Datum
+
+		Text item=aktuell_common icon="weather" {
+		Frame {
+			Text item=aktuell icon="weather-unknown"
+			Text item=Tageslicht label="Tageslicht" icon="sun" visibility=[Tageslicht==ON]
+			Text item=Regen label="Regen" icon="rain" visibility=[Regen==ON]
+			Text item=aktuell_Temp valuecolor=[>=25="maroon",>=22="red",>=19="orange",>=15="green",>=12="olive",>=8="aqua",>=0="blue",<=0="navy",<=-5="purple"]
+			Text item=Garage_Auge_Temp valuecolor=[>=25="maroon",>=22="red",>=19="orange",>=15="green",>=12="olive",>=8="aqua",>=0="blue",<=0="navy",<=-5="purple"]
+		}
+		Frame {
+			Text item=Vorhersage icon="weather-unknown"
+			Text item=Temp_minMax
+			Text item=aktuell_Bewoelkung icon="sun_clouds"
+			Text item=Bewoelkung icon="sun_clouds"
+			Text item=Regenwahrscheinlichkeit icon="rain"			 // gibt openweathermap nicht her
+			Text item=Regenmenge icon="rain"
+			Text item=heute_Regenmenge icon="rain"
+			Text item=Windstaerke icon="wind"
+			Text item=morgen_Vorhersage icon="weather-unknown"
+			Text item=morgen_Temp_minMax
+			Text item=morgen_Bewoelkung icon="sun_clouds"
+			Text item=morgen_Regenwahrscheinlichkeit icon="rain"		 // gibt openweathermap nicht her
+			Text item=morgen_Regenmenge icon="rain"
+			Text item=morgen_Windstaerke icon="wind"
+
+			Text item=Sonnenaufgang_Zeit icon="sun"
+			Text item=Sonnenuntergang_Zeit icon="moon"
+			Text item=Wettervorhersage_Zeitpunkt icon="time_clock"
+		}
+		}
+
+		Text item=Anwesenheitsmodus label="Anwesenheitsmodus [MAP(presence.map):%s]"
+		Text item=Ferienschaltung label="Urlaubsschaltung [MAP(vacation.map):%s]" icon="boy_1"
+		Text item=Feiertag label="Feiertag [MAP(yesno.map):%s]" icon="calendar"
+//		Text item=Schulferien label="Schulferien [MAP(school.map):%s]"
+		Text item=SchulferienName label="Schulferien [%s]"
+		Text item=Szene label="Szene [MAP(scene.map):%s]" icon="colorwheel"
+		Text item=Nachtschaltung
+		Text item=Tageslicht label="Tageslicht [MAP(yesno.map):%s]" icon="sun"
+		Text item=Rolladenautomatik
+		Text item=Sonnenschutzschaltung label="Sonnenschutzautomatik hausweit [MAP(shading.map):%s]" icon="blinds"
+		Text item=Sonnenschutz_Bianca label="Sonnenschutz Bianca [MAP(yesno.map):%s]" icon="blinds"
+		Text item=Guten_Morgen_Ansage icon="soundvolume"
+		Text item=Fensteroeffnung_ueberpruefen icon="window-open"
+		Text item=Regen
+/*		Group item=ZWaveStats label="Z-Wave Stats" icon="chart"  {
+			Text item=ZwaveStatsSOF
+			Text item=ZwaveStatsACK
+			Text item=ZwaveStatsCAN
+			Text item=ZwaveStatsNAK
+			Text item=ZwaveStatsOOF
+			Text item=ZwaveStatsTimeout
+		}
+*/
+/*		Group item=Praesenz label="Presence" {
+			Text item=Phone_WLAN_Markus label="Smartphone in WiFi range [MAP(yn.map):%s]" icon="network"
+			Text item=Phone_GPS_Markus_homemarkus label="Smartphone in GPS geofence [MAP(yn.map):%s]" icon="presence"
+			Text item=PC_Markus label="my PC is [%s]"
+			Text item=mqttfind_markus label="FIND knows my mobile is in room [%s]" icon="smiley"
+		}
+*/
+		Group item=daheim_Gruppe label="Präsenz" icon="presence" {
+			Text item=daheim
+			Group item=Praesenz label="alle Indikatoren"
+			Group item=Markus_daheim_Gruppe
+			Group item=Bianca_daheim_Gruppe
+			Group item=Tim_daheim_Gruppe
+			Text item=Tim_owntracks_Uni
+			Group item=Lutz_daheim_Gruppe
+			Text item=Lutz_owntracks_Schule
+			Mapview item=Ortsdaten_Markus icon="question" height=4 // icon="compass"
+			Mapview item=Ortsdaten_Bianca icon="question" height=4 // icon="compass"
+			Mapview item=Ortsdaten_Tim icon="question" height=4 // icon="compass"
+			Mapview item=Ortsdaten_Lutz icon="question" height=4 // icon="compass"
+		}
+		Group item=Bewegungsmelder
+		Group item=Fenster
+		Group item=Rolladen
+		Group item=AussenTueren
+		Group item=InnenTueren
+		Group item=TempInnen
+		Group item=TempAussen
+		Group item=TempTerrasse
+		Group item=Thermostate
+		Group item=Lichtsensoren
+		Group item=Lichtschalter
+		Group item=Dimmerschalter
+		Group item=Energie
+		Group item=Batterien
+	}
+
+}
+
+	Frame {
+		Selection item=Szene label="Szene" icon="colorwheel" mappings=[1="früh",2="Tag",3="Spät",4="Nacht",101="Kino",100="TV",0="Aus"]
+//		Switch item=Szene label="Szene" icon="colorwheel" mappings=[1="früh",2="Tag",3="Spät",4="Nacht"]
+//		Switch item=Szene label="[%d]" icon="" mappings=[101="Kino",100="TV",0="Aus"]
+//		Switch item=Radio_Station label="Radio @pi" mappings=[0=Aus, 1=WDR2, 2=HR3, 3=SWR3, 4=FFH]
+//		Text item=Kamera label="Kamera" icon="camera" {
+//			Video url="http://vstarcam/videostream.cgi?user=admin&pwd=652012&resolution=32"
+//                    	Webview url="http://192.168.178.44:81/snapshot.cgi?user=admin&pwd=652012&size=2" height=10
+//		}
+        }
+	Frame {
+		Group item=D_Dachboden label="Dachboden" icon="attic"
+		Group item=OG label="Obergeschoß" icon="firstfloor"
+		Group item=EG label="Erdgeschoß" icon="groundfloor"
+		Group item=Keller label="Keller" icon="cellar"	
+		Group item=Garage label="Garage" icon="garage" 
+		Group item=Garten label="Garten" icon="garden" {
+		Frame {
+//			Text item=aktuell_Temp valuecolor=[>=28="maroon",>=25="red",>=22="orange",>=20="yellow",>=18="lime",>=15="green",>=12="olive",>=8="aqua",>=0="blue",<=0="navy",<=-5="purple"]
+			Text item=Garten_Auge_Temp
+			Text item=Garten_Auge2_Temp
+			Text item=Lux_Durchschnitt_morgens label="ø Helligkeit Ecke/Ostseite [%.0f lux]" icon="sun"
+			Text item=Lux_Durchschnitt_mittags label="ø Helligkeit Südseite [%.0f lux]" icon="sun"	// Sensor liefert max 1000 lux
+			Switch item=Rasenmaeher label="Landroid" icon="lawnmower" mappings=[ON="Start", OFF="Laden"]
+			Switch item=Garten_Landroid_Garage label="Landroid Garagentor [%d %%]"
+			Text item=Landroid_Status icon="lawnmower" label="Landroid Status [%s]"
+			Text item=Landroid_Batterie icon="lawnmower" label="Landroid Batterie [%s]"
+			Switch item=Garten_Kueche_Aussen label="Strahler Küchentür"
+			Switch item=Garten_Strahler_Giebel label="Giebelstrahler"
+			Switch item=Garten_Terrasse_lang label="Lichter lange Terrasse"
+			Switch item=Garten_Terrasse_kurz label="Lichter kurze Terrasse"
+			Selection item=Garten_Baeume_RGBW label="Farbe Baumstrahler" mappings=["60,100,100"="gelb","120,100,100"="grün","180,100,100"="türkis","240,100,100"="blau","300,100,100"="lila","0,100,100"="rot","0,0,0"="Aus"]
+	                Colorpicker item=Garten_Baeume_RGBW icon="colorwheel"
+			Selection item=Garten_Baeume_Animation label="Programm Baumstrahler" icon="colorwheel" mappings=[1="Aus",6="Kamin",7="Sturm",8="Regenbogen",9="Aurora",10="Polizei"]
+		}
+		}
+	}
+}
+

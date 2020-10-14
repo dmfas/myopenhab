@@ -1,0 +1,31 @@
+# pylint: disable=import-error,invalid-name
+from core.rules import rule
+from core.triggers import when
+from core.utils import sendCommandCheckFirst
+# import personal.util
+# reload(personal.util)
+# from personal.util import send_info
+
+
+@rule("Weihnachtsbeleuchtung initialisieren", description="Weihnachtsbeleuchtungsregeln Initialisierung", tags=["xmas", "init"])
+@when("System started")
+def Weihnachtsbeleuchtung_Init(event):
+    Weihnachtsbeleuchtung_Init.log.info(u"{}".format(u"Weihnachtsbeleuchtung wird initialisiert"))
+
+@rule("Weihnachtsbeleuchtung einschalten", description="schaltet im Dez+Jan morgens und bei Sonnenuntergang die Weihnachtsbeleuchtung an", tags=["xmas"])
+@when("0 30 6 * 12,1 ?")
+@when("Item Tageslicht changed to OFF")
+def Weihnachtsbeleuchtung_An(event):
+    Weihnachtsbeleuchtung_An.log.info(u"[INFO] {}".format(u"Schalte Weihnachtsbeleuchtung AN"))
+    # send_info(Weihnachtsbeleuchtung_An.log, "Schalte Weihnachtsbeleuchtung AN")
+    # send_info(message="Schalte Weihnachtsbeleuchtung AN", logger=Weihnachtsbeleuchtung_An.log) # geht auch so herum aber nur bei named Parametern
+    # events.sendCommand("mobil_Zwischenstecker7", "ON")
+    sendCommandCheckFirst("mobil_Zwischenstecker7", "ON")
+
+@rule("Weihnachtsbeleuchtung ausschalten", description="schaltet im Dez+Jan bei Sonnenaufgang und nachts die Weihnachtsbeleuchtung wieder aus", tags=["xmas"])
+@when("0 30 8 * 12,1 ?")
+@when("0 30 22 * 12,1 ?")
+@when("Item Tageslicht changed to ON")
+def Weihnachtsbeleuchtung_Aus(event):
+    Weihnachtsbeleuchtung_Aus.log.info(u"[INFO] {}".format(u"Schalte Weihnachtsbeleuchtung AUS"))
+    sendCommandCheckFirst("mobil_Zwischenstecker7", OFF)

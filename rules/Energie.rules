@@ -1,0 +1,82 @@
+val telegramAction = getActions("telegram","telegram:telegramBot:openhab")
+
+val Number UPS_Warnung_Restlaufzeit = 300
+
+rule "USV Statusaenderung"
+when
+        Item USV_Status changed
+then
+        logInfo("Energie", "USV Status hat sich geändert auf " + USV_Status.state + ".")
+end
+
+
+/*
+# OL      - On line (mains is present)
+# OB      - On battery (mains is not present)
+# LB      - Low battery
+# HB      - High battery
+# RB      - The battery needs to be replaced
+# CHRG    - The battery is charging
+# DISCHRG - The battery is discharging (inverter is providing load power)
+# BYPASS  - UPS bypass circuit is active - no battery protection is available
+# CAL     - UPS is currently performing runtime calibration (on battery)
+# OFF     - UPS is offline and is not supplying power to the load
+# OVER    - UPS is overloaded
+# TRIM    - UPS is trimming incoming voltage (called "buck" in some hardware)
+# BOOST   - UPS is boosting incoming voltage
+# FSD     - Forced Shutdown (restricted use, see the note below)
+*/
+
+/*
+rule "USV Alarm Zustandswechsel"
+when
+        Item USV_Status changed from OL
+then
+	val msg = "USV Status hat sich geändert auf " + transform("MAP", "ups.map", USV_Status.state) + "."
+        logWarn("Energie", msg)
+	getActions("telegram","telegram:telegramBot:openhab").sendTelegram(markus_telegram_chatid.state, msg)
+end
+
+
+rule "USV Alarm Restlaufzeit"
+when
+        Item USV_Batterie_Laufzeit changed
+then
+        if ((USV_Batterie_Laufzeit.state as Number) < UPS_Warnung_Restlaufzeit) {
+		val msg = "USV hat nur noch eine Restlaufzeit auf Batterie von " + USV_Batterie_Laufzeit.state + " Sekunden."
+		logWarn("Energie", msg)
+		getActions("telegram","telegram:telegramBot:openhab")
+		telegramAction.sendTelegram((markus_telegram_chatid.state as Number).longValue(), msg)
+	}
+end
+*/
+
+
+rule "Fenster offen ?"
+when
+        Item Fensteroeffnung_ueberpruefen changed
+	or
+	Member of Fenster changed
+	or
+	Time cron "30 * * ? * *"
+then
+	var String msg = "Fenster sind noch offen:"
+
+	val Boolean offeneFenster = false
+	val Number offene = Fenster.members.filter(s | s.state == OPEN).size as Number
+	logDebug("Energie", "debug Oeffnungspruefung: " + offene + " Fenster sind offen; Schwellwert = " + Fensteroeffnung_maxDauer)
+
+	Fenster.members.filter(s | s.state == OPEN).forEach [ f |
+		if (! f.changedSince(now.minusMinutes((Fensteroeffnung_maxDauer.state as Number).intValue()))) {
+			logDebug("Energie", "Fenster " + f.label + " ist länger als " + Fensteroeffnung_maxDauer.state + " Minuten offen.")
+			msg = msg + " " + f.label
+			offeneFenster = true
+		}
+	]
+        if (offeneFenster) {
+		logWarn("Energie", msg)
+		getActions("telegram","telegram:telegramBot:openhab")
+		telegramAction.sendTelegram((markus_telegram_chatid.state as Number).longValue(), msg)
+	}
+end
+

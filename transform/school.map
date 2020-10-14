@@ -1,0 +1,6 @@
+OFF=Schule
+ON=schulfrei
+0=Schule
+1=schulfrei
+false=Schulzeit
+-=keine Daten

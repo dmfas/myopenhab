@@ -1,0 +1,182 @@
+Number Homegear_dutycycle "Homegear 868 MHz Duty Cycle [%d]"		<number> (Heizung)			{ channel="homematic:bridge:bb2ed046:DUTY_CYCLE_RATIO" }
+
+
+// Dachboden
+Contact D_Dachboden_Treppe_Kontakt "Dachtreppe [MAP(contacts.map):%s]"	<door> (D_Dachboden,InnenTueren)	{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ0433928:1#STATE" }
+Switch D_Dachboden_Treppe_Batterie "Dachtreppe [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ0433928:0#LOWBAT" }
+
+
+// Markus
+Contact OG_Markus_Fenster_Kontakt "Markus [MAP(contacts.map):%s]"	<contact> (OG_Markus,Fenster)		{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4008071:1#STATE" }
+Switch OG_Markus_Fenster_Batterie "Fensterkontakt [%s]" 		<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4008071:0#LOWBAT" }
+
+//Group OG_Markus_Thermo "Markus Zimmer"					<temperature> (OG_Markus,Heizung)	{ alexa="Endpoint.Thermostat" }
+String OG_Markus_Thermo_Modus "Modus [%s]"				<calendar> (OG_Markus_Thermo,Heizung)	{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:1#CONTROL_MODE",
+									alexa="ThermostatController.thermostatMode" [HEAT="MANU-MODE", COOL="MANU-MODE", AUTO="AUTO-MODE"] }
+//Number:Temperature OG_Markus_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (OG_Markus_Thermo,OG_Markus,SteuerTemp,Heizung)
+Number:Temperature OG_Markus_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (OG_Markus,SteuerTemp,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3034277:1#ACTUAL_TEMPERATURE" }
+//									alexa="TemperatureSensor.temperature" [itemSensor="OG_Markus_Auge_Temp"] }
+Number:Temperature OG_Markus_Thermo_Soll "Solltemperatur [%.1f °C]"	<temperature> (OG_Markus_Thermo,OG_Markus,SollTempTherm,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:1#SET_TEMPERATURE", 
+									alexa="ThermostatController.targetSetpoint" }
+Number OG_Markus_Thermo_Ventil "Ventilöffnung [%d %%]"			<sani_valve> (OG_Markus_Thermo)		{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:1#VALVE_STATE" }
+Switch OG_Markus_Thermo_Batterie "Batteriewarnung [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3024277:0#LOWBAT" }
+
+
+// Lutz
+Contact OG_Lutz_Fenster_Kontakt	"Lutz [MAP(contacts.map):%s]"		<contact> (OG_Lutz,Fenster)		{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ1157216:1#STATE" }
+Switch OG_Lutz_Fenster_Batterie "Fensterkontakt Lutz [%s]"		<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ1157216:0#LOWBAT" }
+
+//Group OG_Lutz_Thermo "Lutz Zimmer"					<temperature> (OG_Lutz,Heizung)		{ alexa="Endpoint.Thermostat" }
+String OG_Lutz_Thermo_Modus "Modus [%s]"				<calendar> (OG_Lutz_Thermo,Heizung)	{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3031132:1#CONTROL_MODE",
+									alexa="ThermostatController.thermostatMode" [HEAT="MANU-MODE", COOL="MANU-MODE", AUTO="AUTO-MODE"] }
+//Number:Temperature OG_Lutz_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (OG_Lutz_Thermo,OG_Lutz,SteuerTemp,Heizung)
+Number:Temperature OG_Lutz_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (OG_Lutz,SteuerTemp,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3031132:1#ACTUAL_TEMPERATURE" }
+//									alexa="TemperatureSensor.temperature" [itemSensor="OG_Lutz_Auge_Temp"] }
+Number:Temperature OG_Lutz_Thermo_Soll "Solltemperatur [%.1f °C]"	<temperature> (OG_Lutz_Thermo,OG_Lutz,SollTempTherm,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3031132:1#SET_TEMPERATURE",
+									alexa="ThermostatController.targetSetpoint" }
+Number OG_Lutz_Thermo_Ventil "Ventilöffnung [%d %%]"			<sani_valve> (OG_Lutz_Thermo)		{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3031132:1#VALVE_STATE" }
+Switch OG_Lutz_Thermo_Batterie "Thermostat Lutz Batterie"		<battery> (Batterien)			{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3031132:0#LOWBAT" }
+
+
+// Tim
+Contact OG_Tim_Fenster_Kontakt	"Tim [MAP(contacts.map):%s]"		<contact> (OG_Tim,Fenster)		{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ1157179:1#STATE" }
+Switch OG_Tim_Fenster_Batterie "Fensterkontakt Tim [%s]"		<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ1157179:0#LOWBAT" }
+
+//Group OG_Tim_Thermo "Tims Zimmer"					<temperature> (OG_Tim,Heizung)		{ alexa="Endpoint.Thermostat" }
+String OG_Tim_Thermo_Modus "Modus [%s]"					<calendar> (OG_Tim_Thermo,Heizung)	{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3039533:1#CONTROL_MODE",
+									alexa="ThermostatController.thermostatMode" [HEAT="MANU-MODE", COOL="MANU-MODE", AUTO="AUTO-MODE"] }
+//Number:Temperature OG_Tim_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (OG_Tim_Thermo,OG_Tim,SteuerTemp,Heizung)
+Number:Temperature OG_Tim_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (OG_Tim,SteuerTemp,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3039533:1#ACTUAL_TEMPERATURE" }
+//									alexa="TemperatureSensor.temperature" [itemSensor="OG_Tim_Auge_Temp"] }
+Number:Temperature OG_Tim_Thermo_Soll "Solltemperatur [%.1f °C]"	<temperature> (OG_Tim_Thermo,OG_Tim,SollTempTherm,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3039533:1#SET_TEMPERATURE",
+									alexa="ThermostatController.targetSetpoint" }
+Number OG_Tim_Thermo_Ventil "Ventilöffnung [%d %%]"			<sani_valve> (OG_Tim_Thermo)		{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3039533:1#VALVE_STATE" }
+Switch OG_Tim_Thermo_Batterie "Thermostat Tim Batterie"			<battery> (Batterien)			{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3039533:0#LOWBAT" }
+
+
+// Erdgeschoss
+// Diele
+Contact EG_Diele_Eingangstuer_Kontakt "Eingang [MAP(contacts.map):%s]"	<contact> (EG_Diele,AussenTueren,Alarmkontakte)	{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:JRE0004439:1#STATE" }
+Switch EG_Diele_Eingangstuer_Batterie "Eingang [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:JRE0004439:0#LOWBAT" }
+
+// WC
+Contact EG_WC_Fenster_Kontakt "Fenster WC [MAP(contacts.map):%s]"	<contact> (EG_WC,Alarmkontakte)		{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ1157218:1#STATE" }
+Switch EG_WC_Fenster_Batterie "Fenster WC [%s]"				<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ1157218:0#LOWBAT" }
+
+// Küche und Essen
+Contact EG_Kueche_Fenster_Kontakt "Küche [MAP(contacts.map):%s]"	<contact> (EG_Kueche,Fenster,Alarmkontakte)	{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4010635:1#STATE" }
+Switch EG_Kueche_Fenster_Batterie "Fensterkontakt Küche [%s]"		<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4010635:0#LOWBAT" }
+Contact EG_Kueche_Tuer_Kontakt "Tür Küche [MAP(contacts.map):%s]"	<contact> (EG_Kueche,AussenTueren,WohnraumTueren,Alarmkontakte)
+									{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ1157309:1#STATE" }
+Switch EG_Kueche_Tuer_Batterie "Türkontakt Küche [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ1157309:0#LOWBAT" }
+
+Contact EG_Essen_Fenster_Kontakt "Fenster Essen [MAP(contacts.map):%s]"	<contact> (EG_Kueche,Fenster,Alarmkontakte)	{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:MKF0008019:1#STATE" }
+Switch EG_Essen_Fenster_Batterie "Fensterkontakt Essen [%s]"		<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:MKF0008019:0#LOWBAT" }
+
+// Wohnen
+Contact EG_Wohnen_li1_Kontakt "Flügeltür links [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte)
+									{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KEQ0659789:1#STATE" }
+Switch EG_Wohnen_li1_Batterie "Flügeltür links [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KEQ0659789:0#LOWBAT" }
+Contact EG_Wohnen_li2_Kontakt "Ecktür links [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte)
+									{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:JRE0004258:1#STATE" }
+Switch EG_Wohnen_li2_Batterie "Ecktür links [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:JRE0004258:0#LOWBAT" }
+Contact EG_Wohnen_Mitte_li_Kontakt "Mitteltür l [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte)
+									{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4011695:1#STATE" }
+Switch EG_Wohnen_Mitte_li_Batterie "Mitteltür li [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4011695:0#LOWBAT" }
+Contact EG_Wohnen_Mitte_re_Kontakt "Mitteltür r [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte)
+									{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KEQ0659709:1#STATE" }
+Switch EG_Wohnen_Mitte_re_Batterie "Mitteltür re [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KEQ0659709:0#LOWBAT" }
+Contact EG_Wohnen_re1_Kontakt "Flügeltür re [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte)
+									{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KEQ0465530:1#STATE" }
+Switch EG_Wohnen_re1_Batterie "Flügeltür re [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KEQ0465530:0#LOWBAT" }
+Contact EG_Wohnen_re2_Kontakt "Ecktür re [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte)
+									{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KEQ0664463:1#STATE" }
+Switch EG_Wohnen_re2_Batterie "Ecktür re [%s]"				<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KEQ0664463:0#LOWBAT" }
+Contact EG_Wohnen_alt_Kontakt "Gartentür alt [MAP(contacts.map):%s]"	<contact> (EG_Wohnen,AussenTueren,WohnraumTueren,Alarmkontakte)
+									{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ1156818:1#STATE" }
+Switch EG_Wohnen_alt_Batterie "Gartentür alt [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ1156818:0#LOWBAT" }
+
+// Bianca
+Contact EG_Bianca_Tuer_Kontakt "Tür Bianca [MAP(contacts.map):%s]"	<door>	  (EG_Bianca,AussenTueren)	{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:JRE0004534:1#STATE" }
+Switch EG_Bianca_Tuer_Batterie "Tür Bianca [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:JRE0004534:0#LOWBAT" }
+
+// Garage
+Contact Garage_Vordertuer_Kontakt "Vordertür Garage [MAP(contacts.map):%s]"	<frontdoor>	  (Garage,AussenTueren,Alarmkontakte)	{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ0433943:1#STATE" }
+Switch Garage_Vordertuer_Batterie "Vordertür Garage [%s]"		<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ0433943:0#LOWBAT" }
+Contact Garage_Gartentuer_Kontakt "Gartentür Garage [MAP(contacts.map):%s]"	<frontdoor>	  (Garage,AussenTueren,Alarmkontakte)	{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ0433798:1#STATE" }
+Switch Garage_Gartentuer_Batterie "Gartentür Garage [%s]"		<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ0433798:0#LOWBAT" }
+Contact Garage_Fenster_Kontakt "Fenster Garage [MAP(contacts.map):%s]"	<contact> (Garage,Fenster)		{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4007236:1#STATE" }
+Switch Garage_Fenster_Batterie "Fensterkontakt Garage [%s]"		<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4007236:0#LOWBAT" }
+
+// Kellerflur
+Contact K_ELW_Innentuer_Kontakt "Innentür ELW [MAP(contacts.map):%s]"	<contact> (K_ELW,InnenTueren)		{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:JRE0004450:1#STATE" }
+Switch K_ELW_Innentuer_Batterie "Innentür ELW [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:JRE0004450:0#LOWBAT" }
+
+// Waschkeller
+//Group K_Waschkeller_Thermo "Waschkeller"				<temperature> (K_Waschkeller,Heizung)	{ alexa="Endpoint.Thermostat" }
+String K_Waschkeller_Thermo_Modus "Modus"				<calendar> (K_Waschkeller_Thermo,Heizung) { channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3025697:1#CONTROL_MODE",
+									alexa="ThermostatController.thermostatMode" [HEAT="MANU-MODE", COOL="MANU-MODE", AUTO="AUTO-MODE"] }
+//Number:Temperature K_Waschkeller_Thermo_Ist "Temperatur [%.1f °C]"	<temperature> (K_Waschkeller_Thermo,K_Waschkeller,SteuerTemp,Heizung)
+Number:Temperature K_Waschkeller_Thermo_Ist "Temperatur [%.1f °C]"	<temperature> (K_Waschkeller,SteuerTemp,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3025697:1#ACTUAL_TEMPERATURE" }
+//									alexa="TemperatureSensor.temperature" [itemSensor="K_Waschkeller_Temp"] }
+Number:Temperature K_Waschkeller_Thermo_Soll "Solltemperatur [%.1f °C]"	<temperature> (K_Waschkeller_Thermo,K_Waschkeller,SollTempTherm,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3025697:1#SET_TEMPERATURE",
+									alexa="ThermostatController.targetSetpoint" }
+Number K_Waschkeller_Thermo_Ventil "Ventilöffnung [%d %%]"		<sani_valve> (K_Waschkeller_Thermo)	{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3025697:1#VALVE_STATE" }
+Switch K_Waschkeller_Thermo_Batterie "Thermostat Waschkeller Batterie"	<battery> (Batterien)			{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3025697:0#LOWBAT" }
+
+// ELW
+Contact K_ELW_Aussentuer_Kontakt "Aussentür ELW [MAP(contacts.map):%s]"	<contact> (K_ELW,Garage,AussenTueren,Alarmkontakte)	{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4011364:1#STATE" }
+Switch K_ELW_Aussentuer_Batterie "Aussentür ELW [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:KMD4011364:0#LOWBAT" }
+Contact K_ELW_Fenster_Kontakt "Fenster ELW [MAP(contacts.map):%s]"	<contact> (K_ELW,Fenster)		{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ0433965:1#STATE" }
+Switch K_ELW_Fenster_Batterie "Fensterkontakt ELW [%s]"			<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM-2:bb2ed046:LEQ0433965:0#LOWBAT" }
+Contact K_Buero_Fenster_Kontakt "Fenster Büro [MAP(contacts.map):%s]"	<contact> (K_ELW,Fenster)		{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:JRE0004418:1#STATE" }
+Switch K_Buero_Fenster_Batterie "Fensterkontakt Büro [%s]"		<battery> (Batterien)			{ channel="homematic:HG-BC-SC-Rd-WM:bb2ed046:JRE0004418:0#LOWBAT" }
+
+//Group K_ELW_Thermo "Einliegerwohnung"					<temperature> (K_ELW,Heizung)		{ alexa="Endpoint.Thermostat" }
+String K_ELW_Thermo_Modus "Modus"					<calendar> (K_ELW_Thermo,Heizung)	{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3023848:1#CONTROL_MODE",
+									alexa="ThermostatController.thermostatMode" [HEAT="MANU-MODE", COOL="MANU-MODE", AUTO="AUTO-MODE"] }
+//Number:Temperature K_ELW_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (K_ELW_Thermo,K_ELW,SteuerTemp,Heizung)	
+Number:Temperature K_ELW_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (K_ELW,SteuerTemp,Heizung)	
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3023848:1#ACTUAL_TEMPERATURE" }
+//									alexa="TemperatureSensor.temperature" }
+Number:Temperature K_ELW_Thermo_Soll "Solltemperatur [%.1f °C]"		<temperature> (K_ELW_Thermo,K_ELW,SollTempTherm,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3023848:1#SET_TEMPERATURE",
+									alexa="ThermostatController.targetSetpoint" }
+Number K_ELW_Thermo_Ventil "Ventilöffnung [%d %%]"			<sani_valve> (K_ELW_Thermo)			{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3023848:1#VALVE_STATE" }
+Switch K_ELW_Thermo_Batterie "Thermostat ELW Batterie"			<battery> (Batterien)				{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3023848:0#LOWBAT" }
+
+// Büro
+//Group K_Buero_Thermo "Büro"						<calendar> (K_Buero,Heizung)			{ alexa="Endpoint.Thermostat" }
+String K_Buero_Thermo_Modus "Modus"					<calendar> (K_Buero_Thermo,Heizung)		{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3040649:1#CONTROL_MODE",
+									alexa="ThermostatController.thermostatMode" [binding="max"] }
+//Number:Temperature K_Buero_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (K_Buero,SteuerTemp,Heizung)
+Number:Temperature K_Buero_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (K_Buero_Thermo,K_Buero,SteuerTemp,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3040649:1#ACTUAL_TEMPERATURE",
+									alexa="TemperatureSensor.temperature" }
+Number:Temperature K_Buero_Thermo_Soll "Solltemperatur [%.1f °C]"	<temperature> (K_Buero_Thermo,K_Buero,SollTempTherm,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3040649:1#SET_TEMPERATURE",
+									alexa="ThermostatController.targetSetpoint" }
+Number K_Buero_Ventil "Ventilöffnung [%d %%]"				<sani_valve> (K_Buero_Thermo)			{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3040649:1#VALVE_STATE" }
+Switch K_Buero_Thermo_Batterie "Büro Thermostat Batterie"		<battery> (Batterien)				{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3040649:0#LOWBAT" }
+
+// ELW WC
+//Group K_WC_Thermo "Keller WC"						<calendar> (K_WC,Heizung)			{ alexa="Endpoint.Thermostat" }
+String K_WC_Thermo_Modus "Modus"					<calendar> (K_WC_Thermo,Heizung)		{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3040111:1#CONTROL_MODE",
+									alexa="ThermostatController.thermostatMode" [binding="max"] }
+//Number:Temperature K_WC_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (K_WC_Thermo,K_WC,SteuerTemp,Heizung)
+Number:Temperature K_WC_Thermo_Ist "Temperatur [%.1f °C]"		<temperature> (K_WC,SteuerTemp,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3040111:1#ACTUAL_TEMPERATURE" }
+//									alexa="TemperatureSensor.temperature" }
+Number:Temperature K_WC_Thermo_Soll "Solltemperatur [%.1f °C]"		<temperature> (K_WC_Thermo,K_WC,SollTempTherm,Heizung)
+									{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3040111:1#SET_TEMPERATURE",
+									alexa="ThermostatController.targetSetpoint" }
+Switch K_WC_Thermo_Batterie "Thermostat ELW WC Batterie"		<battery> (Batterien)				{ channel="homematic:HG-BC-RT-TRX-CyG:bb2ed046:KMD3040111:0#LOWBAT" }
+

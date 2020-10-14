@@ -1,0 +1,91 @@
+var Timer TimerB
+var OnOffType sonnenschutzSpeicher
+var Number sollTemperaturSpeicher
+
+val Number sollTemperaturOffen = 12.0
+val Number Sonnenschutz_Nachlauf = 15	// in Minuten
+
+
+rule "Rolladen Bianca oeffnen bei Tueroeffnung"
+when
+	Item EG_Bianca_Tuer_Kontakt changed to OPEN
+then
+	if (Bianca_Tuer_oeffnen.state == OFF) {
+		Bianca_Tuer_oeffnen.sendCommand(ON)
+		return
+	}
+
+	if (EG_Bianca_Rolladen.state > Hysterese_Rollaeden.state) {
+		EG_Bianca_Rolladen.sendCommand(UP)
+	        logInfo("Bianca", "Fahre Rolladen bei Bianca hoch, da ihre Tür zweimal kurz hintereinander geöffnet wurde.")
+	}
+end
+
+
+rule "Heizung Bianca abstellen bei Tueroeffnung"
+when
+	Item EG_Bianca_Tuer_Kontakt changed to OPEN
+then
+	sollTemperaturSpeicher = Soll_Temp_Bianca.state as Number
+
+	Soll_Temp_Bianca.postUpdate(sollTemperaturOffen)
+end
+
+
+rule "Heizung Bianca wieder aktivieren bei Tueroeffnung"
+when
+	Item EG_Bianca_Tuer_Kontakt changed to OPEN
+then
+	Soll_Temp_Bianca.postUpdate(sollTemperaturSpeicher)
+end
+
+/*
+rule "Sonnenschutzautomatik fuer Biancas Zimmer temporaer deaktivieren"
+when
+	Item EG_Bianca_Auge changed to ON
+	or
+	Item EG_Bianca_Rolladen received command
+then
+	if (TimerB !== null) {
+		TimerB.cancel
+		TimerB = null
+	}
+
+	sonnenschutzSpeicher = Sonnenschutz_Bianca.state
+	Sonnenschutz_Bianca.sendCommand(OFF)
+
+        TimerB = createTimer(now.plusMinutes(Sonnenschutz_Nachlauf.intValue)) [|
+		logInfo("Bianca","Rolladen Bianca werden wieder wie das restliche Haus gesteuert.")
+		Sonnenschutz_Bianca.sendCommand(sonnenschutzSpeicher)
+	]
+end
+*/
+
+rule "Bianca is in da house"
+when
+	Item EG_Bianca_Auge changed to ON
+	or
+	Item EG_Bianca_Auge received update ON
+then
+	mobil_Zwischenstecker7.sendCommand(ON)
+	Bianca_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Bianca Nachlauf"
+when
+	Item EG_Bianca_Auge changed to OFF
+then
+	Bianca_Nachlauf.sendCommand(ON)
+end
+
+
+
+rule "Bianca is out da house"
+when
+	Item Bianca_Nachlauf received command OFF
+then
+	if (now.getHourOfDay >= 6 && now.getHourOfDay <= 21)
+		mobil_Zwischenstecker7.sendCommand(OFF)
+end
+

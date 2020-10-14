@@ -1,0 +1,55 @@
+Switch daheim "jemand daheim [MAP(presence.map):%s]"			<present>			{ expire="5m,command=OFF" }
+
+//Group:Number:SUM daheim_Gruppe	"jemand daheim [(%d Anzeigen)]"		<present>
+//Switch daheim_Timer { expire="5m,command=OFF" }
+
+Switch Markus_daheim "Markus daheim ? [MAP(presence.map):%s]"		<present>	(Praesenz)
+Switch Bianca_daheim "Bianca daheim ? [MAP(presence.map):%s]"		<present>	(Praesenz)
+Switch Tim_daheim "Tim daheim ? [MAP(presence.map):%s]"			<present>	(Praesenz)
+Switch Lutz_daheim "Lutz daheim ? [MAP(presence.map):%s]"		<present>	(Praesenz)
+Group:Number:SUM Markus_daheim_Gruppe "Markus daheim [(%d Anzeigen)]"	<present>	(Praesenz)
+Group:Number:SUM Bianca_daheim_Gruppe "Bianca daheim [(%d Anzeigen)]"	<present>	(Praesenz)
+Group:Number:SUM Tim_daheim_Gruppe "Tim daheim [(%d Anzeigen)]"		<present>	(Praesenz)
+Group:Number:SUM Lutz_daheim_Gruppe "Lutz daheim [(%d Anzeigen)]"	<present>	(Praesenz)
+
+
+Switch Markus_owntracks_daheim "Markus daheim (owntracks)" 		<present>	(Praesenz,Markus_daheim_Gruppe)	{ channel="gpstracker:tracker:f88a9bc7:regionTrigger" [profile="gpstracker:trigger-geofence", regionName="home"] }
+Switch Markus_owntracks_Arbeit_BI "Markus bei TSystems BI Detmolder" 	<present>	(Praesenz)			{ channel="gpstracker:tracker:f88a9bc7:regionTrigger" [profile="gpstracker:trigger-geofence", regionName="TSystemBI"] }
+Switch Bianca_owntracks_daheim "Bianca daheim (owntracks)"	 	<present>	(Praesenz,Bianca_daheim_Gruppe)	{ channel="gpstracker:tracker:11bfa74b:regionTrigger" [profile="gpstracker:trigger-geofence", regionName="home"] }
+Switch Bianca_owntracks_Elsener "Bianca an Elsener Str."		<present>	(Praesenz)			{ channel="gpstracker:tracker:11bfa74b:regionTrigger" [profile="gpstracker:trigger-geofence", regionName="Elsener"] }
+Switch Bianca_owntracks_Talle "Bianca an der Talle"			<present>	(Praesenz)			{ channel="gpstracker:tracker:11bfa74b:regionTrigger" [profile="gpstracker:trigger-geofence", regionName="Talle"] }
+Switch Tim_owntracks_daheim "Tim daheim (owntracks)" 			<present>	(Praesenz,Tim_daheim_Gruppe)	{ channel="gpstracker:tracker:e142cfcc:regionTrigger" [profile="gpstracker:trigger-geofence", regionName="home"] }
+Switch Tim_owntracks_Uni "Tim in der Uni (owntracks)" 			<present>	(Praesenz)			{ channel="gpstracker:tracker:e142cfcc:regionTrigger" [profile="gpstracker:trigger-geofence", regionName="Uni"] }
+Switch Lutz_owntracks_daheim "Lutz daheim (owntracks)" 			<present>	(Praesenz,Lutz_daheim_Gruppe)	{ channel="gpstracker:tracker:ca86672f:regionTrigger" [profile="gpstracker:trigger-geofence", regionName="home"] }
+Switch Lutz_owntracks_Schule "Lutz in der Schule" 			<present>	(Praesenz)			{ channel="gpstracker:tracker:ca86672f:regionTrigger" [profile="gpstracker:trigger-geofence", regionName="Gesamtschule"] }
+
+Number Markus_Entfernung "Entfernung Markus von daheim"			<present>	(Praesenz)		{ channel="gpstracker:tracker:f88a9bc7:homeDistance" }
+Location Ortsdaten_Markus "Aufenthaltsort Markus"			<present>	(Praesenz)		{ channel="gpstracker:tracker:f88a9bc7:lastLocation" }
+Number Bianca_Entfernung "Entfernung Bianca von daheim"			<present>	(Praesenz)		{ channel="gpstracker:tracker:11bfa74b:homeDistance" }
+Location Ortsdaten_Bianca "Aufenthaltsort Bianca"			<present>	(Praesenz)		{ channel="gpstracker:tracker:11bfa74b:lastLocation" }
+Number Tim_Entfernung "Entfernung Tim von daheim"			<present>	(Praesenz)		{ channel="gpstracker:tracker:e142cfcc:homeDistance" }
+Location Ortsdaten_Tim "Aufenthaltsort Tim"				<present>	(Praesenz)		{ channel="gpstracker:tracker:e142cfcc:lastLocation" }
+Number Lutz_Entfernung "Entfernung Lutz von daheim"			<present>	(Praesenz)		{ channel="gpstracker:tracker:ca86672f:homeDistance" }
+Location Ortsdaten_Lutz "Aufenthaltsort Lutz"				<present>	(Praesenz)		{ channel="gpstracker:tracker:ca86672f:lastLocation" }
+
+DateTime lastReport_Markus	"letzte Ortsmeldung Markus"		<present>	(Praesenz)		{ channel="gpstracker:tracker:f88a9bc7:lastReport" }
+Number Batterie_Markus		"Batterystand Handy Markus"		<present>	(Praesenz)		{ channel="gpstracker:tracker:f88a9bc7:batteryLevel" }
+DateTime lastReport_Bianca	"letzte Ortsmeldung Bianca"		<present>	(Praesenz)		{ channel="gpstracker:tracker:11bfa74b:lastReport" }
+Number Batterie_Bianca		"Batterystand Handy Bianca"		<present>	(Praesenz)		{ channel="gpstracker:tracker:11bfa74b:batteryLevel" }
+DateTime lastReport_Tim		"letzte Ortsmeldung Tim"		<present>	(Praesenz)		{ channel="gpstracker:tracker:e142cfcc:lastReport" }
+Number Batterie_Tim		"Batterystand Handy Tim"		<present>	(Praesenz)		{ channel="gpstracker:tracker:e142cfcc:batteryLevel" }
+DateTime lastReport_Lutz	"letzte Ortsmeldung Lutz"		<present>	(Praesenz)		{ channel="gpstracker:tracker:ca86672f:lastReport" }
+Number Batterie_Lutz		"Batterystand Handy Lutz"		<present>	(Praesenz)		{ channel="gpstracker:tracker:ca86672f:batteryLevel" }
+
+
+// fuer FIND
+//String  mqttfind_markus	"Markus ist in Raum [%s]"	(Praesenz,FIND)	{mqtt="<[mosquitto:diestorms/location/markus:state:JSONPATH($.location)]"}
+//String  mqttfind_bianca	"Bianca ist in Raum [%s]"	(Praesenz,FIND)	{mqtt="<[mosquitto:diestorms/location/bianca:state:JSONPATH($.location)]"}
+//String  mqttfind_tim "Tim ist in Raum [%s]"		(Praesenz,FIND)	{mqtt="<[mosquitto:diestorms/location/tim:state:JSONPATH($.location)]"}
+//String  mqttfind_lutz "Lutz ist in Raum [%s]"		(Praesenz,FIND)	{mqtt="<[mosquitto:diestorms/location/lutz:state:JSONPATH($.location)]"}
+
+// fuer FIND3
+String  mqttfind_markus	"Markus ist in Raum [%s]"	(Praesenz,FIND)	{ channel="mqtt:topic:472fd60d:findmarkus" }
+String  mqttfind_bianca	"Bianca ist in Raum [%s]"	(Praesenz,FIND) { channel="mqtt:topic:472fd60d:findbianca" }
+String  mqttfind_tim "Tim ist in Raum [%s]"		(Praesenz,FIND) { channel="mqtt:topic:472fd60d:findtim" }
+String  mqttfind_lutz "Lutz ist in Raum [%s]"		(Praesenz,FIND) { channel="mqtt:topic:472fd60d:findlutz" }

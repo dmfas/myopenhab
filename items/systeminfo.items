@@ -1,0 +1,70 @@
+/* openhabianpi information*/
+String openHABianPi_Network_AdapterName        "Adapter name"		<network>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:openhabianpi#networkDisplayName" }
+String openHABianPi_Network_Name               "Name"			<network>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:openhabianpi#networkName" }
+String openHABianPi_Network_IP                 "IP address"		<network>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:openhabianpi#ip" }
+String openHABianPi_Network_Mac                "Mac address"		<network>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:openhabianpi#mac" }
+Number openHABianPi_Network_DataSent           "Data sent"		<flowpipe>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:openhabianpi#dataSent" }
+Number openHABianPi_Network_DataReceived       "Data received"		<returnpipe>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:openhabianpi#dataReceived" }
+Number openHABianPi_Network_PacketsSent        "Packets sent"		<flowpipe>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:openhabianpi#packetsSent" }
+Number openHABianPi_Network_PacketsReceived    "Packets received"	<returnpipe>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:openhabianpi#packetsReceived" }
+
+/* CPU information*/
+String openHABianPi_CPU_Name                   "Name"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:cpu#name" }
+String openHABianPi_CPU_Description            "Description"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:cpu#description" }
+Number openHABianPi_CPU_Load1                  "Load (1 min)"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:cpu#load1" }
+Number openHABianPi_CPU_Load5                  "Load (5 min)"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:cpu#load5" }
+Number openHABianPi_CPU_Load15                 "Load (15 min)"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:cpu#load15" }
+Number openHABianPi_CPU_Threads                "Threads"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:cpu#threads" }
+Number openHABianPi_CPU_Uptime                 "Uptime"			<time>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:cpu#uptime" }
+
+/* Drive information*/
+String openHABianPi_Drive_Name                 "Name"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:drive#name" }
+String openHABianPi_Drive_Model                "Model"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:drive#model" }
+String openHABianPi_Drive_Serial               "Serial"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:drive#serial" }
+
+/* Storage information*/
+String openHABianPi_Storage_Name               "Name"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:storage#name" }
+String openHABianPi_Storage_Type               "Type"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:storage#type" }
+String openHABianPi_Storage_Description        "Description"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:storage#description" }
+Number openHABianPi_Storage_Available          "Available"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:storage#available" }
+Number openHABianPi_Storage_Used               "Used"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:storage#used" }
+Number openHABianPi_Storage_Total              "Total"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:storage#total" }
+Number openHABianPi_Storage_Available_Percent  "Available (%)"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:storage#availablePercent" }
+Number openHABianPi_Storage_Used_Percent       "Used (%)"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:storage#usedPercent" }
+
+/* Memory information*/
+Number openHABianPi_Memory_Available           "Available"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:memory#available" }
+Number openHABianPi_Memory_Used                "Used"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:memory#used" }
+Number openHABianPi_Memory_Total               "Total"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:memory#total" }
+Number openHABianPi_Memory_Available_Percent   "Available (%)"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:memory#availablePercent" }
+Number openHABianPi_Memory_Used_Percent        "Used (%)"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:memory#usedPercent" }
+
+/* Swap memory information*/
+Number openHABianPi_Swap_Available             "Available"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:swap#available" }
+Number openHABianPi_Swap_Used                  "Used"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:swap#used" }
+Number openHABianPi_Swap_Total                 "Total"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:swap#total" }
+Number openHABianPi_Swap_Available_Percent     "Available (%)"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:swap#availablePercent" }
+Number openHABianPi_Swap_Used_Percent          "Used (%)"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:swap#usedPercent" }
+
+/* Battery information*/
+/*
+String openHABianPi_Battery_Name               "Name"			<batterylevel>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:battery#name" }
+Number openHABianPi_Battery_RemainingCapacity  "Remaining Capacity"	<batterylevel>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:battery#remainingCapacity" }
+Number openHABianPi_Battery_RemainingTime      "Remaining Time"		<batterylevel>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:battery#remainingTime" }
+*/
+
+/* Display information*/
+String openHABianPi_Display_Description        "Display description"	<screen>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:display#information" }
+
+/* Sensors information*/
+Number openHABianPi_Sensor_CPUTemp             "CPU Temperature"	<temperature>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:sensors#cpuTemp" }
+Number openHABianPi_Sensor_CPUVoltage          "CPU Voltage"		<energy>	(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:sensors#cpuVoltage" }
+//Number openHABianPi_Sensor_FanSpeed            "Fan speed"		<fan>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:sensors#fanSpeed" }
+
+/* Process information*/
+Number openHABianPi_Process_load               "Load"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:process#load" }
+Number openHABianPi_Process_used               "Used"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:process#used" }
+String openHABianPi_Process_name               "Name"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:process#name" }
+Number openHABianPi_Process_threads            "Threads"		<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:process#threads" }
+String openHABianPi_Process_path               "Path"			<none>		(openHABianPi)	{ channel="systeminfo:computer:openhabianpi:process#path" }
+

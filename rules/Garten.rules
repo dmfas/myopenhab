@@ -1,0 +1,656 @@
+//var java.util.concurrent.locks.ReentrantLock lock  = new java.util.concurrent.locks.ReentrantLock()
+val telegramAction = getActions("telegram","telegram:telegramBot:openhab")
+
+
+var Timer waitTimer
+var Timer RegenTimer
+var Timer LandroidTorTimer
+var Timer LandroidTorTimer2
+var Timer waitTimerLichtkurz
+var Timer waitTimerLichtlang
+var Timer TimerPumpe
+
+var HSBType hsbValue
+var String redValue
+var String blueValue
+var String greenValue
+
+var Number RegenAnsagen
+var Number maxRegenAnsagen = 2
+var Number Regen_Hysterese = 1800	// 30 Minuten
+
+var Number Schwellwert_Terrassenlicht = 100
+var Number Terrassenbeleuchtung_Nachlauf = 600
+
+val Number Garage_geschlossen = 99
+val Number Garage_offen = 10
+val Number Garagenoeffnungszeit = 10		// sec
+val Number Landroid_Tor_Nachlauf = 30		// sec
+val Number Landroid_Karenzzeit = 60		// sec
+val Number Aussen_Durchschnitt_Nachlauf = 5
+
+var OnOffType Drainagepumpe_alter_Zustand
+var Number Schwellwert_Drainagepumpe = 0.1
+var Number Divisor
+var Number Regen_max_Menge = 20.0  // WAR: 10 !!!
+var Number Drainagepumpe_Intervall = 30		// Pumpbedarf wird in diesen Intervallen geprueft und Pumpe darf max. soviele Minuten laufen
+var Number Drainagepumpe_Grund_Intervall = 60	// Mindest-Pumpdauer in Sek. alle 4 Stunden
+
+
+/* 1. Parameter = Gruppe von Temperatursensoren
+   return-Wert = Korrektur-Faktor), um den alle Temperaturwerte korrigiert werden, ehe sie mit (statischen) Grenzen verglichen werden
+
+   grobe Idee:
+   mitprotokollieren um wieviel °C direkte Sonneneinstrahlung die Werte der in der Sonne liegenden Sensoren übersteigt
+   Maximum durch Bewölkung dividieren
+   Problem verschiedener Sommer/Winter-Tage ? 
+*/
+//val Functions$Function1 <GenericItem,QuantityType<Number>> Korrektur_direkte_Sonne = [ sensor |
+val Functions$Function1 <Number,QuantityType<Number>> Korrektur_direkte_Sonne = [ sensor |
+	val Number Aussen_Durchschnitt_Nachlauf = 15
+	val Number maxRadDefault = 1.0
+	val Number maxTempDiffDefault = 1.0
+
+
+/* ermittelt Wert in °C, um den die Temperaturwerte der Aussentemperatursensoren in der Sonne korrigert werden =
+   Wert bei maximaler Sonneneinstrahlung * (Temperaturdifferenz / max(Temperaturdifferenz) gemäß Historie
+   wird in aufrufender Routine noch durch den Bewoelkungsfaktor relativiert angepasst
+*/
+	var Number kT
+
+        // Sonnenscheinkorrektur := max(Garten_Auge_Temp_roh,Garten_Auge2_Temp_roh) - aktuell_Temp
+        // (oder minus Aussen-Schatten-Referenz wie Garage_Auge_Temp)
+        // fuer (heute minus 1 Tag) auslesen und aendern wenn aktueller Wert höher ist
+	// danach in jedem Fall persisten
+	// TODO: wie erkennt man Ausreisser und überspringt sie ???
+	var Number maxAugeDeltaTempBisher
+	var Number maxAuge2DeltaTempBisher
+	var Number maxSonneRadBisher // war double??
+	var HistoricItem hs
+	var Number dt
+	var Number dt2
+
+
+	if (aktuell_Temp === null || aktuell_Temp.state == UNDEF)
+		return 0.0|°C
+
+	if (Sonneneinstrahlung.state == 0.0|"W/m²") {
+		Sonneneinstrahlung.postUpdate(maxRadDefault)
+//        	logDebug("Garten", "Aussentemp Garten Sonneneinstrahlung = " + Sonneneinstrahlung.state + " ist 0, setze Default !")
+	}
+
+	// was war zur selben Tageszeit die bisherige Maximaldifferenz zwischen Aussensensor und Schattenreferenz ?
+	hs = maxAugeSonnenkorrekturTemp.historicState(now.minusMonths(1))
+	if (hs !== null) {
+		maxAugeDeltaTempBisher = hs.state
+	} else {
+		maxAugeDeltaTempBisher = maxTempDiffDefault
+	}
+	hs = maxAuge2SonnenkorrekturTemp.historicState(now.minusMonths(1))
+	if (hs !== null) {
+		maxAuge2DeltaTempBisher = hs.state
+	} else {
+		maxAuge2DeltaTempBisher = maxTempDiffDefault
+	}
+//	logDebug("Garten","Aussentemp debug 1 sensor = " + sensor + "; Historie 1/2 = " + maxAugeSonnenkorrekturTemp.historicState(now.minusMonths(1)) + "/" + maxAuge2SonnenkorrekturTemp.historicState(now.minusMonths(1)) + " -> " + maxAugeDeltaTempBisher + "/" + maxAuge2DeltaTempBisher + "; maxSonneRadBisher = " + maxSonneRadBisher)
+	// ACHTUNG: Korrekturwert ist negativ, also nur speichern wenn noch niedriger !
+	hs = maxSonnenscheinRad.historicState(now.minusMonths(1))
+	if (hs !== null) {
+		maxSonneRadBisher = hs.state
+//		logDebug("Garten","Aussentemp debug 2a sensor = " + sensor + "; maxSonneRadBisher = " + maxSonneRadBisher)
+	} else {
+		maxSonneRadBisher = (Sonneneinstrahlung.state as Number)
+//		logDebug("Garten","Aussentemp debug 2b sensor = " + sensor + "; maxSonneRadBisher = " + maxSonneRadBisher)
+	}
+
+//	logDebug("Garten", "Aussentemp Garten anfangs: Sensor = " + sensor + "; Temp/max Korrektur A1/A2[historisch A1/A2] = " + aktuell_Temp.state + "/" + maxAugeSonnenkorrekturTemp.state + "/" + maxAuge2SonnenkorrekturTemp.state + "[" + maxAugeDeltaTempBisher + "/" + maxAuge2DeltaTempBisher + "]; Strahlung/max Korrektur[historisch] = " + Sonneneinstrahlung.state + "/" + maxSonnenscheinRad.state + "[" + maxSonneRadBisher + "]")
+
+	dt = Garten_Auge_Temp_roh.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf.intValue))
+	if (dt === null) dt = 0.0
+	dt2 = Garten_Auge2_Temp_roh.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf.intValue))
+	if (dt2 === null) dt2 = 0.0
+	dt = dt - aktuell_Temp.state
+	dt2 = dt2 - aktuell_Temp.state
+
+	logDebug("Garten", "Aussentemp Garten mittendrin: off. Temp/Max Korrektur A1/A2[hist. Max A1/A2] = " + aktuell_Temp.state + "/" + dt + "/" + dt2 + "[" + maxAugeDeltaTempBisher + "/" + maxAuge2DeltaTempBisher + "]")
+
+	// ACHTUNG: Korrekturwerte sind negativ, also nur speichern wenn noch niedriger !
+	if (dt < maxAugeDeltaTempBisher) {
+		maxAugeSonnenkorrekturTemp.postUpdate(dt)
+//		logDebug("Garten", "Aussentemp Garten speichere neuen maximal negativen Korrekturwert dt=" + dt + " < maxAugeDeltaTempBisher=" + maxAugeDeltaTempBisher)
+	} else {
+//		logDebug("Garten", "Aussentemp Garten nutze maximal negativen Korrekturwert dt=" + dt)
+		maxAugeSonnenkorrekturTemp.postUpdate(maxAugeDeltaTempBisher)
+	}
+	maxAugeSonnenkorrekturTemp.persist
+
+	if (dt2 < maxAuge2DeltaTempBisher) {
+//		logDebug("Garten", "Aussentemp Garten speichere neuen maximal negativen Korrekturwert dt2=" + dt2 + " < maxAuge2DeltaTempBisher=" + maxAuge2DeltaTempBisher)
+		maxAuge2SonnenkorrekturTemp.postUpdate(dt2)
+	} else {
+//		logDebug("Garten", "Aussentemp Garten nutze maximal negativen Korrekturwert dt2=" + dt2)
+		maxAuge2SonnenkorrekturTemp.postUpdate(maxAuge2DeltaTempBisher)
+	}
+	maxAuge2SonnenkorrekturTemp.persist
+
+	// TODO: nur mit Werten minusMonths(1) vergleichen, damit vergleichbare Tage benutzt werden!
+	if (Sonneneinstrahlung.state > maxSonneRadBisher) {
+		maxSonnenscheinRad.postUpdate(Sonneneinstrahlung.state)
+//		logDebug("Garten", "Aussentemp Garten speichere neues Maxmum Sonneneinstrahlung=" + Sonneneinstrahlung.state + " > maxSonneRadBisher=" + maxSonneRadBisher)
+	} else {
+		maxSonnenscheinRad.postUpdate(maxSonneRadBisher)
+//		logDebug("Garten", "Aussentemp Garten nutze Maximum Sonneneinstrahlung=" + maxSonneRadBisher)
+	}
+	maxSonnenscheinRad.persist
+
+	if (sensor == 1) {
+		kT = (Sonneneinstrahlung.state as Number).doubleValue / (maxSonnenscheinRad.state as Number).doubleValue * (maxAugeSonnenkorrekturTemp.state as Number).doubleValue
+//		logDebug("Garten", "berechne kT für Sensor 1 = " + kT)
+	} else {
+		kT = (Sonneneinstrahlung.state as Number).doubleValue / (maxSonnenscheinRad.state as Number).doubleValue * (maxAuge2SonnenkorrekturTemp.state as Number).doubleValue
+//		logDebug("Garten", "berechne kT für Sensor 2 = " + kT)
+	}
+
+	logDebug("Garten", "Aussentemp Garten Ende: Sensor = " + sensor + "; Sonneneinstrahlung = " + Sonneneinstrahlung.state + "; max Korrektur = " + maxAugeSonnenkorrekturTemp.state + "/" + maxAuge2SonnenkorrekturTemp.state + "; kT = " + kT)
+
+	if (Tageslicht.state == ON) {
+		return kT
+	} else
+		return 0.0|°C
+]
+
+
+rule "Garten Init virtual Items"
+when
+	System started
+then
+        RegenAnsagen = maxRegenAnsagen
+
+//	Aussentemperatur_Korrekturfaktor.postUpdate(0.0|°C)
+	if (Sonneneinstrahlung.state == NULL) Sonneneinstrahlung.postUpdate(100.0)
+
+	logInfo("Garten", "Garten Initialisierung.")
+end
+
+
+
+rule "Es regnet"
+when
+        Item Regensensor changed to CLOSED
+then
+	logDebug("Garten", "Regensensor meldet CLOSED.")
+	Regen.postUpdate(ON)
+end
+
+
+// nur wenn _changed_ (nicht wenn updated) zwecks anti-flapping
+rule "Regenansage"
+when
+        Item Regen changed from OFF to ON
+then
+	var String Meldung = "Achtung, es regnet !"
+	var String Ansage = 'Achtung_es_regnet.mp3'
+
+        RegenAnsagen=maxRegenAnsagen
+        logDebug("Garten", "debug Regen-Ansage, verbleibend: " + RegenAnsagen.toString + "; Regen.previousState = " + Regen.previousState)
+
+	lock.lock()
+        try {
+		if ((Nachtschaltung.state == OFF) && (RegenAnsagen > 0) && (Regen.previousState != NULL)) {
+        		RegenAnsagen = RegenAnsagen - 1
+        		logDebug("Garten", "Regen-Ansage, verbleibend: " + RegenAnsagen.toString)
+			playSound(Ansage)
+//			Meldung = "War nur Spass"
+// Voice fuer inoffizielles Caching Google TTS Modul
+			voice(Meldung)
+			getActions("telegram","telegram:telegramBot:openhab").sendTelegram(markus_telegram_chatid.state, Meldung)
+		}
+        } finally{
+           lock.unlock()
+	}
+end
+
+
+rule "Regen Ansagen Reset"
+when
+        Time cron "0 0/30 6-22 * * ?"
+then
+        logDebug("Garten", "Regen Ansagen Reset.")
+        RegenAnsagen=maxRegenAnsagen
+end
+
+
+rule "Es regnet nicht mehr"
+when
+        Item Regensensor changed to OPEN
+then
+        logDebug("Garten", "Regensensor meldet OPEN.")
+        if (RegenTimer !== null) {
+                RegenTimer.cancel
+                RegenTimer = null
+        }
+
+	// Anti-flapping
+	RegenTimer = createTimer(now.plusSeconds(Regen_Hysterese)) [|
+        	logDebug("Garten", "Regensensor jetzt/Änderung seit " + (Regen_Hysterese - 5).toString + " Sek.: " + Regensensor.state + "/" + Regensensor.changedSince(now.minusSeconds(Regen_Hysterese - 5))) 
+		if ((Regensensor.state == OPEN) && (!Regensensor.changedSince(now.minusSeconds(Regen_Hysterese - 5)))) {
+			Regen.postUpdate(OFF)
+        		logDebug("Garten", "Es regnet nicht mehr.")
+		}
+	]
+end
+
+
+
+rule "Garten Helligkeit Sonnenschutz"
+when
+	Item Garten_Auge_Lux received update
+	or
+	Item Garten_Auge2_Lux received update
+then
+	var Number Durchschnitt_morgens = Garten_Auge_Lux.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf.intValue))
+	var Number Durchschnitt_mittags = Garten_Auge2_Lux.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf.intValue))
+//	var Number Durchschnitt_mittags = Durchschnitt_morgens
+
+//	logDebug("Garten", "Helligkeitsdurchschnittswerte Morgenseite/Mittagseite = " + Durchschnitt_morgens + "/" + Durchschnitt_mittags)
+	if ((Durchschnitt_morgens > 0) && (Durchschnitt_mittags > 0)) {
+		Lux_Durchschnitt_morgens.postUpdate(Durchschnitt_morgens)
+		Lux_Durchschnitt_mittags.postUpdate(Durchschnitt_mittags)
+	}
+end
+
+
+rule "Terrassenbeleuchtung kurze Seite einschalten"
+when
+	Item Garten_Auge_Bewegung changed to ON
+then
+	var Schaltbedarf = (Tageslicht.state == OFF || (Garten_Auge_Lux.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf)) < Schwellwert_Terrassenlicht && Garten_Auge2_Lux.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf)) < Schwellwert_Terrassenlicht))
+
+
+        logDebug("Garten", "Terrassenbeleuchtung auf kurzer Seite: Lampe/Lux = " + Garten_Terrasse_kurz.state + "/" + Garten_Auge_Lux.state + "; Durchschnitt Lux = " + Garten_Auge_Lux.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf)) + "; Schwellwert = " + Schwellwert_Terrassenlicht + "; Schaltbedarf = " + Schaltbedarf )
+
+	if (Schaltbedarf) {
+		Garage_Strahler_Tuer.sendCommand(ON)
+		Garten_Terrasse_kurz.sendCommand(ON)
+		Garten_Bewegung_Timer.sendCommand(ON)
+	}
+end
+
+rule "Garten Terrassenbeleuchtung kurze Seite Timer-Aus"
+when
+	Item Garten_Auge_Bewegung changed to OFF
+then
+	Garten_Bewegung_Timer.sendCommand(ON)
+end
+
+rule "Garten Terrassenbeleuchtung kurze Seite wieder aus"
+when
+	Item Garten_Bewegung_Timer received command OFF
+then
+	logDebug("Garten", "Schalte Terrassenbeleuchtung auf kurzer Seite und an der Garage aus.")
+	Garage_Strahler_Tuer.sendCommand(OFF)
+	Garten_Terrasse_kurz.sendCommand(OFF)
+end
+
+rule "Terrassenbeleuchtung lange Seite einschalten"
+when
+	Item Garten_Auge_Bewegung changed to ON
+	or
+	Item Garten_Auge2_Bewegung changed to ON
+then
+	var Schaltbedarf = (Garten_Terrasse_lang.state != ON) && (Tageslicht.state == OFF || Garten_Auge2_Lux.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf)) < Schwellwert_Terrassenlicht)
+
+        logDebug("Garten", "debug Terrassenbeleuchtung lange Seite: now/-10 = " + now + "/" + now.minusMinutes(Aussen_Durchschnitt_Nachlauf))
+        logDebug("Garten", "Terrassenbeleuchtung auf langer Seite: Lampe/Lux = " + Garten_Terrasse_lang.state + "/" + Garten_Auge2_Lux.state + "; Durchschnitt Lux = " + Garten_Auge2_Lux.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf)) + "; Schwellwert = " + Schwellwert_Terrassenlicht + "; Schaltbedarf = " + Schaltbedarf )
+	if (Schaltbedarf) {
+		Garten_Terrasse_lang.sendCommand(ON)
+		Terrasse_Bewegung_Timer.sendCommand(ON)
+	}
+end
+
+
+rule "Garten Terrassenbeleuchtung lange Seite Timer-Aus"
+when
+	Item Garten_Auge2_Bewegung changed to OFF
+then
+	Terrasse_Bewegung_Timer.sendCommand(ON)
+end
+
+
+rule "Garten Terrassenbeleuchtung lange Seite wieder aus"
+when
+	Item Terrasse_Bewegung_Timer received command OFF
+then
+	logDebug("Garten", "Schalte Terrassenbeleuchtung auf langer Seite aus.")
+	Garten_Terrasse_lang.sendCommand(OFF)
+end
+
+
+
+rule "speichere Zeitpunkt der letzten Wettervorhersage"
+when
+	Item aktuell_common received update
+then
+	Wettervorhersage_Zeitpunkt.postUpdate(new DateTimeType())
+end
+
+
+rule "Drainagepumpe an wegen Regens"
+when
+	// zu geraden Stunden
+	Time cron "0 36 */2 * * ?"
+then
+	var Number Dauer
+
+
+	Drainagepumpe_alter_Zustand = Garten_Drainagepumpe.state
+
+//	logDebug("Garten", "debug Drainagepumpe EIN 1: Garten_Drainagepumpe = " + Garten_Drainagepumpe.state + "; Drainagepumpe_Intervall = " + Drainagepumpe_Intervall + "; Regenmenge = " + Regenmenge + "; Drainagepumpe_alter_Zustand = " + Drainagepumpe_alter_Zustand)
+	if ((Garten_Drainagepumpe.state != ON) && ((Regenmenge.state as Number) > Schwellwert_Drainagepumpe || (heute_Regenmenge.state as Number) > Schwellwert_Drainagepumpe)) {
+		logInfo("Garten", "Drainagepumpe eingeschaltet; es regnet aktuell " + Regenmenge.state + " mm/h und soll " + heute_Regenmenge.state + " mm/h regnen.")
+	       	Garten_Drainagepumpe.sendCommand(ON)
+	}
+
+//	logDebug("Garten", "debug Drainagepumpe EIN 2: Garten_Drainagepumpe = " + Garten_Drainagepumpe.state + "; Drainagepumpe_Intervall = " + Drainagepumpe_Intervall + "; Regenmenge = " + Regenmenge + "; Regen_max_Menge = " + Regen_max_Menge + "; Dauer = " + Dauer)
+	if (Regenmenge.state > Regen_max_Menge) 
+		Dauer = 10
+	else
+		Dauer = (Drainagepumpe_Intervall / Regen_max_Menge)
+
+	if (Dauer >= Drainagepumpe_Intervall - 1)
+		Dauer = Drainagepumpe_Intervall - 1
+
+        if (TimerPumpe !== null) {
+                TimerPumpe.cancel
+                TimerPumpe = null
+        }
+
+	TimerPumpe = createTimer(now.plusMinutes(Dauer.intValue)) [|
+//		logDebug("Garten", "debug Drainagepumpe AUS: Garten_Drainagepumpe = " + Garten_Drainagepumpe.state + "; Drainagepumpe_alter_Zustand = " + Drainagepumpe_alter_Zustand)
+		if (Garten_Drainagepumpe.state == ON && Drainagepumpe_alter_Zustand != ON) {
+			Garten_Drainagepumpe.sendCommand(OFF)
+			logInfo("Garten", "Drainagepumpe wieder ausgeschaltet.")
+		}
+	]
+end
+
+
+rule "Drainagepumpe zuverlaessig aus"
+when
+	Time cron "0 0/5 * * * ?"
+then
+	Garten_Drainagepumpe.sendCommand(OFF)
+end
+
+
+rule "Drainageschwimmer an angeschlagen"
+when
+	Item Garten_Drainagepumpe changed to ON
+then
+	logInfo("Garten", "Drainagepumpe wurde durch Schwimmerschalter eingeschaltet.")
+        if (TimerPumpe !== null) {
+                TimerPumpe.cancel
+                TimerPumpe = null
+        }
+end
+
+
+rule "Landroid Befehl"
+when
+	Item Landroid_Command received command
+then
+	/* Commands:
+	   11 = start
+	   12 = stop (back to base)
+	   13 = charging Complete
+	   14 = manual stop
+	   15 = going home */
+
+	val String URL = "http://admin:7252@landroid/jsondata.cgi"
+
+	var String jsondata = 'data=[[\"settaggi\",' + Landroid_Command.state.toString + ',1]]'
+
+
+//	logDebug("Garten", "debug Landroid Command:" + jsondata)
+	logDebug("Garten", "Sende Befehl " + Landroid_Command.state + " an Landroid.")
+
+	sendHttpPostRequest(URL, "application/x-www-form-urlencoded", jsondata)
+//	if ((receivedCommand as Number).intValue == 12)
+	if (receivedCommand == 12)
+		sendHttpPostRequest(URL, "application/x-www-form-urlencoded", jsondata)
+end
+
+
+rule "Landroid Status-Update"
+when
+	Time cron "0/10 * * ? APR-NOV MON-SAT"
+then
+	var String state
+	var String msg
+	var String battery
+	var String lastRequest
+	var String httpout
+
+
+	if (Landroid_IP.state == ON) {
+		httpout	= sendHttpGetRequest("http://admin:7252@192.168.178.30/jsondata.cgi",4000)	 
+		logDebug("Garten", "Landroid Rohantwort = " + httpout)
+	}
+
+	if (httpout !== null) {
+		state		= transform("JSONPATH", "$.state", httpout.toString)
+		msg		= transform("JSONPATH", "$.message", httpout.toString)
+		battery		= transform("JSONPATH", "$.perc_batt", httpout.toString)
+		lastRequest	= transform("JSONPATH", "$.workReq", httpout.toString)
+	}
+
+	Landroid_Status.postUpdate(state)
+	Landroid_Display.postUpdate(msg)
+	Landroid_Batterie.postUpdate(battery)
+	Landroid_Request.postUpdate(lastRequest)
+
+//	logDebug("Garten", "Landroid update: state = " + state + "; msg = " + msg + "; batt = " + battery + "; req = " + lastRequest)
+end
+
+
+rule "Landroid zeitgesteuerter Start"
+when
+	Time cron "0 15 7 ? APR-NOV MON-SAT"
+then
+	if (Rasenmaeher_aktiviert.state == ON)
+		Landroid_Command_Proxy.sendCommand(11)
+end
+
+
+rule "Landroid Start"
+when
+	Item Rasenmaeher received command ON
+then
+	Landroid_Command_Proxy.sendCommand(11)
+end
+
+
+rule "Landroid Stop"
+when
+	Item Rasenmaeher received command OFF
+then
+	Landroid_Command_Proxy.sendCommand(12)
+	Landroid_Command_Proxy.sendCommand(12)
+end
+
+
+rule "Landroid Proxy-Befehl"
+when
+	Item Landroid_Command_Proxy received command
+then
+	logDebug("Garten", "Landroid Befehl " + receivedCommand + " empfangen. Status = " + Landroid_Status.state)
+
+
+	if (receivedCommand == '11') {
+		logDebug("Garten", "Öffne dem Landroid das Tor, damit er los kann.")
+		Garten_Landroid_Garage.sendCommand(UP)
+		LandroidTorTimer = createTimer(now.plusSeconds(Garagenoeffnungszeit)) [|
+			Landroid_Command.sendCommand(receivedCommand)
+		]
+	} else {
+		Landroid_Command.sendCommand(receivedCommand)
+	}
+//        if (LandroidTorTimer !== null) {
+//                LandroidTorTimer.cancel
+//                LandroidTorTimer = null
+//        }
+end
+
+
+rule "Landroid festgefahren"
+when
+	Item Landroid_Status changed to "idle"
+then
+	var String Meldung = "Hinweis, Landroid hat sich festgefahren !"
+
+
+//	logDebug("Garten", "debug Landroid festgefahren Status changed to ==>" + Landroid_Status.state + "<== !! ")
+        if (LandroidTorTimer !== null) {
+                LandroidTorTimer.cancel
+                LandroidTorTimer = null
+        }
+	LandroidTorTimer = createTimer(now.plusSeconds(Landroid_Karenzzeit)) [|
+		if (Landroid_Status.state == "idle") {
+			logInfo("Garten", "Landroid festgefahren : informiere Admin")
+			getActions("telegram","telegram:telegramBot:openhab").sendTelegram(markus_telegram_chatid.state, Meldung)
+//			say(Meldung)
+		}
+	]
+end
+
+
+rule "Landroid kommt evtl. zurueck"
+when
+	Item Landroid_Status changed to "searching wire"
+	or
+	Item Landroid_Status changed to "following wire"
+then
+	if (Landroid_Status.state == 'searching wire' || Landroid_Status.state == 'following wire') {
+		logDebug("Garten", "Öffne dem heimkommenden Landroid das Tor.")
+		Garten_Landroid_Garage.sendCommand(UP)
+	}
+end
+
+
+rule "Landroid startet selbst"
+when
+	Item Landroid_Status changed to "start sequence"
+then
+	logDebug("Garten", "neuer Landroid Status " + Landroid_Status.state + ". Garage = " + Garten_Landroid_Garage.state + ".")
+
+	if (Landroid_Status.state == "start sequence") {
+		if (Garten_Landroid_Garage.state < Garage_geschlossen) {
+			logDebug("Garten", "Landroid fährt selbst los, öffne Garagentor.")
+			Garten_Landroid_Garage.sendCommand(UP)
+		}
+	}
+end
+
+
+rule "Landroid ist zurueck"
+when
+	Item Landroid_Status changed to "home"
+then
+	logDebug("Garten", "neuer Landroid Status " + Landroid_Status.state + ". Garage = " + Garten_Landroid_Garage.state + ".")
+
+	if (Landroid_Status.state == "home") {
+		if (Garten_Landroid_Garage.state < Garage_geschlossen) {
+			logDebug("Garten", "Landroid ist zurück, senke Garagentor.")
+			LandroidTorTimer2 = createTimer(now.plusSeconds(Landroid_Tor_Nachlauf)) [|
+				Landroid_Command.sendCommand(receivedCommand)
+			]
+			Garten_Landroid_Garage.sendCommand(DOWN)
+		}
+	}
+end
+
+
+rule "Garagenstrahler an"
+when
+	Item EG_Kueche_Tuer_Kontakt changed to OPEN
+	or
+	Item Garage_Gartentuer_Kontakt changed to OPEN
+then
+	if (Tageslicht.state == OFF) {
+		logDebug("Garten", "Schalte Beleuchtung vor Küche & Garagentür ein.")
+		Garage_Strahler_Tuer.sendCommand(ON)
+		Garten_Kueche_Aussen.sendCommand(ON)
+		Garten_Terrasse_kurz.sendCommand(ON)
+
+		Kuechentuer_Bewegung_Timer.sendCommand(ON)
+	}
+end
+
+
+rule "Garagenstrahler Aus-Timer"
+when
+	Item EG_Kueche_Tuer_Kontakt changed to CLOSED
+	or
+	Item Garage_Gartentuer_Kontakt changed to CLOSED
+then
+	if ((EG_Kueche_Tuer_Kontakt.state == CLOSED) && (Garage_Gartentuer_Kontakt.state == CLOSED))
+		Kuechentuer_Bewegung_Timer.sendCommand(ON)
+end
+
+
+rule "Garagenstrahler wieder aus"
+when
+	Item Kuechentuer_Bewegung_Timer received command OFF
+then
+	logDebug("Garten", "Schalte Beleuchtung vor Küche & Garagentür wieder aus.")
+	Garage_Strahler_Tuer.sendCommand(OFF)
+	Garten_Kueche_Aussen.sendCommand(OFF)
+	Garten_Terrasse_kurz.sendCommand(OFF)
+end
+
+
+rule "Dynamische Korrektur Terrassentemperatursensoren"
+when
+	Member of LuxAussen changed
+	or
+	Member of TempTerrasseRohwerte changed
+	or
+	Item aktuell_Bewoelkung changed
+then
+	var Number kF
+	var Number kF2
+	var Number kF3
+
+	if (aktuell_Bewoelkung === null || aktuell_Bewoelkung.state== UNDEF)
+		aktuell_Bewoelkung.postUpdate(0)
+
+	kF3 = (Korrektur_direkte_Sonne.apply(1) as Number)
+	kF = kF3.doubleValue * (100.0 - aktuell_Bewoelkung.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf.intValue)).doubleValue) / 100.0
+	Auge_Korrektur.postUpdate(kF)
+	kF3 = (Korrektur_direkte_Sonne.apply(2) as Number)
+	kF2 = kF3.doubleValue * (100.0 - aktuell_Bewoelkung.averageSince(now.minusMinutes(Aussen_Durchschnitt_Nachlauf.intValue)).doubleValue) / 100.0
+	Auge2_Korrektur.postUpdate(kF2)
+        logDebug("Garten", "Garten Aussentemperatur-Korrekturwerte wurden bei " + aktuell_Bewoelkung.state + "% Bewölkung neu als " + kF + "/" + kF2 + " berechnet.")
+end
+
+
+rule "update proxy temperature values"
+when
+	Item TempTerrasseRohwerte changed
+	or
+	Item Auge_Korrektur received update
+	or
+	Item Auge2_Korrektur received update
+then
+	var QuantityType<Number> t
+
+
+	t = (Garten_Auge_Temp_roh.state as Number).doubleValue + (Auge_Korrektur.state as Number).doubleValue
+	Garten_Auge_Temp.postUpdate(t as Number)
+
+	t = (Garten_Auge2_Temp_roh.state as Number).doubleValue + (Auge2_Korrektur.state as Number).doubleValue
+	Garten_Auge2_Temp.postUpdate(t as Number)
+
+	logDebug("Garten", "Aktualisiere korrigierte Aussensensor-Temperaturen: " + Garten_Auge_Temp_roh.state + " -> " + Garten_Auge_Temp.state + " / " + Garten_Auge2_Temp_roh.state + " -> " + Garten_Auge2_Temp.state)
+end
+

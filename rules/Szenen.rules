@@ -1,0 +1,365 @@
+val java.util.Random rand
+
+val Number Programm_Aus = 1
+val Number Programm_Kamin = 6
+val Number Programm_Sturm = 7
+val Number Programm_Regenbogen = 8
+val Number Programm_Aurora = 9
+val Number Programm_Polizei = 10
+
+
+var Timer LichtTimer
+
+val Number Licht_Nachlauf = 5
+val Number Nacht_Nachlauf = 15
+val Number TV_Helligkeitsschwellwert = 50
+
+var HSBType hsb
+var HSBType hsb2
+var HSBType hsb3
+
+val String Licht_aus="0,0,0"
+
+val String Treppe_morgens="121,4,35"
+val String Wohnen_morgens="0,0,0"
+val String Treppe_tags="0,0,0"
+val String Wohnen_tags="0,0,0"
+val String Treppe_TV="120,1,13"
+val String Wohnen_TV = "120,1,25"
+val Number Deckenwert_TV = 30
+val String Treppe_Kino="120,1,2"
+val String Wohnen_Kino = "120,1,1"
+val String Treppe_abends = "36,94,40"	// war: 36,94,30
+val Number Weisswert_Wohnen_abends = 4
+val String Wohnen_abends = "32,94,35"	// war: 32,94,25
+val Number Deckenwert_abends = 0
+val String Treppe_nachts = "120,100,1"	// war: 240,100,1
+val String Wohnen_nachts = "0,0,0"
+
+
+
+rule "Szene1 morgens"
+when
+	Item Szene received command 1
+then
+	hsb = new HSBType(Treppe_morgens)
+	EG_Treppe_RGBW.sendCommand(hsb)
+
+        EG_Wohnen_Decke_Krone.sendCommand(OFF)
+        EG_Bianca_Decke.sendCommand(OFF)
+
+	hsb = new HSBType(Wohnen_morgens)
+	EG_Wohnen_Decke_RGBW.sendCommand(hsb)  // Decke 2 ergibt sich automatisch
+
+	Garten_Terrasse_kurz.sendCommand(OFF)
+	Garten_Terrasse_lang.sendCommand(OFF)
+	Garage_Kellertreppe.sendCommand(OFF)
+//	Garten_Strahler_Mauer.sendCommand(OFF)
+
+	hsb = EG_Treppe_RGBW.state as HSBType
+//	logDebug("Szenen", "Szene morgens (bisher: " + Szene.state + "); Treppe = " + hsb)
+
+	mobil_Zwischenstecker20.sendCommand(ON)
+
+	logInfo("Szenen","Schalte Szene 1 - morgens.")
+end
+
+
+rule "Szene2 tags"
+when
+	Item Szene received command 2
+then
+	hsb = new HSBType(Treppe_tags)
+	EG_Treppe_RGBW.sendCommand(hsb)
+
+	EG_Kueche_Decke.sendCommand(OFF)
+	EG_Kuechenlichter_Insel.sendCommand(0)
+
+        EG_Wohnen_Decke_Krone.sendCommand(OFF)
+	EG_Wohnen_TV.sendCommand(DOWN)
+//        EG_Essen_Decke.sendCommand(OFF)
+        EG_Bianca_Decke.sendCommand(OFF)
+
+	hsb = new HSBType(Wohnen_tags)
+//	EG_Wohnen_Iris1_Farbe.sendCommand(hsb)
+//	EG_Wohnen_Iris3_Farbe.sendCommand(hsb)
+	EG_Wohnen_Decke_RGBW.sendCommand(hsb)
+
+	Garten_Terrasse_kurz.sendCommand(OFF)
+	Garten_Terrasse_lang.sendCommand(OFF)
+	Garage_Strahler_Tuer.sendCommand(OFF)
+//	Garten_Strahler_Mauer.sendCommand(OFF)
+
+	hsb = EG_Treppe_RGBW.state as HSBType
+//	logDebug("Szenen", "Szene tags (bisher: " + Szene.state + "); Treppe = " + hsb)
+
+	mobil_Zwischenstecker20.sendCommand(OFF)
+	logInfo("Szenen","Schalte Szene 2 - tagsüber.")
+end
+
+
+rule "Szene 100 TV"
+when
+	Item Szene received command 100
+	or
+	Item Szene received command 101
+then
+	AVR_Power.sendCommand(ON)
+	EG_Wohnen_TV.sendCommand(UP)
+
+	if (receivedCommand == 100) {
+		if (Tageslicht.state == OFF || EG_Wohnen_Auge_Lux.state < TV_Helligkeitsschwellwert)
+			hsb = new HSBType(Treppe_TV)
+		else
+			hsb = new HSBType(Licht_aus)
+//		EG_Wohnen_Decke_W.sendCommand(Deckenwert_TV)
+//		EG_Wohnen_Decke2_W.sendCommand(Deckenwert_TV)
+	} else {
+		hsb = new HSBType(Treppe_Kino)
+        	EG_Kueche_Decke.sendCommand(OFF)
+		mobil_Zwischenstecker20.sendCommand(OFF)
+	}
+	EG_Treppe_RGBW.sendCommand(hsb)
+
+	if (receivedCommand == 100) 
+		hsb = new HSBType(Wohnen_TV)
+	else
+		hsb = new HSBType(Wohnen_Kino)
+	EG_Wohnen_Decke_RGBW.sendCommand(hsb)
+	EG_Wohnen_Decke_W.sendCommand(0)
+	EG_Wohnen_Decke2_RGBW.sendCommand(hsb)
+	EG_Wohnen_Decke2_W.sendCommand(0)
+
+        EG_Wohnen_Decke_Krone.sendCommand(0)
+        EG_Essen_Decke.sendCommand(0)
+	EG_Kuechenlichter_Deckenstrip.sendCommand(0)
+	EG_Kuechenlichter_Haengeschrank.sendCommand(0)
+	EG_Kuechenlichter_Insel.sendCommand(0)
+
+	EG_Wohnen_Spots_Mitten.sendCommand(0)
+	EG_Wohnen_Spots_Ecken.sendCommand(0)
+
+	logInfo("Szenen","Schalte Szene " + receivedCommand + " TV/Kino.");
+end
+
+
+rule "Szene 3 abends"
+when
+	Item Szene received command 3
+then
+        EG_Wohnen_Decke_Krone.sendCommand(Deckenwert_abends)
+
+	hsb = new HSBType(Treppe_abends)
+	EG_Treppe_RGBW.sendCommand(hsb)
+	hsb = EG_Treppe_RGBW.state as HSBType
+//	logDebug("Szenen", "Szene abends (bisher: " + Szene.state + "); Treppe = " + hsb)
+
+	hsb = new HSBType(Wohnen_abends)
+//	EG_Wohnen_Iris1_Farbe.sendCommand(hsb)
+//	EG_Wohnen_Iris3_Farbe.sendCommand(hsb)
+	EG_Wohnen_Decke_RGBW.sendCommand(hsb)
+	EG_Kuechenlichter_Insel.sendCommand(Weisswert_Wohnen_abends)
+
+	if (now.getMonthOfYear > 3 && now.getMonthOfYear < 10) {
+		var Number prog = Programm_Regenbogen
+	        Garten_Baeume_Animation.sendCommand(prog)
+//		logDebug("Szenen", "Szene abends: Gartenbaum-Programm = " + prog)
+	}
+
+	mobil_Zwischenstecker20.sendCommand(ON)
+
+	logInfo("Szenen","Schalte Szene abends.");
+end
+
+
+rule "Szene 4 Nacht"
+when
+	Item Szene received command 4
+then
+	Dreambox.sendCommand(OFF)
+	EG_Wohnen_TV.sendCommand(DOWN)
+	AVR_Power.sendCommand(OFF)
+
+	hsb = new HSBType(Treppe_nachts)
+	EG_Treppe_RGBW.sendCommand(hsb)
+	LichtTimer = createTimer(now.plusMinutes(Nacht_Nachlauf), [ |
+		hsb = new HSBType(Licht_aus)
+		EG_Treppe_RGBW.sendCommand(hsb)
+	] )
+	hsb = new HSBType(Wohnen_nachts)
+//	EG_Wohnen_Iris1_Farbe.sendCommand(hsb)
+//	EG_Wohnen_Iris3_Farbe.sendCommand(hsb)
+	EG_Wohnen_Decke_RGBW.sendCommand(hsb)
+	EG_Wohnen_Decke_W.sendCommand(0)
+	EG_Wohnen_Decke2_W.sendCommand(0)
+
+	EG_Wohnen_Decke_Krone.sendCommand(0)
+	EG_Wohnen_Spots_Mitten.sendCommand(0)
+	EG_Wohnen_Spots_Ecken.sendCommand(0)
+
+	OG_Bad_Decke.sendCommand(OFF)
+
+	EG_WC_Decke.sendCommand(OFF)
+	EG_Diele_Decke.sendCommand(0)
+	EG_Kueche_Decke.sendCommand(OFF)
+	EG_Kuechenlichter_Haengeschrank.sendCommand(0)
+	EG_Kuechenlichter_Insel.sendCommand(0)
+	EG_Kuechenlichter_Deckenstrip.sendCommand(0)
+	EG_Essen_Decke.sendCommand(0)
+	EG_Kabuff_Decke.sendCommand(OFF)
+	Garage_Aussenlampe.sendCommand(OFF)
+
+        hsb = new HSBType(Licht_aus)
+	Garten_Baeume_Animation.sendCommand(Programm_Aus)
+	Garten_Baeume_RGBW.sendCommand(hsb)
+
+	Garten_Terrasse_kurz.sendCommand(OFF)
+	Garten_Terrasse_lang.sendCommand(OFF)
+	Garage_Strahler_Tuer.sendCommand(OFF)
+//	Garten_Strahler_Mauer.sendCommand(OFF)
+
+	Garage_Kellertreppe.sendCommand(OFF)
+
+	K_Flur_unten.sendCommand(OFF)
+	K_Treppe.sendCommand(OFF)
+	K_Waschkeller_Decke.sendCommand(OFF)
+
+	D_Dachboden_Licht.sendCommand(OFF)
+
+	hsb = Garten_Baeume_RGBW.state as HSBType
+//	logDebug("Szenen", "Szene nachts (bisher: " + Szene.state + "); Gartenbäume = " + hsb)
+
+	mobil_Zwischenstecker20.sendCommand(OFF)
+
+	logInfo("Szenen","Schalte Szene - nachts.")
+end
+
+
+rule "Szene 0 Aus"
+when
+	Item Szene received command 0
+then
+	logInfo("Szenen","Schalte Szene 0 - Alles Aus")
+        logInfo("Szenen","Alles Aus Befehl erhalten, schalte sämtliche Verbraucher aus und die Heizung auf Abwesenheit ...")
+
+	Dreambox.sendCommand(OFF)
+	EG_Wohnen_TV.sendCommand(DOWN)
+	AVR_Power.sendCommand(OFF)
+	Anwesenheitsmodus.sendCommand(2)
+
+	EG_Kabuff_Decke.sendCommand(OFF)
+	EG_WC_Decke.sendCommand(0)
+	EG_Diele_Decke.sendCommand(0)
+	EG_Kueche_Decke.sendCommand(OFF)
+	EG_Kuechenlichter_Haengeschrank.sendCommand(0)
+	EG_Kuechenlichter_Insel.sendCommand(0)
+	EG_Kuechenlichter_Deckenstrip.sendCommand(0)
+	EG_Bianca_Decke.sendCommand(0)
+	EG_Essen_Decke.sendCommand(0)
+
+	OG_Bad_Decke.sendCommand(0)
+
+	EG_Wohnen_Decke_Krone.sendCommand(0)
+	EG_Wohnen_Spots_Mitten.sendCommand(0)
+	EG_Wohnen_Spots_Ecken.sendCommand(0)
+
+	hsb = new HSBType(Licht_aus)
+	EG_Wohnen_Decke_RGBW.sendCommand(hsb)
+	EG_Treppe_RGBW.sendCommand(hsb)
+	EG_Wohnen_Decke_W.sendCommand(0)
+//	EG_Wohnen_Decke2_W.sendCommand(0)
+
+	Garage_Kellertreppe.sendCommand(OFF)
+	Garten_Baeume_RGBW.sendCommand(hsb)
+	Garten_Baeume_Animation.sendCommand(Programm_Aus)
+	Garage_Aussenlampe.sendCommand(OFF)
+	Garten_Baeume_Animation.sendCommand(Programm_Aus)
+
+	Garten_Terrasse_kurz.sendCommand(OFF)
+	Garten_Terrasse_lang.sendCommand(OFF)
+	Garage_Strahler_Tuer.sendCommand(OFF)
+
+	D_Dachboden_Licht.sendCommand(OFF)
+
+	K_Flur_unten.sendCommand(OFF)
+	K_Treppe.sendCommand(OFF)
+	K_Waschkeller_Decke.sendCommand(OFF)
+
+
+	hsb = EG_Treppe_RGBW.state as HSBType
+//	logDebug("Szenen", "Szene Aus (bisher: " + Szene.state + "); Treppe = " + hsb)
+	hsb2 = EG_Wohnen_Decke1_RGBW.state as HSBType
+	hsb3 = EG_Wohnen_Decke2_RGBW.state as HSBType
+//	logDebug("Szenen", "Szene Aus: Treppe = " + hsb + "; Decke1 = " + hsb2 + "/Decke2 = " + hsb3)
+	hsb = Garten_Baeume_RGBW.state as HSBType
+//	logDebug("Szenen", "Szene Aus: Gartenbäume = " + hsb)
+
+	mobil_Zwischenstecker20.sendCommand(OFF)
+
+	logInfo("Szenen","Schalte Szene Aus.")
+end
+
+
+rule "Alexa-Szenen"
+when
+        Item Szene_TV received command
+	or
+        Item Szene_Kino received command
+	or
+        Item Szene_morgens received command
+	or
+        Item Szene_tagsueber received command
+	or
+        Item Szene_abends received command
+	or
+        Item Szene_nachts received command
+	or
+        Item Szene_Aus received command
+then
+	var String s = "tagsueber"
+
+
+	if (triggeringItem !== null) {
+		s = triggeringItem.name
+		s = triggeringItem.toString().replace('Szene_', '')
+		s = triggeringItem.name.replace('Szene_', '')
+	}
+
+	switch (s) {
+		case "TV": {
+			Rollaeden_setzen.sendCommand(100)
+			Szene.sendCommand(100)
+		}
+		case "Kino": {
+			Rollaeden_setzen.sendCommand(101)
+			Szene.sendCommand(101)
+		}
+		case "morgens": {
+			Szene.sendCommand(1)
+		}
+		case "tagsueber": {
+			Rollaeden_setzen.sendCommand(2)
+			Szene.sendCommand(2)
+		}
+		case "abends": {
+			Szene.sendCommand(3)
+		}
+		case "nachts": {
+			Szene.sendCommand(4)
+		}
+		case "Aus": {
+			Szene.sendCommand(0)
+		}
+	}
+
+	var String t = "Szenen-Auftrag von Alexa erhalten für Szene " + s + "."
+
+	if (Durchsagen.state == ON) {
+		t += " Verkünde Szene via Echo."
+		// Echo via amazonechocontrol
+//		Echo_Wohnen_TTS_Volume.sendCommand(Durchsagen_Lautstaerke.state)
+		Echo_Wohnen_TTS.sendCommand("Szene " + s)
+	}
+        logInfo("Szenen", t)
+end
+

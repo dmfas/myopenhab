@@ -1,0 +1,534 @@
+// Controller Stats
+Number ZwaveStatsSOF "Number Start of Frames[%s]"		(gZwave) {channel="zwave:device:ddd23e6c:node1:serial_sof"}
+Number ZwaveStatsACK "Number of Acknowledgments [%s]"		(gZwave) {channel="zwave:device:ddd23e6c:node1:serial_ack"}
+Number ZwaveStatsCAN "Number of CAN [%s]"			(gZwave) {channel="zwave:device:ddd23e6c:node1:serial_can"}
+Number ZwaveStatsNAK "Number of NAK [%s]"			(gZwave) {channel="zwave:device:ddd23e6c:node1:serial_nak"}
+Number ZwaveStatsOOF "Number of OOF [%s]"			(gZwave) {channel="zwave:device:ddd23e6c:node1:serial_oof"}
+
+/*
+ZWave Devices:
+1   - Controller
+2   - Fibaro Zwischenstecker mobil (z.Zt. Waschmaschine)
+3   - Philio Dual-Relay Drainagepumpe,Ventilator Waschkeller
+4   - Strahler Mauer (WAR: Doppel-Relais Waschkeller Heizungspumpen) 
+(5   - WAR: Danalock V2 Eingangstür)
+(6   - WAR: Everspring Zwischenstecker Kuehlschrank)
+7   - Everspring Zwischenstecker ELW Leuchte
+8   - Cyrus Multisensor Ersatz
+(9   - WAR: Bewegungsmelder/Türkontakt Garagentür)
+10  - Sauna-Licht/Sauna-Ventilator
+(11  - war: Rauchmelder Wohnen)
+12  - Fibaro Auge Wohnen
+13  - RGBW Bad RGB-Bodenstrip
+14  - Deckenlicht Kabuff
+15   - Fibaro Dimmer Bianca
+(16  - WAR: Rauchmelder Wohnen)
+17  - Fibaro FGS-223 Bad (FBH + frei aber mit Szenenschalter neben WC)
+18  - Fibaro Dimmer Flur
+19  - Fibaro Dimmer Eingangstür Aussen
+20  - Cyrus Zwischenstecker mit 2xUSB
+(21  - WAR: Bewegungsmelder/Türkontakt Garagentür, aber Kontakt + Motion ist kaputt)
+22  - Everspring Ersatz
+24  - Rolladenaktor Fibaro FGRM Tim
+(25  - WAR: Aeotec Multisensor 6 Bad)
+(26  - WAR: Fibaro Dimmer Bad)
+27  - Fibaro Dimmer Bad
+28  - Doppel-Relais Garage
+29  - Fibaro Dimmer Wohnen
+30  - Dimmer Esszimmer
+(31  - WAR: Aeotec Multisensor 6 Hausecke aussen)
+32  - FGD-212 Kueche (nur S2 Szenenschalter)
+(34  - WAR: Aeotec Multisensor 6 Kabuff)
+36  - Fibaro Auge WC (war: 40,35)
+(38  - WAR: Danalock V2 Eingangstür)
+42  - Fibaro Auge Markus (war: Kellerflur)
+43  - Aeotec Multisensor 6 lange Terrassenseite
+(45  - WAR: Rauchmelder Wohnen)
+46  - Fibaro CO Sensor
+47  - Aeotec Multisensor 6 Kabuff
+48  - Aeotec Multisensor 6 Bad
+(49  - WAR: Bewegungsmelder/Hausecke)
+51  - Fibaro Dimmer Essen
+52  - Fibaro Auge Hausecke
+55  - Qubino Dimmer Ersatz (WAR: Bad)
+56  - RGBW Treppe
+(57  - WAR: Qubino Dimmer Tim)
+58 - Fibaro Dimmer Empore (noch nicht an Decke angeschlossen)
+59  - Qubino Dimmer Markus
+60  - Dimmer Küche
+61  - Qubino Dimmer Lutz
+(62  - WAR: Düwi Zwischenstecker mobil DEFEKT)
+(63  - WAR: Düwi Zwischenstecker Kühlschrank ELW)
+64  - Fernbedienung Düwi (nicht als ZWave Gerät in habmin konfigurierbar !)
+(65  - war: Düwi Zwischenstecker ELW Stehleuchte DEFEKT)
+66  - Düwi Zwischenstecker mobil, z.Zt. in Garage
+67  - Greenwave 6-fach Steckdose Kabuff Verteiler FBH
+(69  - WAR: zwave.me Deckenlicht Waschkeller)
+(70  - WAR: Philio Dual-Relay Drainagepumpe,Ventilator Waschkeller)
+71  - Aeon Multisensor mobil
+72  - Düwi Zwischenstecker Dimmer mobil
+(75  - WAR: Lichtschalter Dachboden (Duewi, kaputt))
+77  - ZWave.ME ZME_05431 Deckenlichtschalter Waschkeller
+79  - Fibaro RGBW Controller Wohnen Querseiten
+(80  - WAR: Fibaro Auge Flur)
+81  - Fibaro FGRM-222-alt Raffstore Mitte
+83  - (WAR: Bewegungsmelder/Türkontakt Kabuff)
+84  - (WAR: Aeon Multisensor Suedterrasse)
+(85  - WAR: Fibaro Flutsensor Waschkeller)
+(86  - WAR: Fibaro Auge Garage Gartenseite)
+87  - Fibaro Auge Lutz
+(89  - WAR: Aeon Multisensor Waschkeller)
+90  - Fibaro Auge Bianca (war: ELW)
+91  - Rolladenaktor Lüftungsabsperrventil
+93  - Fibaro Doppel-Relais Küche + Aussen
+95  - Fibaro FGRM-222-alt Raffstore rechts
+96  - Rolladen Küchenfenster
+97  - Rolladen Küchentür
+98  - Rolladen Esszimmer
+99  - Rolladen WC
+101 - Philio Doppel-Relais FBH Neubau
+102 - Fibaro RGBW Controller Wohnen Längsseiten
+103 - Fibaro RGBW Controller Küchen-Strips & Stufenleuchten
+104 - Fibaro Dimmer Wohnen Spots Mitten
+106 - Rolladen altes Wohnen
+107 - Fibaro Dimmer Wohnen Spots Ecken
+109 - Fibaro Universal Binary Sensor Klingel/Flur
+111 - Fibaro FGRM-222-neu TV-Klappe
+112 - Fibaro FGRM-222-neu Rolladen Bianca
+113 - Fibaro FGRM-222-neu Raffstore links
+115 - Fibaro Doppel-Relais Terrassenleuchten
+116 - Fibaro RGBW Garten Baeume
+117 - Fibaro Doppel-Relais Heizung
+(119 - WAR: Fibaro Auge Küche)
+120 - Fibaro Doppel-Relais Sole-Waermetauscher Dachboden und Digitaleingang1 Lüftungsanlage
+(121 - WAR: Fibaro Auge Tim)
+(122 - WAR: Rauchmelder Wohnen)
+126 - Fibaro Dachboden (Dachbodenlicht + Gartenstrahler)
+127 - Fibaro Dimmer WC
+128 - CO-/Rauchmelder Kamin
+129 - Qubino Dimmer Tim
+(130 - WAR: Danalock V2 Eingangstür)
+131 - Fibaro FGS-223 Kellerflur/Treppenabsatz
+(WAR: 132 - Rolladenaktor Fibaro FGRM Ersatz)
+133 - Fibaro FGRM-223 Landroid Garagentor
+(134 - WAR: Fibaro Auge Garage Gartenseite)
+(135 - WAR: Fibaro Auge Küche)
+136 - Fibaro Flutsensor Waschkeller
+137 - Auge Ersatz
+(138 - WAR: Fibaro Auge Garage Gartenseite)
+139 - Aeon gen 5 lange Terrasse
+(140 - WAR: Fibaro Auge Tim)
+(141 - WAR: Fibaro Auge Küche)
+142 - Fibaro Auge Küche
+143 - Fibaro Auge Flur
+(145 - WAR: Fibaro Auge Tim)
+(147 - WAR: Bewegungsmelder/Türkontakt Kabuff)
+149 - Fibaro Auge Tim
+(150 - WAR: Danalock V2 Eingangstür)
+151 - Philio PST-02-A Bewegungsmelder/Türkontakt Garage (WAR: Kabuff)
+(152 - WAR: zwave.me/Reitz/düwi ZME_05461 Deckenlicht Waschkeller)
+153 - Fibaro FGRM-222 Ersatz
+154 - Heiman HEIEHS1SA Rauchmelder Waschkeller
+155 - Rauchmelder Wohnen
+156 - Aeon Multisensor Waschkeller (war: 89)
+157 - Fibaro FGS-222 Ersatz
+(158 - WAR: Philio Dual-Relay Drainagepumpe,Ventilator Waschkeller)
+(159 - WAR: Danalock V2 Eingangstür)
+*/
+
+
+// Waschkeller, Sauna
+Number:Power K_Waschkeller_Saunavent_Watt "Leistung S-Vent. [%.2f W]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node10:meter_watts" }
+Number:Energy K_Waschkeller_Saunavent_Verbr "Verbr. S-Vent. [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node10:meter_kwh" }
+Switch K_Waschkeller_Decke "Waschkeller Deckenlicht "			<whites>	(K_Waschkeller)				{ channel="zwave:device:ddd23e6c:node77:switch_binary",
+											alexa="PowerController.powerState" }
+Switch K_Waschkeller_Auge "Bewegung Waschkeller [MAP(motion.map):%s]"	<present>	(K_Waschkeller,BewegungsmelderInnen)	{ channel="zwave:device:ddd23e6c:node156:sensor_binary" }
+Number:Temperature K_Waschkeller_Temp "Temperatur Waschen [%.1f °C]"	<temperature>	(K_Waschkeller,SteuerTemp,TempInnen)	{ channel="zwave:device:ddd23e6c:node156:sensor_temperature" }
+// Helligkeitssensor an verschiedenen Aeotec Multisensor Devices (#71, #84, #89/#156) kaputt
+//Number K_Waschkeller_Auge_Lux "Helligkeit Waschkeller (kaputt) [%.0f lux]"	<brightness>		(Lichtsensoren)				{ channel="zwave:device:ddd23e6c:node156:sensor_luminance" }
+Number K_Waschkeller_Feuchtigkeit "Luftfeuchte Waschkeller [%.0f %%]"	<humidity>	(K_Waschkeller,Sensoren)		{ channel="zwave:device:ddd23e6c:node156:sensor_relhumidity" }
+Switch K_Waschkeller_Flut "Wasser-Sensor [MAP(flood.map):%s]"		<flow>		(K_Waschkeller,Sensoren)		{ channel="zwave:device:ddd23e6c:node136:alarm_flood" }
+Number:Temperature K_Waschkeller_Flut_Temp "Temperatur Boden [%.1f °C]"	<temperature>	(K_Waschkeller,TempInnen)		{ channel="zwave:device:ddd23e6c:node136:sensor_temperature" }
+Number K_Waschkeller_Flut_battery "Flut-Sensor Batterie [%d %%]"	<battery>	(Batterien)				{ channel="zwave:device:ddd23e6c:node136:battery-level" }
+Switch K_Sauna_Licht "Saunavorraum Licht"				<light>		(K_Waschkeller,Lichter)			{ channel="zwave:device:ddd23e6c:node10:switch_binary",
+											alexa="PowerController.powerState" }
+Switch K_Sauna_Ventilator "Sauna Ventilator"				<fan>		(K_Waschkeller,Lueftung)		{ channel="zwave:device:ddd23e6c:node10:switch_binary2",
+											alexa="PowerController.powerState" }
+Switch K_Waschkeller_Ventilator	"Waschkeller Ventilator"		<fan>		(K_Waschkeller,Lueftung) 		{ channel="zwave:device:ddd23e6c:node101:switch_binary1",
+											alexa="PowerController.powerState" }
+Number:Energy K_Waschkeller_Vent_Verb "Verbr. Ventilator [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node101:meter_kwh" }
+Switch K_Waschkeller_Rauchmelder_Rauch_Alarm "Brandmelderalarm Heizung"	<fire>		(K_Waschkeller,Rauchmelder)		{ channel="zwave:device:ddd23e6c:node154:alarm_smoke" }
+Switch K_Waschkeller_Rauchmelder_battery "Brandmelder Batterie"		<fire>		(Batterien)				{ channel="zwave:device:ddd23e6c:node154:battery-level" }
+Switch Garten_Drainagepumpe "Drainagepumpe"				<sewerage>	(Garten,K_Waschkeller,Abwasser)		{ channel="zwave:device:ddd23e6c:node3:switch_binary1",
+											alexa="PowerController.powerState" } 
+
+Switch K_Heizung_Pumpe_BK "Heizungspumpe oben und Keller"		<temperature> 	(K_Waschkeller,Heizung) 		{ channel="zwave:device:ddd23e6c:node117:switch_binary",
+											alexa="PowerController.powerState" } 
+Switch K_Heizung_Pumpe_MK1 "Heizungspumpe Erdgeschoss"			<temperature> 	(K_Waschkeller,Heizung) 		{ channel="zwave:device:ddd23e6c:node117:switch_binary2",
+											alexa="PowerController.powerState" } 
+
+// Kellerflur
+Switch K_Treppe	"Kellertreppe Licht"					<whites>	(Keller,Lichter) 			{ channel="zwave:device:ddd23e6c:node131:switch_binary1",
+											channel="zwave:device:ddd23e6c:node131:switch_binary2" [ profile="follow" ],  
+											alexa="PowerController.powerState" }
+Switch K_Flur_unten "Kellerflur Licht"					<whites>	(Keller,Lichter) 			{ channel="zwave:device:ddd23e6c:node131:switch_binary2",
+											alexa="PowerController.powerState" } 
+
+
+// ELW
+Switch K_ELW_Kuehlschrank "Keller Kühlschrank"				<socket>	(K_ELW) 				{ channel="zwave:device:ddd23e6c:node66:switch_binary",
+											alexa="PowerController.powerState" } 
+
+// Ersatzgeraete
+// #22 => Spülmaschine
+//Switch mobil_Zwischenstecker22 "Zwischenstecker 22" 				<light>		(Lichter)				{ channel="zwave:device:ddd23e6c:node22:switch_binary", alexa="PowerController.powerState" } 
+//Switch Ersatz_Auge "Ersatz-Auge [MAP(motion.map):%s]"			<present>	(BewegungsmelderInnen)			{ channel="zwave:device:ddd23e6c:node84:sensor_binary" }
+
+
+// Essen
+Dimmer EG_Essen_Decke "Esszimmer Esstisch"				<whites>	(EG_Kueche,Dimmerschalter,Lichter) 	{ channel="zwave:device:ddd23e6c:node51:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Rollershutter EG_Essen_Rolladen "Esszimmer Rolladen [%d %%]"		<rollershutter>	(EG_Kueche,Rolladen) 			{ channel="zwave:device:ddd23e6c:node98:blinds_control",
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(-10),Raise=(+10)", stateMappings="Closed=1:100,Open=0"] }
+Number:Power EG_Essen_Rolladen_Watt "Leistung Esszimmer [%.1f W]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node98:meter_watts" }  
+Number:Energy EG_Essen_Rolladen_Verbrauch "Verbr. Esszimmer [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node98:meter_kwh" }  
+
+Number Szenenschalter_Saeule "Szenenschalter Säule Essen/Wohnen"	<switch>	(Szenen)				{ channel="zwave:device:ddd23e6c:node51:scene_number" }
+
+
+// Küche
+Switch EG_Kueche_Decke "Küche Deckenlicht"				<whites>	(EG_Kueche,Lichter)			{ channel="zwave:device:ddd23e6c:node93:switch_binary2", alexa="PowerController.powerState" }
+Switch EG_Kueche_Auge "Küche Auge [MAP(motion.map):%s]"			<present>	(EG_Kueche,BewegungsmelderInnen)	{ channel="zwave:device:ddd23e6c:node142:alarm_motion" }
+Number:Temperature EG_Kueche_Auge_Temp "Roh-Temperatur [%.1f °C]"	<temperature>	(EG_Kueche,SteuerTemp,TempInnen)	{ channel="zwave:device:ddd23e6c:node142:sensor_temperature" }
+Number EG_Kueche_Auge_Lux "Küche Helligkeit [%.0f lux]"			<brightness>	(EG_Kueche,Lichtsensoren)		{ channel="zwave:device:ddd23e6c:node142:sensor_luminance" }
+Switch EG_Kueche_Spuelmaschine "Spülmaschine"				<washingmachine>	(EG_Kueche)			{ channel="zwave:device:ddd23e6c:node22:switch_binary", alexa="PowerController.powerState" }
+Dimmer EG_Kuechenlichter_RGBW_hell "Küchenlichter Helligkeit [%.0f %%]"	<brightness>	(Dimmerschalter)			{ channel="zwave:device:ddd23e6c:node103:switch_dimmer" }
+Dimmer EG_Kuechenlichter_Insel "Insellicht [%.0f %%]"			<light_led_stripe>	(EG_Kueche,Farbkanaele) 	{ channel="zwave:device:ddd23e6c:node103:switch_dimmer5",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Dimmer EG_Kuechenlichter_Deckenstrip "Küche Deckenstrip [%.0f %%]"	<light_led_stripe>	(EG_Kueche,Farbkanaele) 	{ channel="zwave:device:ddd23e6c:node103:switch_dimmer2",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Dimmer EG_Kuechenlichter_Haengeschrank "Hängeschrank [%.0f %%]"		<light_led_stripe>	(EG_Kueche,Farbkanaele)		{ channel="zwave:device:ddd23e6c:node103:switch_dimmer3",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Number:Power EG_Kuechenlichter_Watt "Leistung Insellicht [%.1f W]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node103:meter_watts" }
+Number:Energy EG_Kuechenlichter_Verbrauch "Verb. Insellicht [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node103:meter_kwh" }
+Rollershutter EG_Kueche_Rolladen_Tuer "Küchentür Rolladen [%d %%]"	<rollershutter>	(EG_Kueche,Rolladen) 			{ channel="zwave:device:ddd23e6c:node97:blinds_control",
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(-10),Raise=(+10)", stateMappings="Closed=1:100,Open=0"] }
+Rollershutter EG_Kueche_Rolladen_Fenster "Küchenfenster Rolladen [%d %%]" <rollershutter>	(EG_Kueche,Rolladen)		{ channel="zwave:device:ddd23e6c:node96:blinds_control",
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(-10),Raise=(+10)", stateMappings="Closed=1:100,Open=0"] }
+Number:Energy EG_Kueche_Roll_T_Verb "Verb. Rolladen Tür [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node97:meter_kwh" }  
+Number:Energy EG_Kueche_Roll_F_Verb "Verb. Fenster Rolladen [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node96:meter_kwh" }  
+
+	
+// Wohnen
+Switch EG_Wohnen_Auge "Wohnen Auge [MAP(motion.map):%s]"		<present>	(EG_Wohnen,BewegungsmelderInnen)	{ channel="zwave:device:ddd23e6c:node12:alarm_motion" }
+Number:Temperature EG_Wohnen_Auge_Temp "Roh-Temperatur [%.1f °C]"	<temperature>	(EG_Wohnen,SteuerTemp,TempInnen)	{ channel="zwave:device:ddd23e6c:node12:sensor_temperature" }
+Number EG_Wohnen_Auge_Lux "Wohnen Helligkeit [%.0f lux]"		<brightness>	(EG_Wohnen,Lichtsensoren)		{ channel="zwave:device:ddd23e6c:node12:sensor_luminance" }
+Dimmer EG_Wohnen_Decke_Krone "Wohnen Krone"				<whites>	(EG_Wohnen,Dimmerschalter,Lichter)	{ channel="zwave:device:ddd23e6c:node29:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Dimmer EG_Wohnen_Spots_Mitten "Deckenspots Mitten"			<whites>	(EG_Wohnen,Dimmerschalter,Lichter)	{ channel="zwave:device:ddd23e6c:node104:switch_dimmer1",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Dimmer EG_Wohnen_Spots_Ecken "Deckenspots Ecken"			<whites>	(EG_Wohnen,Dimmerschalter,Lichter)	{ channel="zwave:device:ddd23e6c:node107:switch_dimmer1",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Rollershutter EG_Wohnen_Rolladen "Wohnzimmer Wohnen Rolladen [%d %%]"	<rollershutter>	(EG_Wohnen,Rolladen)			{ channel="zwave:device:ddd23e6c:node106:blinds_control",
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(+10),Raise=(-10)", stateMappings="Closed=1:100,Open=0"] }
+Rollershutter EG_Wohnen_Jalousie_links "Raffstore links [%d %%]"	<rollershutter>	(EG_Wohnen,Rolladen,Jalousien)		{ channel="zwave:device:ddd23e6c:node113:blinds_control",
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(+10),Raise=(-10)", stateMappings="Closed=1:100,Open=0"] }
+Dimmer EG_Wohnen_Jalousie_links_Lamellen "Lamellen links [%d %%]"	<rollershutter>	(EG_Wohnen,Jalousien) 			{ channel="zwave:device:ddd23e6c:node113:blinds_lamella",
+											alexa="PercentageController.percentage" }
+Rollershutter EG_Wohnen_Jalousie_Mitte "Raffstore Mitte [%d %%]"	<rollershutter>	(EG_Wohnen,Rolladen,Jalousien)		{ channel="zwave:device:ddd23e6c:node81:blinds_control",
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(-10),Raise=(+10)", stateMappings="Closed=1:100,Open=0"] }
+Dimmer EG_Wohnen_Jalousie_Mitte_Lamellen "Lamellen Mitte [%d %%]"	<rollershutter>	(EG_Wohnen,Jalousien) 			{ channel="zwave:device:ddd23e6c:node81:blinds_lamella",
+											alexa="PercentageController.percentage" }  
+Rollershutter EG_Wohnen_Jalousie_rechts "Raffstore rechts [%d %%]"	<rollershutter> (EG_Wohnen,Rolladen,Jalousien) 		{ channel="zwave:device:ddd23e6c:node95:blinds_control",
+											alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(-10),Raise=(+10)", stateMappings="Closed=1:100,Open=0"] }
+Dimmer EG_Wohnen_Jalousie_rechts_Lamellen "Lamellen rechts [%d %%]"	<rollershutter>	(EG_Wohnen,Jalousien)			{ channel="zwave:device:ddd23e6c:node95:blinds_lamella",
+											alexa="PercentageController.percentage" }  
+
+
+Group Wohnen_Decke1 "Wohnen Längsseiten"				<colorwheel>	(Lichter)
+Color EG_Wohnen_Decke1_RGBW "Wohnen längs Farbe"			<color>		(Wohnen_Decke1,EG_Wohnen,Farblichter)	{ channel="zwave:device:ddd23e6c:node102:color_color" }
+Dimmer EG_Wohnen_Decke1_RGBW_hell "Wohnen längs Helligkeit [%.0f %%]"	<brightness>	(Wohnen_Decke1,Dimmerschalter)		{ channel="zwave:device:ddd23e6c:node102:switch_dimmer" }
+Number EG_Wohnen_Decke1_Animation "Wohnen längs Animationsprogramm"	<color>		(EG_Wohnen,Farbanimationen)		{ channel="zwave:device:ddd23e6c:node102:scene_number_param72", expire="3m,1" }
+Dimmer EG_Wohnen_Decke1_R "Wohnen längs Rot [%.0f %%]"			<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node102:switch_dimmer2" }
+Dimmer EG_Wohnen_Decke1_G "Wohnen längs Grün [%.0f %%]"			<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node102:switch_dimmer3" }
+Dimmer EG_Wohnen_Decke1_B "Wohnen längs Blau [%.0f %%]"			<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node102:switch_dimmer4" }
+Dimmer EG_Wohnen_Decke1_W "Wohnen längs Weiß [%.0f %%]"			<color>		(EG_Wohnen,Farbkanaele)			{ channel="zwave:device:ddd23e6c:node102:switch_dimmer5" }
+Number:Power EG_Wohnen_Decke1_Watt "Leistung Wohnen längs [%.1f W]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node102:meter_watts" }
+Number:Energy EG_Wohnen_Decke1_Verbrauch "Verbr. Wohnen lgs [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node102:meter_kwh" }
+
+Group Wohnen_Decke2 "Wohnen Querseiten"					<colorwheel>	(Lichter)
+Color EG_Wohnen_Decke2_RGBW "Wohnen quer Farbe"				<color>		(Wohnen_Decke2,EG_Wohnen,Farblichter)	{ channel="zwave:device:ddd23e6c:node79:color_color" }
+Dimmer EG_Wohnen_Decke2_RGBW_hell "Wohnen quer Helligkeit [%.0f %%]"	<brightness>	(Wohnen_Decke2,Dimmerschalter)		{ channel="zwave:device:ddd23e6c:node79:switch_dimmer" }
+Number EG_Wohnen_Decke2_Animation "Wohnen quer Animationsprogramm"	<color>		(EG_Wohnen,Farbanimationen)		{ channel="zwave:device:ddd23e6c:node79:scene_number_param72", expire="3m,1" }
+Dimmer EG_Wohnen_Decke2_R "Wohnen quer Rot [%.0f %%]"			<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node79:switch_dimmer2" }
+Dimmer EG_Wohnen_Decke2_G "Wohnen quer Grün [%.0f %%]"			<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node79:switch_dimmer3" }
+Dimmer EG_Wohnen_Decke2_B "Wohnen quer Blau [%.0f %%]"			<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node79:switch_dimmer4" }
+Dimmer EG_Wohnen_Decke2_W "Wohnen quer Weiß [%.0f %%]"			<color>		(EG_Wohnen,Farbkanaele)			{ channel="zwave:device:ddd23e6c:node79:switch_dimmer5" }
+Number:Power EG_Wohnen_Decke2_Watt "Leistung Wohnen quer [%.1f W]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node79:meter_watts" }
+Number:Energy EG_Wohnen_Decke2_Verbrauch "Verb. Wohnen Quer [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node79:meter_kwh" }
+
+// WAR: "Wohnen Decke", "Wohnen Farbe"
+Group Wohnen_Decke "Wohnzimmer Wohnen Deckenlicht"			<colorwheel>	(Lichter)				{ alexa="Endpoint.Light" }
+Color EG_Wohnen_Decke_RGBW "Wohnen Deckenlicht"				<color>		(Wohnen_Decke,EG_Wohnen,Farblichter)	{ channel="zwave:device:ddd23e6c:node79:color_color",
+											channel="zwave:device:ddd23e6c:node102:color_color" [ profile="follow", profile-parameterID="EG_Wohnen_Decke1_RGBW" ],
+//											channel="zwave:device:ddd23e6c:node102:color_color",
+											alexa="PowerController.powerState,BrightnessController.brightness,ColorController.color" }
+Dimmer EG_Wohnen_Decke_RGBW_hell "Helligkeit [%.0f %%]"			<brightness>	(Wohnen_Decke,Dimmerschalter)		{ channel="zwave:device:ddd23e6c:node79:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Dimmer EG_Wohnen_Decke_R "Wohnen Rot [%.0f %%]"				<color>		(EG_Wohnen,Farblichter)			{ channel="zwave:device:ddd23e6c:node79:switch_dimmer2",
+																  channel="zwave:device:ddd23e6c:node102:switch_dimmer2" [ profile="follow" ] }
+Dimmer EG_Wohnen_Decke_G "Wohnen Grün [%.0f %%]"			<color>		(EG_Wohnen,Farblichter)			{ channel="zwave:device:ddd23e6c:node79:switch_dimmer3",
+																  channel="zwave:device:ddd23e6c:node102:switch_dimmer3" [ profile="follow" ] }
+Dimmer EG_Wohnen_Decke_B "Wohnen Blau [%.0f %%]"			<color>		(EG_Wohnen,Farblichter)			{ channel="zwave:device:ddd23e6c:node79:switch_dimmer4",
+																  channel="zwave:device:ddd23e6c:node102:switch_dimmer4" [ profile="follow" ] }
+Dimmer EG_Wohnen_Decke_W "Wohnen Weiß [%.0f %%]"			<color>		(Wohnen_Decke,EG_Wohnen,Farblichter)	{ channel="zwave:device:ddd23e6c:node79:switch_dimmer5",
+																  channel="zwave:device:ddd23e6c:node102:switch_dimmer5" [profile="follow" ] }
+
+Rollershutter EG_Wohnen_TV "Fernseher Klappe [%d %%]"			<rollershutter>	(EG_Wohnen)				{ channel="zwave:device:ddd23e6c:node111:blinds_control", 
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(-10),Raise=(+10)", stateMappings="Closed=1:100,Open=0"] }
+Number:Energy EG_Wohnen_TV_Klappe_Verbrauch "Verbr. Klappe [%.2f kWh]" 	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node111:meter_kwh" }  
+
+Switch EG_Wohnen_Rauchmelder_Rauch_Alarm "Brandmelderalarm SMOKE"	<smoke>		(EG_Wohnen,Rauchmelder)			{ channel="zwave:device:ddd23e6c:node155:alarm_smoke" }
+Switch EG_Wohnen_Rauchmelder_Hitze_Alarm "Brandmelder Alarm HEAT"	<fire>		(Rauchmelder)				{ channel="zwave:device:ddd23e6c:node155:alarm_heat" }
+Switch EG_Wohnen_Rauchmelder_tamper_Alarm "Tamper Brandmelder"		<fire>		(Rauchmelder)				{ channel="zwave:device:ddd23e6c:node155:alarm_motion" }
+Number EG_Wohnen_Rauchmelder_Temp "Temperatur Brandmelder [%.1f °C]"	<temperature>	(EG_Wohnen,Heizung)			{ channel="zwave:device:ddd23e6c:node155:sensor_temperature" }
+Number EG_Wohnen_Rauchmelder_Bat "Brandmelder [%d %%]"			<battery>	(Batterien)				{ channel="zwave:device:ddd23e6c:node155:battery-level" }
+Switch EG_Wohnen_COmelder_CO_Alarm "CO-Melder Alarm CO"			<exclamation>	(Rauchmelder)				{ channel="zwave:device:ddd23e6c:node46:alarm_co" }
+Switch EG_Wohnen_COmelder_Hitze_Alarm "CO-Melder Alarm HEAT"		<fire>		(EG_Wohnen,Rauchmelder)			{ channel="zwave:device:ddd23e6c:node46:alarm_heat" }
+Number EG_Wohnen_COmelder_CO "CO Wert CO-Melder [%.1f °C]"		<carbondioxide>	(EG_Wohnen,Heizung)			{ channel="zwave:device:ddd23e6c:node46:sensor_co" }
+Number EG_Wohnen_COmelder_Temp "Temperatur CO-Melder [%.1f °C]"		<temperature>	(EG_Wohnen,Heizung,TempInnen)		{ channel="zwave:device:ddd23e6c:node46:sensor_temperature" }
+Number EG_Wohnen_COmelder_Bat "CO-Melder [%d %%]"			<battery>	(Batterien)				{ channel="zwave:device:ddd23e6c:node46:battery-level" }
+
+
+// Bianca
+Dimmer EG_Bianca_Decke "Bianca Deckenlicht [%d %%]"			<light>		(EG_Bianca,Dimmerschalter,Lichter)	{ channel="zwave:device:ddd23e6c:node15:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" } 
+Switch EG_Bianca_Auge "Bewegung Bianca [MAP(motion.map):%s]"		<present>	(EG_Bianca,BewegungsmelderInnen)	{ channel="zwave:device:ddd23e6c:node90:alarm_motion" }
+Number:Temperature EG_Bianca_Auge_Temp "Roh-Temperatur [%.1f °C]"	<temperature>	(EG_Bianca,SteuerTemp,TempInnen)	{ channel="zwave:device:ddd23e6c:node90:sensor_temperature" }
+Number EG_Bianca_Auge_Lux "Helligkeit [%d lux]"				<brightness>	(EG_Bianca,Lichtsensoren)		{ channel="zwave:device:ddd23e6c:node90:sensor_luminance" }
+Switch EG_Bianca_Auge_Tamper "Bianca"					<exclamation>	(Tampersensoren)			{ channel="zwave:device:ddd23e6c:node90:alarm_tamper" }
+Number EG_Bianca_Auge_Bat "Bianca Auge [%d %%]"				<battery>	(EG_Bianca,Batterien)			{ channel="zwave:device:ddd23e6c:node90:battery-level" }
+Switch BiancaDrei "Dreifachdruck Bianca"				<smiley>	(EG_Bianca)
+Rollershutter EG_Bianca_Rolladen "Rolladen Bianca [%d %%]"		<rollershutter>	(EG_Bianca,Rolladen)			{ channel="zwave:device:ddd23e6c:node112:blinds_control",
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(-10),Raise=(+10)", stateMappings="Closed=1:100,Open=0"] }
+Number:Energy EG_Bianca_Rolladen_Verbrauch "Verbr. Rolladen [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node112:meter_kwh" }  
+
+
+// WC
+Dimmer EG_WC_Decke "WC Deckenlicht [%d %%]"				<whites>	(EG_WC,Dimmerschalter,Lichter)		{ channel="zwave:device:ddd23e6c:node127:switch_dimmer1",
+											alexa="PowerController.powerState,BrightnessController.brightness" } 
+Number Szenenschalter_WC_Tuer "Szenenschalter WC Tür"			<switch>        (Szenen)                               	{ channel="zwave:device:ddd23e6c:node127:scene_number" }
+Switch EG_WC_Auge "Bewegung WC [MAP(motion.map):%s]"			<present>	(EG_WC,BewegungsmelderInnen)		{ channel="zwave:device:ddd23e6c:node36:alarm_motion" }
+Number:Temperature EG_WC_Auge_Temp "Roh-Temperatur [%.1f °C]"		<temperature>	(EG_WC,SteuerTemp,TempInnen)		{ channel="zwave:device:ddd23e6c:node36:sensor_temperature" }
+Number EG_WC_Auge_Lux "Helligkeit WC Auge [%.0f lux]"			<brightness>	(EG_WC,Lichtsensoren)			{ channel="zwave:device:ddd23e6c:node36:sensor_luminance" }
+Switch EG_WC_Auge_Tamper "Tamper WC Auge"				<exclamation>	(Tampersensoren)			{ channel="zwave:device:ddd23e6c:node36:alarm_tamper" }
+Rollershutter EG_WC_Rolladen "Rolladen WC [%d %%]"			<rollershutter>	(EG_WC,Rolladen)			{ channel="zwave:device:ddd23e6c:node99:blinds_control",
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(-10),Raise=(+10)", stateMappings="Closed=1:100,Open=0"] }
+Number:Power EG_WC_Decke_Watt "Leistung Decke [%.1f W]"			<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node127:meter_watts" }  
+Number:Energy EG_WC_Decke_Verbrauch "Verbrauch Decke [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node127:meter_kwh" }  
+Number:Energy EG_WC_Rolladen_Verbrauch "Verbrauch Rolladen [%.2f kWh]" 	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node99:meter_kwh" }  
+
+
+// Diele
+Dimmer EG_Diele_Decke "Diele Deckenlicht [%d %%]"			<whites>	(EG_Diele,Dimmerschalter,Lichter)	{ channel="zwave:device:ddd23e6c:node18:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Switch EG_Diele_Auge "Diele Auge [MAP(motion.map):%s]"			<present>	(EG_Diele,BewegungsmelderInnen)		{ channel="zwave:device:ddd23e6c:node143:alarm_motion" }
+Number:Temperature EG_Diele_Auge_Temp "Roh-Temperatur [%.1f °C]"	<temperature>	(EG_Diele,SteuerTemp,TempInnen)		{ channel="zwave:device:ddd23e6c:node143:sensor_temperature" }
+Number EG_Diele_Auge_Lux "Helligkeit Diele [%.0f lux]"			<brightness>	(EG_Diele,Lichtsensoren)		{ channel="zwave:device:ddd23e6c:node143:sensor_luminance" }
+Switch EG_Diele_Auge_Tamper "Tamper Diele Auge"				<exclamation>	(Tampersensoren)			{ channel="zwave:device:ddd23e6c:node143:alarm_tamper" }
+Switch EG_Diele_Klingel "Klingel"					<bell>		(EG_Diele)				{ channel="zwave:device:ddd23e6c:node109:sensor_binary1",
+											alexa="PowerController.powerState" }
+Dimmer Garage_Aussenlampe "Einfahrt Aussenleuchte"			<whites>	(Garage,Blinklicht,Dimmerschalter,Lichter)	{ channel="zwave:device:ddd23e6c:node19:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+//Switch EG_Eingangstuer "Eingangstür"					<frontdoor>	(EG_Diele)				{ channel="zwave:device:ddd23e6c:node159:lock_door" }
+//Switch EG_Eingangstuer_battery "Batterie Eingangstür"			<battery>	(EG_Diele)				{ channel="zwave:device:ddd23e6c:node159:battery-level" }
+Number Szenenschalter_Garage "Szenenschalter Garage"			<switch>	(Szenen)				{ channel="zwave:device:ddd23e6c:node19:scene_number" }
+
+
+// Kabuff
+Switch EG_Kabuff_Decke "Kabuff Licht"					<whites>	(EG_Kabuff,Lichter)			{ channel="zwave:device:ddd23e6c:node14:switch_binary",
+											alexa="PowerController.powerState" }
+Switch EG_Kabuff_Auge "Kabuff Auge [MAP(motion.map):%s]"		<present>	(EG_Kabuff,BewegungsmelderInnen)	{ channel="zwave:device:ddd23e6c:node47:sensor_binary" }
+Number:Temperature EG_Kabuff_Auge_Temp "Roh-Temperatur [%.1f °C]"	<temperature>	(EG_Kabuff,TempInnen)			{ channel="zwave:device:ddd23e6c:node47:sensor_temperature" }
+Number EG_Kabuff_Auge_Lux "Helligkeit Kabuff [%.1f %%]"			<brightness>	(EG_Kabuff,Lichtsensoren)		{ channel="zwave:device:ddd23e6c:node47:sensor_luminance" }
+Number EG_Kabuff_Feuchtigkeit "Kabuff Luftfeuchte [%d %%]"		<humidity>	(EG_Kabuff,Sensoren)			{ channel="zwave:device:ddd23e6c:node47:sensor_relhumidity" }
+Switch EG_Diele_FBH "FBH Diele"						<heating>	(EG_Diele,EG_Kabuff,Heizung)		{ channel="zwave:device:ddd23e6c:node67:switch_binary1"} 
+Switch EG_Essen_FBH_links "FBH Essen Türseite" 				<heating>	(EG_Kueche,EG_Kabuff,Heizung)		{ channel="zwave:device:ddd23e6c:node67:switch_binary2"} 
+Switch EG_Essen_FBH_rechts "FBH Essen Gartenseite"			<heating>	(EG_Kueche,EG_Kabuff,Heizung)		{ channel="zwave:device:ddd23e6c:node67:switch_binary3"} 
+Switch EG_Kueche_FBH "FBH Küche"					<heating>	(EG_Kueche,EG_Kabuff,Heizung)		{ channel="zwave:device:ddd23e6c:node67:switch_binary4"} 
+Switch EG_WC_FBH "FBH WC"						<heating>	(EG_WC,EG_Kabuff,Heizung)		{ channel="zwave:device:ddd23e6c:node67:switch_binary5"} 
+Switch EG_Kabuff_Leiste6 "Steckerleistenplatz 6"			<socket>	(EG_Kabuff)				{ channel="zwave:device:ddd23e6c:node67:switch_binary6"} 
+Number:Power EG_Kabuff_Leiste6_Watt "Steckerleistenplatz 6 [%.1f W]"	<energy>	(EG_Kabuff)				{ channel="zwave:device:ddd23e6c:node67:meter_watts6"} 
+Switch EG_Bianca_FBH "FBH Bianca"					<heating>	(EG_Bianca,K_Waschkeller,Heizung)	{ channel="zwave:device:ddd23e6c:node3:switch_binary2"} 
+Switch EG_Wohnen_FBH "FBH Wohnen (3 Kreise)"				<heating>	(EG_Wohnen,K_Waschkeller,Heizung)	{ channel="zwave:device:ddd23e6c:node101:switch_binary2"} 
+	
+
+// Treppe, Empore
+Group Treppe "Innentreppe" 						<stairs> 	(EG,OG)					{ alexa="Endpoint.Light" }
+Color EG_Treppe_RGBW "Treppenlicht"					<color>		(Treppe,Farblichter) 			{ channel="zwave:device:ddd23e6c:node56:color_color",
+											alexa="PowerController.powerState,ColorController.color" }
+Dimmer EG_Treppe_RGBW_hell "Treppenlicht Helligkeit [%d %%]"		<brightness>	(Treppe,Dimmerschalter)			{ channel="zwave:device:ddd23e6c:node56:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Number EG_Treppe_Animation "Treppenlicht Animationsprogramm"		<color>		(Treppe,Farbanimationen)		{ channel="zwave:device:ddd23e6c:node56:scene_number_param72", expire="3m,1" }
+Dimmer EG_Treppe_R "Treppenlicht Rot [%.0f %%]"				<color>		(Treppe,Farbkanaele)			{ channel="zwave:device:ddd23e6c:node56:switch_dimmer2" }
+Dimmer EG_Treppe_G "Treppenlicht Grün [%.0f %%]"			<color>		(Treppe,Farbkanaele)			{ channel="zwave:device:ddd23e6c:node56:switch_dimmer3" }
+Dimmer EG_Treppe_B "Treppenlicht Blau [%.0f %%]"			<color>		(Treppe,Farbkanaele)			{ channel="zwave:device:ddd23e6c:node56:switch_dimmer4" }
+Dimmer EG_Treppe_W "Treppenlicht Warmweiß [%.0f %%]"			<light_led>	(Treppe,Blinklicht,Farbkanaele)		{ channel="zwave:device:ddd23e6c:node56:switch_dimmer5" }
+Number:Power EG_Treppe_Watt "Leistung Treppe [%.1f W]"			<energy>	(Treppe,Energie)			{ channel="zwave:device:ddd23e6c:node56:meter_watts" }
+Number:Energy EG_Treppe_Verbrauch "Verbrauch Treppe [%.2f kWh]"		<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node56:meter_kwh" }
+
+Number Szenenschalter_Treppe "Szenenschalter Treppenfuss"		<switch>	(Szenen)				{ channel="zwave:device:ddd23e6c:node15:scene_number" }
+Number Szenenschalter_Empore "Szenenschalter Empore"			<switch>	(Szenen)				{ channel="zwave:device:ddd23e6c:node58:scene_number" } 
+
+
+// Tim
+Dimmer OG_Tim_Decke "Tims Deckenlicht [%d %%]"				<whites>	(OG_Tim,Dimmerschalter,Lichter) 	{ channel="zwave:device:ddd23e6c:node129:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Number:Power OG_Tim_Decke_Watt "Leistung Decke [%.1f W]"		<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node129:meter_watts" }  
+Number:Energy OG_Tim_Decke_Verbrauch "Verbrauch Decke [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node129:meter_kwh" }  
+Switch OG_Tim_Auge "Tim Auge [MAP(motion.map):%s]"			<present>	(OG_Tim,BewegungsmelderInnen)		{ channel="zwave:device:ddd23e6c:node149:alarm_motion" }
+Number:Temperature OG_Tim_Auge_Temp "Roh-Temperatur [%.1f °C]"		<temperature>	(OG_Tim,SteuerTemp,TempInnen)		{ channel="zwave:device:ddd23e6c:node149:sensor_temperature" }
+Number OG_Tim_Auge_Lux "Helligkeit Tim [%.0f lux]"			<brightness>	(OG_Tim,Lichtsensoren)			{ channel="zwave:device:ddd23e6c:node149:sensor_luminance" }
+Switch OG_Tim_Auge_Tamper "Tamper Tim Auge"				<exclamation>	(Tampersensoren)			{ channel="zwave:device:ddd23e6c:node149:alarm_tamper" }
+Rollershutter OG_Tim_Rolladen "Rolladen Tim [%d %%]"			<rollershutter>	(OG_Tim,Rolladen)			{ channel="zwave:device:ddd23e6c:node24:blinds_control",
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(-10),Raise=(+10)", stateMappings="Closed=1:100,Open=0"] }
+
+
+// Lutz
+Dimmer OG_Lutz_Decke "Lutz Deckenlicht [%d %%]"				<whites>	(OG_Lutz,Dimmerschalter,Lichter) 	{ channel="zwave:device:ddd23e6c:node61:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Number:Power OG_Lutz_Decke_Watt "Leistung Decke [%.1f W]"		<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node61:meter_watts" }  
+Number:Energy OG_Lutz_Decke_Verbrauch "Verbrauch Lutz [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node61:meter_kwh" }  
+Switch OG_Lutz_Auge "Lutz Auge [MAP(motion.map):%s]"			<present>	(OG_Lutz,BewegungsmelderInnen)		{ channel="zwave:device:ddd23e6c:node87:alarm_motion" }
+Number:Temperature OG_Lutz_Auge_Temp "Roh-Temperatur [%.1f °C]"		<temperature>	(OG_Lutz,SteuerTemp,TempInnen)		{ channel="zwave:device:ddd23e6c:node87:sensor_temperature" }
+Number OG_Lutz_Auge_Lux "Helligkeit Lutz [%.0f lux]"			<brightness>	(OG_Lutz,Lichtsensoren)			{ channel="zwave:device:ddd23e6c:node87:sensor_luminance" }
+
+
+// Markus
+Dimmer OG_Markus_Decke "Markus Deckenlicht [%d %%]"			<whites>	(OG_Markus,Dimmerschalter,Lichter)	{ channel="zwave:device:ddd23e6c:node59:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Number:Power OG_Markus_Decke_Watt "Leistung Deckenlicht [%.1f W]"	<energy>	(OG_Markus,Energie)			{ channel="zwave:device:ddd23e6c:node59:meter_watts" }  
+Number:Energy OG_Markus_Decke_Verbrauch "Verbrauch Decke [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node59:meter_kwh" }  
+Switch OG_Markus_Auge "Bewegung Markus [MAP(motion.map):%s]" 		<present>	(OG_Markus,BewegungsmelderInnen)	{ channel="zwave:device:ddd23e6c:node42:alarm_motion" }
+Number:Temperature OG_Markus_Auge_Temp "Roh-Temperatur [%.1f °C]"	<temperature>	(OG_Markus,SteuerTemp,TempInnen)	{ channel="zwave:device:ddd23e6c:node42:sensor_temperature" }
+Number OG_Markus_Auge_Lux "Helligkeit Markus [%.0f lux]"		<brightness>	(OG_Markus,Lichtsensoren)		{ channel="zwave:device:ddd23e6c:node42:sensor_luminance" }
+
+
+// Bad
+Dimmer OG_Bad_Decke "Bad Deckenlicht [%d %%]"				<whites>	(OG_Bad,Dimmerschalter,Lichter) 	{ channel="zwave:device:ddd23e6c:node27:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Number:Power OG_Bad_Decke_Watt "Leistung Decke [%.1f W]"		<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node27:meter_watts" }
+Number:Energy OG_Bad_Decke_Verbrauch "Verbrauch Decke [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node27:meter_kwh" }  
+Number Szenenschalter_Bad_Tuer "Szenenschalter Bad Tür"			<switch>        (Szenen)                               	{ channel="zwave:device:ddd23e6c:node27:scene_number" }
+//Switch OG_Bad_Auge "Bad Auge [MAP(motion.map):%s]"			<present>	(OG_Bad,BewegungsmelderInnen)		{ channel="zwave:device:ddd23e6c:node48:sensor_binary" }
+Switch OG_Bad_Auge "Bad Auge [MAP(motion.map):%s]"			<present>	(OG_Bad,BewegungsmelderInnen)		{ channel="zwave:device:ddd23e6c:node48:alarm_motion" }
+Number:Temperature OG_Bad_Auge_Temp "Roh-Temperatur [%.1f °C]"		<temperature>	(OG_Bad,SteuerTemp,TempInnen)		{ channel="zwave:device:ddd23e6c:node48:sensor_temperature" }
+Number OG_Bad_Auge_Lux "Bad Helligkeit [%d lux]"			<brightness>	(OG_Bad,Lichtsensoren)			{ channel="zwave:device:ddd23e6c:node48:sensor_luminance" }
+Number OG_Bad_Feuchtigkeit "Bad Luftfeuchte [%d %%]"			<humidity>	(OG_Bad,Sensoren)			{ channel="zwave:device:ddd23e6c:node48:sensor_relhumidity" }
+Number OG_Bad_Auge_UV "Bad UV-Lichtstärke [UV index %d]"		<sun>		(Lichtsensoren)				{ channel="zwave:device:ddd23e6c:node48:sensor_ultraviolet" }
+
+Group Badbodenstrip "Bad Bodenlicht"					<color>		{ alexa="Endpoint.Light" }
+Color OG_Bad_Bodenstrip_RGBW "Bad Bodenlicht"				<color>		(Badbodenstrip,OG_Bad) 			{ channel="zwave:device:ddd23e6c:node30:color_color",
+											alexa="PowerController.powerState,ColorController.color" }
+Number OG_Bad_Bodenstrip_Animation "Badbodenlicht Animationsprogramm"	<color>		(OG_Bad)				{ channel="zwave:device:ddd23e6c:node30:scene_number_param72", expire="3m,1" }
+Dimmer OG_Bad_Bodenstrip_RGBW_hell "Badbodenlicht Helligkeit [%.0f %%]"	<brightness>	(Badbodenstrip,Dimmerschalter)		{ channel="zwave:device:ddd23e6c:node30:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Dimmer OG_Bad_Bodenstrip_R "Badbodenlicht Rot [%.0f %%]"		<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node30:switch_dimmer2" }
+Dimmer OG_Bad_Bodenstrip_G "Badbodenlicht Grün [%.0f %%]"		<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node30:switch_dimmer3" }
+Dimmer OG_Bad_Bodenstrip_B "Badbodenlicht Blau [%.0f %%]"		<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node30:switch_dimmer4" }
+Number:Power OG_Bad_Bodenstrip_Watt "Leistung Badbodenlicht [%.1f W]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node30:meter_watts" }
+Number:Energy OG_Bad_Bodenstrip_Verbrauch "Verbrauch Boden [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node30:meter_kwh" }
+
+Switch OG_Bad_FBH "FBH Bad"						<heating>	(OG_Bad,Heizung)			{ channel="zwave:device:ddd23e6c:node17:switch_binary1" }
+Switch OG_Bad_durchsichtig "Bad Fenster [MAP(opaque.map):%s]"		<window>	(OG_Bad)				{ channel="zwave:device:ddd23e6c:node17:switch_binary2",
+											alexa="PowerController.powerState" }
+	
+
+// Dachboden
+Switch D_Dachboden_Licht "Dachboden Licht"				<light>		(D_Dachboden,Lichter)			{ channel="zwave:device:ddd23e6c:node126:switch_binary1",
+											alexa="PowerController.powerState" }
+Switch Garten_Strahler_Giebel "Strahler Garten Giebel"			<outdoorlight> 	(Garten,D_Dachboden) 			{ channel="zwave:device:ddd23e6c:node126:switch_binary2" ,
+											alexa="PowerController.powerState" }
+Switch D_Lueftung_EWT_Pumpe "Erdwärmetauscher Pumpe"			<climate> 	(D_Dachboden,Garten,Lueftung)		{ channel="zwave:device:ddd23e6c:node120:switch_binary1" }
+Switch D_Lueftung_DigitalEingang1 "Lüftung reduzieren"			<climate> 	(D_Dachboden,Lueftung) 			{ channel="zwave:device:ddd23e6c:node120:switch_binary2",
+											alexa="PowerController.powerState" }
+Switch D_Lueftung_Ventil_Bianca "Lüftung Bianca [MAP(valve.map):%s]"	<fan> 		(D_Dachboden,EG_Bianca,Lueftung)	{ channel="zwave:device:ddd23e6c:node91:switch_binary1",
+											alexa="PowerController.powerState" }
+
+
+// Garage
+Switch Garage_Auge "Garage Auge [MAP(motion.map):%s]"			<present>	(Garage,BewegungsmelderAussen)		{ channel="zwave:device:ddd23e6c:node151:alarm_motion" }
+Number:Temperature Garage_Auge_Temp "Temperatur [%.1f °C]"		<temperature>	(Garage,TempAussen)			{ channel="zwave:device:ddd23e6c:node151:sensor_temperature" }
+Number Garage_Auge_Lux "Garage Auge [%.1f %%]"				<sun>		(Garage,Lichtsensoren)			{ channel="zwave:device:ddd23e6c:node151:sensor_luminance" }
+Contact Garage_Auffahrt_Kontakt "Garagentür vorn [MAP(contacts.map):%s]"	<frontdoor>	(Garage,AussenTueren)		{ channel="zwave:device:ddd23e6c:node151:sensor_door" }
+Switch Garage_Auge_Tamper "Garage Auge Tamper"				<exclamation>	(Tampersensoren)			{ channel="zwave:device:ddd23e6c:node151:alarm_tamper" }
+Switch Garage_Auge_Access "Garage Auge Access"				<present>	(Garage,BewegungsmelderAussen)		{ channel="zwave:device:ddd23e6c:node151:alarm_access" }
+Switch Garage_Auge_Burglar "Garage Auge Burglar"			<exclamation>	(Tampersensoren)			{ channel="zwave:device:ddd23e6c:node151:alarm_burglar" }
+Switch Garage_Kellertreppe "Garagentreppe Licht"			<light>		(Garage,Lichter) 			{ channel="zwave:device:ddd23e6c:node28:switch_binary",
+											alexa="PowerController.powerState" }
+Switch Garage_Strahler_Tuer "Gartenstrahler Garage"			<outdoorlight>	(Garage,Garten,Lichter)			{ channel="zwave:device:ddd23e6c:node28:switch_binary2",
+											alexa="PowerController.powerState" }
+
+
+// Garten
+Switch Garten_Auge_Bewegung "Auge Hausecke [MAP(motion.map):%s]"	<present>	(Garten,BewegungsmelderAussen)		{ channel="zwave:device:ddd23e6c:node52:alarm_motion" }
+Switch Garten_Auge_Bewegung2 "Auge Hausecke [MAP(motion.map):%s]"	<present>	(Garten,BewegungsmelderAussen)		{ channel="zwave:device:ddd23e6c:node52:sensor_binary" }
+Number:Temperature Garten_Auge_Temp_roh "Auge Hausecke roh [%.1f °C]"	<temperature>	(TempTerrasseRohwerte)			{ channel="zwave:device:ddd23e6c:node52:sensor_temperature" }
+Number Garten_Auge_Lux "Helligkeit Garten Ost/Hausecke [%.0f lux]"	<sun>		(Garten,LuxAussen,Lichtsensoren)	{ channel="zwave:device:ddd23e6c:node52:sensor_luminance" }
+Number Garten_Auge_UV "UV-Strahlung Garten Ost/Hausecke [Index %d]"	<sun>		(Garten,Lichtsensoren)			{ channel="zwave:device:ddd23e6c:node52:sensor_luminance" }
+Number Garten_Auge_Feuchte "Feuchtigkeit Garten Hausecke [%d %%]"	<humidity>	(Lichtsensoren)				{ channel="zwave:device:ddd23e6c:node52:sensor_relhumidity" }
+
+Switch Garten_Auge2_Bewegung "Auge Südseite [MAP(motion.map):%s]"	<exclamation>	(Tampersensoren)			{ channel="zwave:device:ddd23e6c:node43:alarm_motion" }
+Number:Temperature Garten_Auge2_Temp_roh "Auge Südseite roh [%.1f °C]"	<temperature>	(TempTerrasseRohwerte)			{ channel="zwave:device:ddd23e6c:node43:sensor_temperature" }
+Number Garten_Auge2_Lux "Helligkeit Garten Südseite [%.0f lux]"		<sun>		(Garten,LuxAussen,Lichtsensoren)	{ channel="zwave:device:ddd23e6c:node43:sensor_luminance" }
+Number Garten_Auge2_UV "UV-Strahlung Garten Südseite [Index %d]"	<sun>		(Garten,Lichtsensoren)			{ channel="zwave:device:ddd23e6c:node43:sensor_ultraviolet" }
+Number Garten_Auge2_Feuchte "Feuchtigkeit Garten Südseite [%d %%]"	<humidity>	(Lichtsensoren)				{ channel="zwave:device:ddd23e6c:node43:sensor_relhumidity" }
+
+// MS gen 5 ausser Betrieb genommen
+//Switch Garten_Auge2 "Terrasse lang Auge [MAP(motion.map):%s]"		<present>	(BewegungsmelderAussen)			{ channel="zwave:device:ddd23e6c:node139:sensor_binary" }
+//Number:Temperature Garten_Auge2_Temp_roh "Terrasse lang roh [%.1f °C]"	<temperature>	(TempTerrasseRohwerte)			{ channel="zwave:device:ddd23e6c:node139:sensor_temperature" }
+//Number Garten_Auge2_Lux "Helligkeit Terrasse Südseite [%d lux]"		<sun>		(Garten,Lichtsensoren)			{ channel="zwave:device:ddd23e6c:node139:sensor_luminance" }
+//Number Garten_Feuchtigkeit "Terrasse Luftfeuchte [%d %%]"		<humidity>	(Garten,Sensoren)			{ channel="zwave:device:ddd23e6c:node139:sensor_relhumidity" }
+//Switch Garten_Auge2_Tamper "Terrasse lang Auge"				<exclamation>	(Tampersensoren)			{ channel="zwave:device:ddd23e6c:node139:alarm_general" }
+
+//Switch Garten_Strahler_Mauer "Strahler Gartenmauer rechts"		<outdoorlight>	(Garten,Lichter)		 	{ channel="zwave:device:ddd23e6c:node4:switch_binary2" }
+Switch Garten_Kueche_Aussen "Küche Aussenstrahler"			<whites>	(EG_Kueche,Garage,Garten,Lichter) 		{ channel="zwave:device:ddd23e6c:node93:switch_binary1",
+											alexa="PowerController.powerState" }
+Switch Garten_Terrasse_kurz "Terrasse Osten kurze Seite"		<outdoorlight>	(Garten,Blinklicht,Lichter) 		{ channel="zwave:device:ddd23e6c:node115:switch_binary2",
+											alexa="PowerController.powerState" }
+Switch Garten_Terrasse_lang "Terrasse Süden lange Seite"		<outdoorlight>	(Garten,Lichter) 			{ channel="zwave:device:ddd23e6c:node115:switch_binary1",
+											alexa="PowerController.powerState" }
+Group Baumlichter "Baumlichter"						<color>		(Garten) 				{ alexa="Endpoint.Light" }
+Color Garten_Baeume_RGBW "Baumlichter"					<color>		(Baumlichter,Garten,Farblichter) 	{ channel="zwave:device:ddd23e6c:node116:color_color",
+											alexa="PowerController.powerState,ColorController.color" }
+Number Garten_Baeume_Animation "Baumlichter Animationsprogramm"		<color>		(Garten,Farbanimationen)		{ channel="zwave:device:ddd23e6c:node116:scene_number_param72", expire="3m,1",
+	alexa="ModeController.mode" [supportedModes="1=Aus:OFF,6=Kamin,7=Sturm,8=Regenbogen,9=Aurora,10=Polizei",friendlyNames="Wash Temperature,@Setting.WaterTemperature",ordered=false] }
+Dimmer Garten_Baeume_RGBW_hell "Baumlichter Helligkeit [%.0f %%]"	<brightness>	(Baumlichter,Dimmerschalter)		{ channel="zwave:device:ddd23e6c:node116:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+Dimmer Garten_Baeume_R "Baumlichter Rot [%.0f %%]"			<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node116:switch_dimmer2" }
+Dimmer Garten_Baeume_G "Baumlichter Grün [%.0f %%]"			<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node116:switch_dimmer3" }
+Dimmer Garten_Baeume_B "Baumlichter Blau [%.0f %%]"			<color>		(Farbkanaele)				{ channel="zwave:device:ddd23e6c:node116:switch_dimmer4" }
+// Weiß ist nicht angeschlossen
+Number:Power Garten_Baeume_Watt "Leistung Baumlichter [%.1f W]"		<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node116:meter_watts" }
+Number:Energy Garten_Baeume_Verbrauch "Verbrauch Baumlicht [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node116:meter_kwh" }
+
+Rollershutter Garten_Landroid_Garage "Landroid Garagentor [%d %%]"	<rollershutter>	(Garten,Landroid) 			{ channel="zwave:device:ddd23e6c:node133:blinds_control",
+	alexa="RangeController.rangeValue" [category="INTERIOR_BLIND", friendlyNames="@Setting.Opening", supportedRange="0:100:10", unitOfMeasure="Percent", actionMappings="Close=100,Open=0,Lower=(-10),Raise=(+10)", stateMappings="Closed=1:100,Open=0"] }
+	
+// mobile Zwischenstecker
+Switch mobil_Zwischenstecker2 "Zwischenstecker 2"			<socket>	(mobil)					{ channel="zwave:device:ddd23e6c:node2:switch_binary",
+											alexa="PowerController.powerState" } 
+Number:Power mobil_Stecker2_Watt "Leistung Stecker #2 [%.1f W]"		<energy>	(mobil,Energie)				{ channel="zwave:device:ddd23e6c:node2:meter_watts" }
+Number:Energy mobil_Stecker2_Verbrauch "Verbrauch Stecker 2 [%.2f kWh]" <energy>	(mobil,Energie)				{ channel="zwave:device:ddd23e6c:node2:meter_kwh" }
+Switch mobil_Zwischenstecker7 "Zwischenstecker 7"			<socket>	(mobil)					{ channel="zwave:device:ddd23e6c:node7:switch_binary",
+											alexa="PowerController.powerState" } 
+Switch mobil_Zwischenstecker20 "Zwischenstecker mit USB 20"		<socket>	(mobil)					{ channel="zwave:device:ddd23e6c:node20:switch_binary",
+											alexa="PowerController.powerState" } 
+// deaktiviert, kaputt?
+//Switch mobil_Zwischenstecker65 "Zwischenstecker 65"			<socket>	(mobil)					{ channel="zwave:device:ddd23e6c:node65:switch_binary",
+//											alexa="PowerController.powerState" } 
+Switch mobil_Zwischenstecker66 "Zwischenstecker 66"			<socket>	(mobil)					{ channel="zwave:device:ddd23e6c:node66:switch_binary",
+											alexa="PowerController.powerState" } 
+Dimmer mobil_Dimmer72 "mobiler Dimmer"					<light>		(mobil,Dimmerschalter,Lichter)		{ channel="zwave:device:ddd23e6c:node72:switch_dimmer",
+											alexa="PowerController.powerState,BrightnessController.brightness" }
+

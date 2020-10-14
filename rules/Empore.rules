@@ -1,0 +1,106 @@
+var Timer TreppenlichtTimer
+
+var Number minimale_Treppen_Helligkeit = 20
+var Number neue_Treppen_Leuchtstaerke = 0
+
+var boolean Treppenleuchterhoehung = false
+
+var HSBType hsb
+var HSBType Farbwert_alt
+var Number Rotwert_alt
+var Number Gruenwert_alt
+var Number Blauwert_alt
+var Number Weisswert_alt
+var Number Helligkeit_alt
+
+var String redValue
+var String blueValue
+var String greenValue
+
+var Number Treppenspeicher
+
+val String Aus="0,0,0"
+val String weiss="0,0,2"
+val String vollweiss="0,0,99"
+
+
+rule "Empore Init virtual Items"
+when
+	System started
+then
+	Treppenspeicher = false
+	Rotwert_alt = 0
+	Gruenwert_alt = 0
+	Blauwert_alt = 0
+	Weisswert_alt = 0
+
+	logInfo("Empore", "Empore Initialisierung.")
+end
+
+
+rule "Emporenschalter Einfachdruck neu"
+when
+	Item Szenenschalter_Empore received update 26
+	or
+	Item Szenenschalter_Treppe received update 26
+then
+	val Number Weisswert_Treppe = 99
+
+
+        logInfo("Empore", "Treppenfuss- oder Emporen-Schalter einmal gedrückt, Treppenspeicher = " + Treppenspeicher)
+//        logDebug("Empore", "Speicher-Werte vorher HSB/W: " + Farbwert_alt + "/"+ Weisswert_alt)
+
+	if (Treppenspeicher == false) {
+		Farbwert_alt = EG_Treppe_RGBW.state		// HSBtype existiert, aber kein Constructor fuer HSBType (beachte t/T !!)
+		Weisswert_alt = EG_Treppe_W.state
+
+		hsb = new HSBType(vollweiss)
+        	EG_Treppe_RGBW.sendCommand(hsb)
+       		EG_Treppe_W.sendCommand(Weisswert_Treppe)
+
+		Treppenspeicher = true
+	} else {
+        	EG_Treppe_RGBW.sendCommand(Farbwert_alt)
+       		EG_Treppe_W.sendCommand(Weisswert_alt)
+//        	EG_Treppe_RGBW_hell.sendCommand(Helligkeit_alt)
+
+		Treppenspeicher = false
+	}
+
+        logInfo("Empore", "Speicher-Werte nachher HSB/W: " + Farbwert_alt + "/" + Weisswert_alt)
+end
+
+
+rule "Emporenschalter Doppeldruck"
+when
+	Item Szenenschalter_Empore received update 24
+	or
+	Item Szenenschalter_Treppe received update 24
+then
+	hsb = new HSBType(weiss)
+        EG_Treppe_RGBW.sendCommand(hsb)
+	Treppe_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Treppennachtlicht wieder aus"
+when
+	Item Treppe_Nachlauf received command OFF
+then
+        EG_Treppe_RGBW.sendCommand(Aus)
+end
+
+
+rule "Emporenschalter Dreifachdruck"
+when
+//	Item Szenenschalter_Empore received command 25
+//	or
+	Item Szenenschalter_Empore received update 25
+	or
+	Item Szenenschalter_Treppe received update 25
+then
+	Nachtschaltung.sendCommand(ON)
+        logInfo("Empore", "Emporen-/Treppen-Schalter dreifach gedrückt, stelle auf Nachtschaltung ...")
+end
+
+

@@ -1,0 +1,119 @@
+var Number Insel_Leuchtstaerke = 99
+var Number neue_Kuechen_Leuchtstaerke = 99
+
+//val Number Kuechenhaengeschrank_Leuchtstaerke_nachts = 20
+val Number Kueche_Nachlauf = 60
+
+
+/*
+rule "Rolladenoeffnung Kueche"
+when
+	Item EG_Kueche_Tuer_Kontakt changed to OPEN
+then
+	logDebug("Kueche","Rolladenoeffnung Küche: Status Fenster/Tür = " +  EG_Kueche_Rolladen_Fenster.state + "/" + EG_Kueche_Rolladen_Tuer.state)
+	if (EG_Kueche_Rolladen_Tuer.state > Hysterese_Rollaeden.state) {
+		EG_Kueche_Rolladen_Tuer.sendCommand(UP)
+		logDebug("Kueche", "Rolladen an der Kuechentuer wird wegen Türoeffnung hochgefahren.")
+	}
+end
+*/
+
+rule "Haengeschrank einschalten"
+when
+	Item EG_Kueche_Auge changed to ON
+then
+	// nachts oder bei Kinomodus nicht anmachen wenn jemand die Kueche betritt
+	if (Nachtschaltung.state == ON || Szene.state == 100 || Szene.state == 101)
+		return;
+
+//	logDebug("Kueche", "Schalte Arbeitslicht unter dem Hängeschrank ein auf " + neue_Kuechen_Leuchtstaerke + ".")
+	if (EG_Kuechenlichter_Haengeschrank.state != NULL && EG_Kuechenlichter_Haengeschrank.state == 0) {
+		EG_Kuechenlichter_Haengeschrank.sendCommand(neue_Kuechen_Leuchtstaerke)
+	}
+
+	Kueche_Haengeschrank_Nachlauf.sendCommand(ON)
+end
+
+
+/*
+// kein Szenenschalter_Kueche mehr
+rule "Insel einschalten"
+when
+	Item Szenenschalter_Kueche received update 25
+then
+	if (EG_Kuechenlichter_Insel.state == 0)
+		EG_Kuechenlichter_Insel.sendCommand(Insel_Leuchtstaerke)
+	else
+		EG_Kuechenlichter_Insel.sendCommand(0)
+end
+*/
+
+rule "Kueche Deckenstrip einschalten"
+when
+	Item EG_Kueche_Auge changed to ON
+then
+	if ((EG_Kueche_Decke.state == OFF) && (Tageslicht.state == OFF) &&
+	   (EG_Kuechenlichter_Deckenstrip.state != NULL && EG_Kuechenlichter_Deckenstrip.state == 0)) {
+//		logDebug("Kueche", "Schalte Küchen-Deckenstrip ein auf " + neue_Kuechen_Leuchtstaerke)
+		EG_Kuechenlichter_Deckenstrip.sendCommand(neue_Kuechen_Leuchtstaerke)
+		Kueche_Strip_Nachlauf.sendCommand(ON)
+	}
+end
+
+
+rule "Kueche Deckenstrip und Haengeschrank Nachlauf"
+when
+	Item EG_Kueche_Auge changed to OFF
+then
+	Kueche_Strip_Nachlauf.sendCommand(ON)
+	Kueche_Haengeschrank_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Kueche Deckenstrip ausschalten"
+when
+	Item Kueche_Strip_Nachlauf received command OFF
+then
+//	logDebug("Kueche", "Schalte Kuechen-Strip(s) wieder aus.")
+
+	if (EG_Kuechenlichter_Deckenstrip.state > 0)
+		EG_Kuechenlichter_Deckenstrip.sendCommand(0)
+end
+
+rule "Kueche Haengeschrank ausschalten"
+when
+	Item Kueche_Haengeschrank_Nachlauf received command OFF
+then
+//	logDebug("Kueche", "Schalte Kuechen-Hängeschrank wieder aus.")
+
+	if (EG_Kuechenlichter_Haengeschrank.state > 0)
+		EG_Kuechenlichter_Haengeschrank.sendCommand(0)
+end
+
+
+rule "Kuechen Helligkeit setzen"
+when
+	Item EG_Kueche_Auge_Lux changed 
+then
+	var Number Lux = 0
+	var Number Ist = 0
+
+	if (EG_Kueche_Auge_Lux.state != NULL && EG_Kuechenlichter_Deckenstrip.state != NULL) {
+		Lux = (EG_Kueche_Auge_Lux.state as Number)
+		Ist = (EG_Kuechenlichter_Deckenstrip.state as Number)
+	}
+
+	if (Nachtschaltung.state == ON) {
+		neue_Kuechen_Leuchtstaerke = 30
+	}
+	else
+		if (Ist == 0) {
+			if (Lux < 20) 
+				neue_Kuechen_Leuchtstaerke = (20 - Lux) * 4 + 20
+			else
+				neue_Kuechen_Leuchtstaerke = 0
+		}
+
+//	logDebug("Kueche","Küchen Auge meldet " + Lux + "; Deckenstrip ist auf " + Ist)
+end
+

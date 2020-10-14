@@ -1,0 +1,45 @@
+"""utility methods"""
+# pylint: disable=import-error,invalid-name,no-name-in-module
+# from core.jsr223 import scope
+from core.log import logging, LOG_PREFIX, log_traceback
+from core.jsr223.scope import actions
+from configuration import admin_email
+
+log = logging.getLogger("{}.personal.utils".format(LOG_PREFIX))
+
+
+def SendError(logger, message, subject="openHAB Fehlermeldung"):
+    """sends Error message to Telegram, sends mail and prints to openHAB log"""
+    out = str(message)
+    logger.error("{}".format(out))
+    telegram = actions.get("telegram", "telegram:telegramBot:openhab")
+    telegram.sendTelegram(out)
+    actions.get("mail", "mail:smtp:gmx").sendMail(admin_email, subject, out)
+
+
+def SendWarning(logger, message):
+    """sends Warning message to Telegram and prints to openHAB log"""
+    out = str(message)
+    logger.warn("{}".format(out))
+    telegram = actions.get("telegram", "telegram:telegramBot:openhab")
+    telegram.sendTelegram(out)
+
+
+def SendInfo(logger, message):
+    """sends Info message to Telegram and prints to openHAB log"""
+    out = str(message)
+    logger.info("{}".format(out))
+    telegram = actions.get("telegram", "telegram:telegramBot:openhab")
+    telegram.sendTelegram(out)
+
+
+def LogInfo(logger, message):
+    """prints Info message to openHAB log"""
+    out = str(message)
+    logger.info("{}".format(out))
+
+
+def LogDebug(logger, message):
+    """prints Debug message to openHAB log"""
+    out = str(message)
+    logger.debug("{}".format(out))

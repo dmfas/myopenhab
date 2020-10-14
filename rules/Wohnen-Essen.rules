@@ -1,0 +1,265 @@
+var Timer waitTimer
+
+var HSBType hsbValue
+var String redValue
+var String blueValue
+var String greenValue
+
+val String Aus = "0,0,0"
+
+val Number Lux_Rueckwaertsfenster = 10
+
+var boolean TV_Klappe_offen = false
+
+var Number Rotwert_Wohnen = 99
+var Number Gruenwert_Wohnen = 99
+var Number Blauwert_Wohnen = 99
+var Number Weisswert_Wohnen = 99
+
+var Number neue_Szene = 2
+
+
+
+val Functions$Function2 <RollershutterItem,ContactItem,Boolean> check_open_blinds = [ blinds, door |
+	var String b = "default"
+	var String d = "default"
+
+	if (blinds !== null)
+		b = blinds.label
+	if (door !== null)
+		d = door.label
+	logDebug("Wohnen","check_open_blinds blinds=" + b + "=" + blinds.state + " >? Toleranz= " + Hysterese_Rollaeden.state + "; door=" + d)
+	if (blinds.state > Hysterese_Rollaeden.state) {
+		logDebug("Wohnen","Tür " + d + " wurde geöffnet, fahre " + b + " hoch.")
+		blinds.sendCommand(UP)
+	}
+	true
+]
+
+
+rule "Init virtual Items"
+when
+        Time is midnight
+then
+	TV_Klappe_offen = false
+end
+
+
+rule "Saeule einfach"
+when
+	Item Szenenschalter_Saeule received update 26
+then
+	if (Szene.state != 100) {
+		Szene.sendCommand(100)
+		Rollaeden_setzen.sendCommand(100)
+		logInfo("Wohnen", "Säulenschalter einfach gedrückt, stelle TV-Umgebung her.")
+	} else {
+		if (Tageslicht.state == ON)
+			neue_Szene = 2
+		else
+			neue_Szene = 3
+		EG_Wohnen_TV.sendCommand(DOWN)
+		Rollaeden_setzen.sendCommand(neue_Szene)
+		Szene.sendCommand(neue_Szene)
+		logInfo("Wohnen", "Säulenschalter einfach gedrückt, stelle übliche Beleuchtung wieder her.")
+	}
+end
+
+
+rule "Saeule doppelt"
+when
+	Item Szenenschalter_Saeule received update 24
+then
+	if (EG_Wohnen_Spots_Mitten.state > 0 || EG_Wohnen_Spots_Ecken.state > 0 || EG_Wohnen_Decke_Krone.state > 0) {
+		EG_Wohnen_Spots_Mitten.sendCommand(OFF)
+		EG_Wohnen_Spots_Ecken.sendCommand(OFF)
+		EG_Wohnen_Decke_Krone.sendCommand(OFF)
+		EG_Wohnen_Decke1_W.sendCommand(0)
+		EG_Wohnen_Decke2_W.sendCommand(0)
+		logDebug("Wohnen","Säulenschalter doppelt gedrückt; schalte Spots aus.")
+	} else {
+		EG_Wohnen_Spots_Mitten.sendCommand(99)
+		EG_Wohnen_Spots_Ecken.sendCommand(99)
+		EG_Wohnen_Decke_Krone.sendCommand(99)
+		EG_Wohnen_Decke1_W.sendCommand(Weisswert_Wohnen)
+		EG_Wohnen_Decke2_W.sendCommand(Weisswert_Wohnen)
+		logDebug("Wohnen","Säulenschalter doppelt gedrückt; schalte Spots auf volle Helligkeit.")
+	}
+end
+
+
+rule "Saeule dreifach"
+when
+	Item Szenenschalter_Saeule received update 25
+then
+	if (Szene.state != 101) {
+		Szene.sendCommand(101)
+		Rollaeden_setzen.sendCommand(101)
+		logInfo("Wohnen", "Säulenschalter einfach gedrückt, schalte Kino-Modus ein.")
+	} else {
+		if (Tageslicht.state == ON)
+			neue_Szene = 2
+		else
+			neue_Szene = 3
+		EG_Wohnen_TV.sendCommand(DOWN)
+		Rollaeden_setzen.sendCommand(neue_Szene)
+		Szene.sendCommand(neue_Szene)
+		logInfo("Wohnen", "Säulenschalter dreifach gedrückt, stelle übliche Beleuchtung wieder her.")
+	}
+end
+
+
+rule "Bianca dreifach"
+when
+	Item Szenenschalter_Bianca received update 25
+then
+	Nachtschaltung.sendCommand(ON)
+	logInfo("Wohnen", "Biancas Schalter dreifach gedrückt, stelle auf Nachtschaltung ...")
+end
+
+
+/*
+rule "TV an - aus"
+when
+	Item Dreambox changed
+then
+	logInfo("Wohnen", "Dreambox Status hat sich geändert auf " + Dreambox.state.toString)
+
+
+	if (Dreambox.state == OFF) {
+		AVR_Power.sendCommand(ON)
+		EG_Wohnen_TV.sendCommand(UP)
+		Dreambox.postUpdate(ON)
+		if (now.getHourOfDay >= 16 && Tageslicht.state == ON) {
+			Szene.sendCommand(100)
+			Rollaeden_setzen.sendCommand(100)
+		}
+	} else {
+		// TV Klappe nicht sofort herunterfahren damit dies nicht bei
+		// versehentlichem Dreambox AN-AUS passiert
+
+		Dreambox.postUpdate(OFF)
+//		if (Szene.state == 100 || Szene.state == 101) {
+//			if (Tageslicht.state == OFF)
+//				Szene.sendCommand(3)
+//			else {
+//				Szene.sendCommand(2)
+//				Rollaeden_setzen.sendCommand(100)
+//			}
+//		}
+	}
+end
+*/
+
+
+rule "Jalousien/Raffstore oeffnen bei Tueroeffnung"
+when
+	Member of WohnraumTueren changed to OPEN
+then
+	var String s
+	var RollershutterItem r
+
+	// TODO: Suche nach besserem Pattern "wenn Element A auslöst, starte ElementB-Aktion"
+	logDebug("Wohnen", "Wohnraumtür wurde geöffnet oder geschlossen: " + triggeringItem)
+
+        if (triggeringItem !== null) {
+                s = triggeringItem.name	// ist das jetzt die Group oder das Item ?
+		logDebug("Wohnen", "Wohnraumtür wurde geöffnet oder geschlossen: " + triggeringItem.name + "/" + triggeringItem.label)
+        }
+
+	// TODO: statische Mapping Liste wie in Python
+	switch (s) {
+                case "EG_Wohnen_li1_Kontakt",
+                case "EG_Wohnen_li2_Kontakt": {
+			r = EG_Wohnen_Jalousie_links
+                }
+                case "EG_Wohnen_Mitte_li_Kontakt",
+                case "EG_Wohnen_Mitte_re_Kontakt": {
+			r = EG_Wohnen_Jalousie_Mitte
+                }
+                case "EG_Wohnen_re1_Kontakt",
+                case "EG_Wohnen_re2_Kontakt": {
+			r = EG_Wohnen_Jalousie_rechts
+                }
+                case "EG_Wohnen_alt_Kontakt": {
+			r = EG_Wohnen_Rolladen
+                }
+                case "EG_Essen_Fenster_Kontakt": {
+			r = EG_Essen_Rolladen
+                }
+                case "EG_Kueche_Tuer_Kontakt": {
+			r = EG_Kueche_Rolladen_Tuer
+                }
+	}
+
+	check_open_blinds.apply(r,triggeringItem)
+end
+
+
+/*
+rule "Rolladen Esszimmer oeffnen bei Fensteroeffnung"
+when
+        Item EG_Essen_Fenster_Kontakt changed to OPEN
+then
+	check_open_blinds.apply(EG_Essen_Rolladen,triggeringItem)
+end
+
+
+rule "Raffstore links oeffnen bei Tueroeffnung"
+when
+	Item EG_Wohnen_li1_Kontakt changed to OPEN
+	or
+	Item EG_Wohnen_li2_Kontakt changed to OPEN
+then
+	if (EG_Wohnen_Jalousie_links.state > Hysterese_Rollaeden.state) {
+		EG_Wohnen_Jalousie_links.sendCommand(UP)
+	        logInfo("Wohnen", "Fahre Raffstore links hoch, da eine Tür geöffnet wurde")
+	}
+end
+
+rule "Raffstore Mitte oeffnen bei Tueroeffnung"
+when
+	Item EG_Wohnen_Mitte_li_Kontakt changed to OPEN
+	or
+	Item EG_Wohnen_Mitte_re_Kontakt changed to OPEN
+then
+	if (EG_Wohnen_Jalousie_Mitte.state > Hysterese_Rollaeden.state) {
+		EG_Wohnen_Jalousie_Mitte.sendCommand(UP)
+	        logInfo("Wohnen", "Fahre Raffstore Mitte hoch, da eine Tür geöffnet wurde")
+	}
+end
+
+rule "Raffstore rechts oeffnen bei Tueroeffnung"
+when
+	Item EG_Wohnen_re1_Kontakt changed to OPEN
+	or
+	Item EG_Wohnen_re2_Kontakt changed to OPEN
+then
+	if (EG_Wohnen_Jalousie_rechts.state > Hysterese_Rollaeden.state) {
+		EG_Wohnen_Jalousie_rechts.sendCommand(UP)
+	        logInfo("Wohnen", "Fahre Raffstore rechts hoch, da eine Tür geöffnet wurde.")
+	}
+end
+
+rule "Rollaeden Wohnen oeffnen bei Tueroeffnung"
+when
+	Item EG_Wohnen_alt_Kontakt changed to OPEN
+then
+	check_open_blinds.apply(EG_Wohnen_Rolladen,EG_Wohnen_alt_Kontakt)
+
+//	if (EG_Wohnen_Rolladen.state > Hysterese_Rollaeden.state) {
+//		EG_Wohnen_Rolladen.sendCommand(UP)
+//	        logInfo("Wohnen", "Fahre Rolladen Wohnzimmer hoch, da die Tür geöffnet wurde.")
+//	}
+end
+*/
+
+
+rule "Hombot Pause"
+when
+	Item Hombot_Pause received command OFF
+then
+	// (weiter) Putzen
+	Hombot_Job.sendCommand(1)
+end
+

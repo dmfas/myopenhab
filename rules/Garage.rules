@@ -1,0 +1,189 @@
+val telegramAction = getActions("telegram","telegram:telegramBot:openhab")
+
+
+var Timer waitTimer
+var Number Aussen_Nachlauf = 120
+var Number Aussenwert_manuell = 99
+var Number Garage_Lux
+var Number min_Lux = 5		/* volles Licht unterhalb dieses Grenzwertes */
+var Number max_Lux = 15		/* Licht nur bis zu diesem Grenzwert */
+
+var Number Temp_Frostgefahr = 1.0
+
+
+var Number Aussenwert_alt = false
+var boolean Aussenspeicher = false
+
+
+val Number default_Garage_Leuchtstaerke = 100
+
+
+rule "Aussenlicht an"
+when
+	Item Garage_Auge changed to ON
+	or
+	Item EG_Diele_Eingangstuer_Kontakt changed to OPEN
+	or
+	Item Szenenschalter_Garage received update 26
+then 
+	val Number soll = 99
+
+//	soll = 99
+//	if (Lichtbedarf && Garage_Aussenlampe.state == 0) {
+	if (Tageslicht.state == OFF) {
+		logInfo("Garage","Schalte Aussenlicht ein auf " + soll + "; derzeit = " + Garage_Aussenlampe.state)
+
+ 		Garage_Aussenlampe.sendCommand(soll)
+ 		Garage_Timer.sendCommand(ON)
+	}
+end
+
+
+rule "Aussenlicht Aus-Timer"
+when
+	Item Garage_Auge changed to OFF
+	or
+	Item EG_Diele_Eingangstuer_Kontakt changed to CLOSED
+then
+ 	Garage_Timer.sendCommand(ON)
+end
+
+
+rule "Aussenlicht wieder aus"
+when
+	Item Garage_Timer received command OFF
+then
+	logInfo("Garage","Schalte Aussenlicht wieder aus.")
+       	Garage_Aussenlampe.sendCommand(0)
+end
+
+
+/*
+rule "Aussenhelligkeit setzen Garage"
+when
+	Item Garage_Auge_Lux received update
+then
+	var Number neue_Aussen_Leuchtstaerke = 0
+
+
+	if (Garage_Auge_Lux.state == NULL) {
+		Garage_Lux = max_Lux + 1
+	} else {
+		Garage_Lux = (Garage_Auge_Lux.state as Number)
+	}
+
+	if (Garage_Lux >= min_Lux) {
+		if (Garage_Lux <= max_Lux) {
+			neue_Aussen_Leuchtstaerke = ((max_Lux - min_Lux - Garage_Lux) * 100 / (max_Lux - min_Lux))
+		} else {
+			neue_Aussen_Leuchtstaerke = 0
+		}
+	} else {
+		neue_Aussen_Leuchtstaerke = 99
+	}
+
+//	logDebug("Garage","Garagen Auge meldet " + Garage_Lux)
+//	logDebug("Garage","Setzen neue Soll-Aussen-Helligkeit auf " + neue_Aussen_Leuchtstaerke)
+//	Aussen_Helligkeit.postUpdate(neue_Aussen_Leuchtstaerke)
+end
+*/
+
+
+rule "Garageninnenlicht an"
+when
+	Item Garage_Gartentuer_Kontakt changed to OPEN 
+	or
+	Item Garage_Vordertuer_Kontakt changed to OPEN 
+then
+	if (Tageslicht.state == OFF) {
+		logInfo("Garage","Garagen Tür geöffnet; schalte Garageninnenlicht ein.")
+		Garage_Kellertreppe.sendCommand(ON)
+	}
+	else
+		logInfo("Garage","Garagen Tür geöffnet; schalte Garageninnenlicht aber nicht ein.")
+
+	Kellertreppe_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Garageninnenlicht aus"
+when
+	Item Garage_Gartentuer_Kontakt changed to CLOSED 
+	or
+	Item Garage_Vordertuer_Kontakt changed to CLOSED 
+then
+	if ((Garage_Gartentuer_Kontakt.state != OPEN) && (Garage_Vordertuer_Kontakt.state == CLOSED )) {
+		logInfo("Garage","Garagen Tür geschlossen; schalte Garageninnenlicht aus.")
+		Garage_Kellertreppe.sendCommand(OFF)
+	}
+	else
+		Kellertreppe_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Garagenlicht wieder aus"
+when
+	Item Kellertreppe_Nachlauf received command OFF
+then
+	logInfo("Garage","Schalte Garagenlicht wieder aus.")
+       	Garage_Kellertreppe.sendCommand(OFF)
+end
+
+
+/*
+rule "Garagenschalter einfach"
+when
+	Item Szenenschalter_Garage received update 26
+then
+        logInfo("Garage", "Aussenschalter einfach gedrückt.")
+        if (Garage_Aussenlampe.state > 0) {
+        	Garage_Aussenlampe.sendCommand(0)
+	}
+	else {
+        	Garage_Aussenlampe.sendCommand(99)
+		waitTimer = createTimer(now.plusSeconds(Aussen_Nachlauf)) [|
+			if (Garage_Aussenlampe.state > 0) {
+        			logInfo("Garage", "und Aussenlicht wieder aus !")
+       				Garage_Aussenlampe.sendCommand(0)
+			}
+        	]
+	}
+
+end
+*/
+
+
+rule "Garagenschalter doppelt"
+when
+	Item Szenenschalter_Garage received update 24
+then
+        logInfo("Garage", "Aussenschalter doppelt gedrückt ...")
+        Garage_Aussenlampe.sendCommand(0)
+end
+
+
+rule "Garagenschalter dreifach"
+when
+	Item Szenenschalter_Garage received update 25
+	or
+	Item Szenenschalter_Garage received update 15
+then
+        logInfo("Garage", "Aussenschalter dreifach gedrückt, Haus wird verlassen ...")
+        Szene.sendCommand(0)
+end
+
+
+rule "Auto Frostschutz"
+when
+        Time cron "0 0 18 * * ?"
+then
+	var String Meldung
+
+	Meldung = "Achtung, heute nacht herrscht Frostgefahr. Auto-Frontscheibe abdecken !"
+	if ((Temp_min.state as Number) <= Temp_Frostgefahr) {
+		logInfo("Garage",Meldung)
+//		telegramAction.sendTelegram(markus_telegram_chatid.state, Meldung)
+		telegramAction.sendTelegram(Meldung)
+	}
+end
+

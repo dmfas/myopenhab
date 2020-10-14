@@ -1,0 +1,14 @@
+String HomBot_State "Luigi Status [%s]"			 <CleaningRobot> 	(HomBot)	{ channel="lghombot:LGHomBot:Luigi:state" }
+DateTime HomBot_lastClean "Luigi letzter Putzvorgang [%s]"		 	(HomBot)	{ channel="lghombot:LGHomBot:Luigi:lastClean" }
+Number HomBot_Battery "Luigi Batterie [%d %%]"					(HomBot)	{ channel="lghombot:LGHomBot:Luigi:battery" }
+Switch HomBot_Clean "Luigi Putzen"						(HomBot)	{ channel="lghombot:LGHomBot:Luigi:clean", alexa="PowerController.powerState" }
+Switch HomBot_Start "Luigi starten"						(HomBot)	{ channel="lghombot:LGHomBot:Luigi:start", alexa="PowerController.powerState" }
+Switch HomBot_Home  "Luigi Heimfahren"						(HomBot)	{ channel="lghombot:LGHomBot:Luigi:home", alexa="PowerController.powerState" }
+Switch HomBot_Pause "Luigi Pause"						(HomBot)	{ channel="lghombot:LGHomBot:Luigi:pause" }
+Switch HomBot_Turbo "Luigi Turbo"						(HomBot)	{ channel="lghombot:LGHomBot:Luigi:turbo" }
+Switch HomBot_Repeat "Luigi Wiederholen"					(HomBot)	{ channel="lghombot:LGHomBot:Luigi:repeat" }
+String HomBot_CleanMode "Luigi Putzmodus [%s]"					(HomBot)	{ channel="lghombot:LGHomBot:Luigi:mode" }
+String HomBot_Nickname "Luigi Nickname [%s]"					(HomBot)	{ channel="lghombot:LGHomBot:Luigi:nickname" }
+Image HomBot_Image "Luigi Kamera"						(HomBot)	{ channel="lghombot:LGHomBot:Luigi:camera" }
+Image HomBot_Map "Luigi Karte"							(HomBot)	{ channel="lghombot:LGHomBot:Luigi:map" }
+Number HomBot_Job

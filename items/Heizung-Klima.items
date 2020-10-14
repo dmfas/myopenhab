@@ -1,0 +1,126 @@
+// in diese Datei kommt alles, wofuer es kein eigenes Items-File gibt
+
+Number FBH_morgens_vorwaermen_Einstellung "FBH morgens vorwärmen [MAP(yesno.map):%s]"	<heating> (Einstellungen)
+Number Schwellwert_min_Luftfeuchte_Waschkeller "Schwellwert min rh Ventilator [%d %%]"	<humidity> (K_Waschkeller,Einstellungen,Lueftung)
+Number Schwellwert_max_Luftfeuchte_Waschkeller "Schwellwert max rh Ventilator [%d %%]"	<humidity> (K_Waschkeller,Einstellungen,Lueftung)
+Number Schwellwert_min_Temperatur_Waschkeller "Schwellwert min Temp [%.1f °C]"		<humidity> (K_Waschkeller,Einstellungen,Lueftung)
+Number Stummschaltung_Lueftung "Stummschaltung Lüftungsanlage [%.0f %%]"		<fan> (Einstellungen,Lueftung)
+Number Stummschaltung_Lueftung_Bianca "Stummschaltung Lüftungventil Bianca [%.0f %%]"	<fan> (Einstellungen,Lueftung)
+Number Stosslueftung_Dauer "Dauer Stosslüftung [%.0f %%]"				<fan> (Einstellungen,Lueftung)
+Number Lux_Durchschnitt_morgens "ø Ostseite aussen [%.0f lux]"				<sun> (Sonnenschutz)
+Number Lux_Durchschnitt_mittags "ø Südseite aussen [%.0f lux]"				<sun> (Sonnenschutz)
+Number Lux_Grenzwert_Sonnenschutz_morgens_niedrig "Schwellwert min morgens [%d lux]"	<sun> (Sonnenschutz,Einstellungen)
+Number Lux_Grenzwert_Sonnenschutz_morgens_hoch "Schwellwert max morgens [%d lux]"	<sun> (Sonnenschutz,Einstellungen)
+Number Lux_Grenzwert_Sonnenschutz_mittags_niedrig "Schwellwert min mittags [%d lux]"	<sun> (Sonnenschutz,Einstellungen)
+Number Lux_Grenzwert_Sonnenschutz_mittags_hoch "Schwellwert max mittags [%d lux]"	<sun> (Sonnenschutz,Einstellungen)
+Number UV_Grenzwert_Sonnenschutz "UV Schwellwert Sonnenschutz [UV index %.0f]"		<sun> (Sonnenschutz,Einstellungen)
+// Gruppenmitgliedschaft für Number:Intensity items macht Probleme bei Wertekonvertierung, openhab-core #1377/#1406
+Number:Intensity Sonneneinstrahlung "Sonneneinstrahlung [%.1f W/m²]"			<sun> (Sonnenschutz) { channel="astro:sun:local:radiation#total" }
+Number EWT_Zuheizung "EWT heizt unterhalb [%.1f °C]"					<heating> (Lueftung,Einstellungen)
+Number EWT_Kuehlung "EWT kühlt oberhalb [%.1f °C]"					<climate> (Lueftung,Einstellungen)
+Number:Temperature Aussentemp_Grenzwert_Sonnenschutz "Schwellwert Sonnenschutz aussen [%.1f °C]"	<temperature> (Sonnenschutz,Einstellungen)
+Number:Temperature Innentemp_Grenzwert_Sonnenschutz "Schwellwert Sonnenschutz innen [%.1f °C]"	<temperature> (Sonnenschutz,Einstellungen)
+Number:Temperature Aussentemp_Hysterese_Sonnenschutz "Hysterese Sonne aussen [%.1f °C]"	<temperature> (Sonnenschutz,Einstellungen)
+Number:Temperature Innentemp_Hysterese_Sonnenschutz "Hysterese Sonne innen [%.1f °C]"	<temperature> (Sonnenschutz,Einstellungen)
+Number Rollaedenstatus "Rolladenstatus [MAP(scene.map):%s]"				<rollershutter> (Einstellungen)
+Number Hysterese_Rollaeden "Schalttoleranz Rolläden [%d]"				<rollershutter> (Einstellungen)
+Switch Rolladenautomatik "Rolladenautomatik hausweit [MAP(yesno.map):%s]"		<rollershutter> (Einstellungen) { alexa="PowerController.powerState" }
+Switch Sonnenschutz_Bianca "Sonnenschutz Bianca [MAP(yesno.map):%s]"			<daylight> (EG_Bianca,Einstellungen) { alexa="PowerController.powerState" }
+Number Sonnenschutzschaltung "Sonnenschutz hausweit [MAP(shading.map):%s]"		<blinds> (Einstellungen)
+Number Sonnenschutz "Sonnenschutz [MAP(shading.map):%s]"				<blinds>
+Number Rollaeden_setzen "Rolläden setzen"						<rollershutter>
+
+Group:Number:AVG LuxAussen "Lichtintensität Aussensensoren"				<sun> (Sonnenschutz,Garten)
+Number:Temperature maxAugeSonnenkorrekturTemp "max. delta-T Temp Auge Sonne-Schatten zu dieser Uhrzeit [%.1f °C]" <temperature> (Sonnenschutz,Einstellungen)
+Number:Temperature maxAuge2SonnenkorrekturTemp "max. delta Temp Auge2 Sonne-Schatten zu dieser Uhrzeit [%.1f °C]" <temperature> (Sonnenschutz,Einstellungen)
+// Gruppenmitgliedschaft für Number:Intensity items macht Probleme bei Wertekonvertierung, openhab-core #1377/#1406
+Number:Intensity maxSonnenscheinRad "max. Einstrahlung zu dieser Uhrzeit [%.1f W/m²]"	<sun> (Sonnenschutz)
+Group:Number:AVG TempTerrasseRohwerte "Rohwerte Aussentemp. Terrasse in der Sonne [%.1f °C]"
+Number:Temperature Auge_Korrektur "Temp.korrektur Aussensensor Hausecke [%.1f °C]"	<temperature> (Sonnenschutz,Einstellungen)
+Number:Temperature Auge2_Korrektur "Temp.korrektur Aussensensor Bianca [%.1f °C]"	<temperature> (Sonnenschutz,Einstellungen)
+
+Group Thermostate "Thermostate"								<heating> (Status)
+Group OG_Markus_Thermo "Markus Zimmer"							<temperature> (OG_Markus,Heizung) { alexa="Endpoint.Thermostat" }
+Group OG_Lutz_Thermo "Lutz Zimmer"							<temperature> (OG_Lutz,Heizung) { alexa="Endpoint.Thermostat" }
+Group OG_Tim_Thermo "Tims Zimmer"							<temperature> (OG_Tim,Heizung) { alexa="Endpoint.Thermostat" }
+Group OG_Bad_Thermo "Badezimmer"							<temperature> (OG_Bad,Heizung) { alexa="Endpoint.Thermostat" }
+Group EG_Wohnen_Thermo "Wohnzimmer"							<temperature> (EG_Wohnen,Heizung) { alexa="Endpoint.Thermostat" }
+Group EG_Bianca_Thermo "Bianca"								<temperature> (EG_Bianca,Heizung) { alexa="Endpoint.Thermostat" }
+Group EG_Essen_Thermo "Esszimmer"							<temperature> (EG_Kueche,Heizung) { alexa="Endpoint.Thermostat" }
+Group EG_Kueche_Thermo "Küche"								<temperature> (EG_Kueche,Heizung) { alexa="Endpoint.Thermostat" }
+Group EG_Diele_Thermo "Diele"								<temperature> (EG_Diele,Heizung) { alexa="Endpoint.Thermostat" }
+Group EG_WC_Thermo "WC"									<temperature> (EG_WC,Heizung) { alexa="Endpoint.Thermostat" }
+Group K_Waschkeller_Thermo "Waschkeller"						<temperature> (K_Waschkeller,Heizung) { alexa="Endpoint.Thermostat" }
+Group K_ELW_Thermo "Einliegerwohnung"							<temperature> (K_ELW,Heizung) { alexa="Endpoint.Thermostat" }
+Group K_Buero_Thermo "Büro"								<calendar> (K_Buero,Heizung) { alexa="Endpoint.Thermostat" }
+Group K_WC_Thermo "Keller WC"								<calendar> (K_WC,Heizung) { alexa="Endpoint.Thermostat" }
+Group:Number:AVG SteuerTemp "Raumtemperaturen Steuergrößen"				<temperature> (Thermostate)
+Group:Number:AVG SollTempBoden "Raumtemperaturen Sollgrößen Boden"			<temperature> (Thermostate)
+Group:Number:AVG SollTempTherm "Raumtemperaturen Sollgrößen Thermostate"		<temperature> (Thermostate)
+Group:Number:AVG KorrekturTemp "Raumtemperaturen Korrekturwerte"			<temperature> (Thermostate)
+
+Group Temperatursensoren "Temperatursensoren"						<temperature> (Sensoren)
+Group:Number:AVG TempInnen "Raumtemperatur [%.1f °C]"		 			<temperature> (Temperatursensoren,Status)
+Group:Number:AVG TempAussen "Aussentemperatur [%.1f °C]"				<temperature> (Temperatursensoren,Status)
+
+Number Kuehlbedarf_Kellerkuehlschrank "Kühlbedarf Kellerkühlschrank ELW [%d]"		<climate> (K_ELW,Einstellungen)
+
+Group:Switch:OR(ON, OFF) Kellerlueftung "Lüftungsbedarf"				<fan> (Lueftung)
+Switch Waschkeller_Lueftung "Waschkeller auto-Lüften [MAP(yesno.map):%s]"		<fan> (Kellerlueftung,Lueftung,Einstellungen) { alexa="ToggleController.toggleState" }
+Switch Waschkeller_Lueftungsbedarf "Lüftungsbedarf Waschkeller [MAP(yesno.map):%s]"	<fan> (Kellerlueftung,Lueftung)
+
+Number:Power K_Waschkeller_Waschmaschine_Power "Leistg. Waschmaschine [%.1f W]"		<energy> (K_Waschkeller,Energie) { channel="zwave:device:ddd23e6c:node2:sensor_power"}
+Number:Power K_Waschkeller_Waschmaschine_Watt "Verbr. Waschmaschine [%.1f W]"		<energy> (K_Waschkeller,Energie) { channel="zwave:device:ddd23e6c:node2:meter_watts" }
+Number Waschmaschine_Status "Betriebszustand [MAP(washer.map):%s]"			<washingmachine> (K_Waschkeller,Status)
+Switch Waschmaschine_Benachrichtigung "Benachrichtg. Waschmaschine [MAP(yesno.map):%s]"	<washingmachine> (K_Waschkeller) { alexa="ToggleController.toggleState" }
+Switch Waschmaschine_ausgeraeumt "Waschmaschine ausgeräumt [MAP(yesno.map):%s]"		<washingmachine> (K_Waschkeller) { alexa="ToggleController.toggleState" }
+
+
+// Heizung
+Number:Temperature Soll_Temp_Diele "Diele [%.1f °C]"					<temperature> (EG_Diele_Thermo,EG_Diele,Heizung,SollTempBoden) { alexa="ThermostatController.targetSetpoint" }
+Number:Temperature Soll_Temp_WC "WC [%.1f °C]"						<temperature> (EG_WC_Thermo,EG_WC,Heizung,SollTempBoden) { alexa="ThermostatController.targetSetpoint" }
+Number:Temperature Soll_Temp_Kueche "Küche [%.1f °C]"					<temperature> (EG_Kueche_Thermo,EG_Kueche,Heizung,SollTempBoden) { alexa="ThermostatController.targetSetpoint" }
+Number:Temperature Soll_Temp_Essen "Esszimmer [%.1f °C]	"				<temperature> (EG_Essen_Thermo,EG_Kueche,Heizung,SollTempBoden) { alexa="ThermostatController.targetSetpoint" }
+Number:Temperature Soll_Temp_Bianca "Bianca [%.1f °C]"					<temperature> (EG_Bianca_Thermo,EG_Bianca,Heizung,SollTempBoden) { alexa="ThermostatController.targetSetpoint" }
+Number:Temperature Soll_Temp_Wohnen "Wohnzimmer [%.1f °C]"				<temperature> (EG_Wohnen_Thermo,EG_Wohnen,Heizung,SollTempBoden) { alexa="ThermostatController.targetSetpoint" }
+Number:Temperature Soll_Temp_Bad "Badezimmer [%.1f °C]"					<temperature> (OG_Bad_Thermo,OG_Bad,Heizung,SollTempBoden) { alexa="ThermostatController.targetSetpoint" }
+
+Number:Temperature default_Soll_Heizung_Tag_Diele "Default Diele [%.1f °C]"		<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_WC "Default WC [%.1f °C]"			<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Kueche "Default Küche [%.1f °C]"		<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Bianca "Default Bianca [%.1f °C]"		<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Essen "Default Essen [%.1f °C]"		<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Wohnen "Default Wohnen [%.1f °C]"		<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Bad "Default Bad [%.1f °C]"			<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Markus "Default Markus [%.1f °C]"		<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Tim	 "Default Tim [%.1f °C]"		<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_Lutz "Default Lutz [%.1f °C]"		<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_ELW "Default ELW [%.1f °C]"			<temperature> (Heizung)
+Number:Temperature default_Soll_Heizung_Tag_ELW_WC "Default ELW_WC [%.1f °C]"		<temperature> (Heizung)
+
+Number:Temperature Korrektur_Ist_Temp_Diele "Korrektur Diele [%.1f °C]"			<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_WC "Korrektur WC [%.1f °C]"			<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Kueche "Korrektur Küche [%.1f °C]"		<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Essen "Korrektur Esszimmer [%.1f °C]"		<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Wohnen "Korrektur Wohnzimmer [%.1f °C]"		<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Bianca "Korrektur Bianca [%.1f °C]"		<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Bad "Korrektur Bad [%.1f °C]"			<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Markus "Korrektur Markus [%.1f °C]"		<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Tim "Korrektur Tim [%.1f °C]"			<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_Lutz "Korrektur Lutz [%.1f °C]"			<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_ELW "Korrektur ELW [%.1f °C]"			<temperature> (Heizung,KorrekturTemp)
+Number:Temperature Korrektur_Ist_Temp_ELW_WC "Korrektur ELW-WC [%.1f °C]"		<temperature> (Heizung,KorrekturTemp)
+
+Number:Temperature Ist_Temp_Diele "Temperatur Diele [%.1f °C]"				<temperature> (EG_Diele_Thermo,EG_Diele,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_WC "Temperatur WC [%.1f °C]"				<temperature> (EG_WC_Thermo,EG_WC,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_Kueche "Temperatur Küche [%.1f °C]"				<temperature> (EG_Kueche_Thermo,EG_Kueche,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_Essen "Temperatur Esszimmer [%.1f °C]"			<temperature> (EG_Essen_Thermo,EG_Essen,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_Wohnen "Temperatur Wohnzimmer [%.1f °C]"			<temperature> (EG_Wohnen_Thermo,EG_Wohnen,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_Bianca "Temperatur Bianca [%.1f °C]"			<temperature> (EG_Bianca_Thermo,EG_Bianca,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_Bad "Temperatur Bad [%.1f °C]"				<temperature> (OG_Bad_Thermo,OG_Bad,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_Markus "Temperatur Markus [%.1f °C]"			<temperature> (OG_Markus_Thermo,OG_Markus,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_Tim "Temperatur Tim [%.1f °C]"				<temperature> (OG_Tim_Thermo,OG_Tim,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_Lutz "Temperatur Lutz [%.1f °C]"				<temperature> (OG_Lutz_Thermo,OG_Lutz,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_ELW "Temperatur ELW [%.1f °C]"				<temperature> (K_ELW_Thermo,K_ELW,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+Number:Temperature Ist_Temp_ELW_WC "Temperatur ELW-WC [%.1f °C]"			<temperature> (K_WC_Thermo,K_WC,Heizung,IstTemp) { alexa="TemperatureSensor.temperature" }
+

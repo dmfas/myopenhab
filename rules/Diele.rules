@@ -1,0 +1,174 @@
+val telegramAction = getActions("telegram","telegram:telegramBot:openhab")
+
+
+val Number default_Diele_Leuchtstaerke = 100
+val Number Diele_Leuchtstaerke_nachts = 15
+
+//val PercentType Lautstaerke_Klingel = 0.5
+val Number Lautstaerke_Klingel = 0.95
+val Number Klingellicht_Reset = 30
+
+var Number neue_Diele_Leuchtstaerke = 0
+var Number BlinkIntervall = 200
+var Number FinalIntervall = 400
+
+
+var HSBType oldState
+var boolean es_klingelt = false
+
+
+
+val Functions$Function3 <GroupItem,Number,Number,void> Blinken = [ g, duration, interval |
+	var Timer timer1 = null
+//	var Timer timer2 = null
+	var OnOffType s = g.getStateAs(OnOffType)
+
+	// Create a timer to blink the light for <duration> seconds
+	var DateTime endTime = now.plusSeconds(duration.intValue)
+	timer1 = createTimer(now, [ |
+		if (s == ON) {
+//			logDebug("Diele", "Sende Blinken, s = " + s + "; int = " + interval)
+			s = OFF
+		} else {
+//			logDebug("Diele", "Stoppe Blinken, s = " + s + "; int = " + interval)
+ 			s = ON
+		}
+		g.sendCommand(s)
+		if (now.isBefore(endTime)) {
+			timer1.reschedule(now.plusMillis(interval))
+		} else {
+			timer1 = null
+			g.sendCommand(OFF)
+		}
+	])
+//	timer2 = createTimer(endTime, [ |
+	createTimer(endTime, [ |
+		g.sendCommand(OFF)
+	])
+]
+
+
+
+rule "Diele Init virtual Items"
+when
+        System started
+then
+	es_klingelt = false
+	logInfo("Diele","Diele Initialisierung.")
+end
+
+
+rule "Dielenlicht an"
+when
+	// unter OH1 ist das ein sensor_binary => Contact mit OPEN/CLOSED, unter OH2 ist das ein Alarm !! => ON/OFF
+	Item EG_Diele_Auge changed to ON
+	or
+	Item EG_Diele_Eingangstuer_Kontakt changed to OPEN
+then
+	var Number Ist = (EG_Diele_Decke.state as Number)
+//	logDebug("Diele","Diele Auge hat angeschlagen, Lux Diele aktuell = " + EG_Diele_Auge_Lux.state + "; Soll/Ist = " + neue_Diele_Leuchtstaerke + "/" + Ist)
+
+	if (Ist == 0 && Tageslicht.state == OFF) {
+       		EG_Diele_Decke.sendCommand(neue_Diele_Leuchtstaerke)
+		Diele_Nachlauf.sendCommand(ON)
+	}
+end
+
+
+rule "Dielenlicht Nachlauf"
+when
+	Item EG_Diele_Auge changed to OFF
+then
+//	logDebug("Diele","Diele Auge wieder aus, Lux Diele aktuell = " + EG_Diele_Auge_Lux.state)
+        Diele_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Dielenlicht aus"
+when
+	Item Diele_Nachlauf received command OFF
+then
+	if (EG_Diele_Decke.state != 0) {
+//		logDebug("Diele","Schalte Dielenlicht aus.")
+        	EG_Diele_Decke.sendCommand(0)
+	}
+end
+
+
+rule "Helligkeit Diele setzen"
+when
+	Item EG_Diele_Auge_Lux received update 
+	or
+	Item EG_Diele_Auge changed
+then
+	var Number Lux = (EG_Diele_Auge_Lux.state as Number)
+	var Number Ist = (EG_Diele_Decke.state as Number)
+
+
+	if (Ist > 0) return;
+
+	if (Nachtschaltung.state == ON) {
+		neue_Diele_Leuchtstaerke = Diele_Leuchtstaerke_nachts
+//		logDebug("Diele","Diele Auge Nachtschaltung; Lux = " + Lux)
+	}
+	else {
+		if (Lux < 17) {
+			neue_Diele_Leuchtstaerke = ((17 - Lux) * 5) + 15
+//			logDebug("Diele","Diele Auge ; Lux = " + Lux + " <= 17; Ist = " + Ist)
+		}
+		else {
+			if (Ist == 0)
+				neue_Diele_Leuchtstaerke = 0
+//			logDebug("Diele","Diele Auge ; Lux = " + Lux + " > 17; Ist = " + Ist)
+		}
+	}
+
+//	logDebug("Diele","Diele Auge meldet " + Lux + "; Dielenlicht ist auf " + Ist + "; setze neue Leuchtstaerke = " + neue_Diele_Leuchtstaerke)
+end
+
+
+
+rule "geklingelt"
+when
+	Item EG_Diele_Klingel changed from OFF to ON
+then
+	val String msg = "Es hat an der Tür geklingelt !"
+	val Number Anzahl_Klingeltoene = 7
+	val Klingeltoene = newArrayList('doorbell.mp3', 'Klingelton-GranVals-Variation.mp3', 'Pferd-aufm-Flur.mp3', 'SMS_Alarm.mp3', 'Hells_Bells.mp3', 'laughter.mp3', 'Was_wolln_Sie_denn_hier.mp3')
+//	val Klingeltoene = newArrayList('silence-10sec.mp3', 'silence-10sec.mp3', 'silence-10sec.mp3', 'silence-10sec.mp3', 'silence-10sec.mp3', 'silence-10sec.mp3', 'silence-10sec.mp3')
+//	var String echo_msg
+
+
+	es_klingelt = true
+
+	if (Klingelton.state == NULL)
+		Klingelton.postUpdate(1)
+	var String s = Klingeltoene.get((Klingelton.state as Number).intValue)
+	var Number neuer_Klingelton = Klingelton.state
+
+
+	neuer_Klingelton = neuer_Klingelton + 1
+	if (neuer_Klingelton == Anzahl_Klingeltoene)	// im Array indiziert mit 0 bis (Anzahl - 1)
+		neuer_Klingelton = 0
+	Klingelton.postUpdate(neuer_Klingelton)
+
+//	setMasterVolume(Lautstaerke_Klingel) // funktioniert eh nicht, ggfs. nach Restart manuell alsamixer benutzen
+	logInfo("Diele", "Klingel gedrückt, Klingelton Nr. " + Klingelton.state + ", gewähltes MP3-File: " + s + "; previousState = " + previousState)
+
+//	echo_msg = "<speak>" + msg + "</speak>"
+//	Echo_Wohnen_TTS.sendCommand(echo_msg)
+	playSound (s)
+
+	logDebug("Diele", "Klingel Glocke, Sound " + s + " abgespielt.")
+
+
+	Blinken.apply(Blinklicht,10,1000)
+
+	telegramAction.sendTelegram((markus_telegram_chatid.state as Number).longValue(), msg)
+	es_klingelt = false
+
+	Klingel_Nachlauf.sendCommand(ON)
+
+	logDebug("Diele", "Klingelroutine beendet.")
+end
+

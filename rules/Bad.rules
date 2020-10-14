@@ -1,0 +1,183 @@
+val Number Bad_Leuchtstaerke_nachts = 3
+val Number Bad_Leuchtstaerke_tags = 0
+val Number Licht_Nachlauf = 1
+
+val Number Programm_Aus = 1
+val Number Programm_Kamin = 6
+val Number Programm_Sturm = 7
+val Number Programm_Regenbogen = 8
+val Number Programm_Aurora = 9
+val Number Programm_Polizei = 10
+
+val String Stimmungslicht_nachts = "160,80,8"
+val String Licht_aus = "0,0,0"
+
+
+var HSBType hsb
+var PercentType b
+var Timer LichtTimer
+var Timer LueftungsTimer
+
+var Number neue_Bad_Leuchtstaerke = 0
+var Number Lueftungsspeicher
+
+var java.util.Random rand
+
+
+rule "Bad betreten"
+when
+	Item OG_Bad_Auge changed to ON
+then
+	rand = new java.util.Random
+	var String Zufallsfarbe = rand.nextInt(360).toString + ",99,49";
+
+
+	if (Bad_Nachlauf.state == ON)
+		return;
+
+	OG_Bad_durchsichtig.sendCommand(OFF)
+
+	if (Nachtschaltung.state == ON) {
+//		logDebug("Bad","Setze Bad Nachtlicht ... Farbe = " + Zufallsfarbe + "; Decken-Leuchtstärke = " + Bad_Leuchtstaerke_nachts)
+        	hsb = new HSBType(Zufallsfarbe)
+		OG_Bad_Bodenstrip_RGBW.sendCommand(hsb)
+	} else {
+		if (Tageslicht.state == OFF) {
+//		logDebug("Bad","Schalte Bad Deckenlicht ein auf " + neue_Bad_Leuchtstaerke + ".")
+//     			OG_Bad_Decke.sendCommand(neue_Bad_Leuchtstaerke)
+			OG_Bad_Bodenstrip_Animation.sendCommand(Programm_Aurora)
+		}
+	}
+	// Sensor bleibt Dauer-An bei Aufenthalt
+	Bad_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Bad verlassen Nachlauf"
+when
+	Item OG_Bad_Auge changed to OFF
+then
+	Bad_Nachlauf.sendCommand(ON)
+end
+
+
+rule "Bad verlassen"
+when
+	Item Bad_Nachlauf received command OFF
+then
+	var HSBType hsb = new HSBType(Licht_aus)
+
+	// falls Sensor = ON dann Anwesenheit seit mehr als <Nachlauf> => Timer verlängern
+	if (OG_Bad_Auge.state == ON) {
+		Bad_Nachlauf.sendCommand(ON)
+
+		return;
+	}
+
+
+	if (Nachtschaltung.state == OFF && Tageslicht.state == ON) {
+       		OG_Bad_Decke.sendCommand(0)
+       		OG_Bad_durchsichtig.sendCommand(ON)
+		OG_Bad_Bodenstrip_Animation.sendCommand(Programm_Aus)
+		OG_Bad_Bodenstrip_RGBW.sendCommand(hsb)
+	} else
+		OG_Bad_Bodenstrip_RGBW.sendCommand(0)
+
+	logDebug("Bad","Schalte Badlicht aus.")
+end
+
+
+rule "Bad Helligkeit setzen"
+when
+	Item OG_Bad_Auge_Lux changed 
+	or
+	Item OG_Bad_Decke received command
+	or
+	Item OG_Bad_Decke received update
+then
+	var Number Lux = 0
+        var Number Ist = 0
+
+//	if (OG_Bad_Auge_Lux.state != NULL && OG_Bad_Decke.state != NULL) {
+	Lux = (OG_Bad_Auge_Lux.state as Number)
+	Ist = (OG_Bad_Decke.state as Number)
+//	}
+
+	if (Nachtschaltung.state == ON) {
+		neue_Bad_Leuchtstaerke = Bad_Leuchtstaerke_nachts
+	}
+	else {
+		neue_Bad_Leuchtstaerke = Bad_Leuchtstaerke_tags
+
+		if (Ist == 0) {
+			if (Lux < 11) 
+				neue_Bad_Leuchtstaerke = (10 - Lux) * 9 + 10
+			else
+				neue_Bad_Leuchtstaerke = 0
+		}
+	}
+
+//	logDebug("Bad","Bad Auge meldet " + Lux + "; Bad Deckenlicht ist auf " + Ist)
+	if (OG_Bad_Decke.state <= 10) {
+//		logDebug("Bad","Setzen neue Soll-Bad-Helligkeit auf " + neue_Bad_Leuchtstaerke)
+	} else {
+//		logDebug("Bad","Bad Deckenlampe ist noch an, Bad-Helligkeit wird ignoriert !")
+	}
+end
+
+
+rule "Badtuer innen einfach gedrueckt"
+when
+	Item Szenenschalter_Bad_Tuer received update 26
+	or
+	Item Szenenschalter_Bad_Tuer received update 16
+then
+	logDebug("Bad","Bad Tür Taster einmal gedrückt.")
+	if (OG_Bad_Decke.state > 0)
+		OG_Bad_Decke.sendCommand(OFF)
+	else
+		OG_Bad_Decke.sendCommand(ON)
+end
+
+
+rule "Badtuer innen doppelt gedrueckt"
+when
+	Item Szenenschalter_Bad_Tuer received update 24
+//	or
+//	Item Szenenschalter_Bad_Tuer received command 24
+then
+	logDebug("Bad","Bad Tür Taster doppelt gedrückt.")
+	if (OG_Bad_durchsichtig.state == ON)
+		OG_Bad_durchsichtig.sendCommand(OFF)
+	else
+		OG_Bad_durchsichtig.sendCommand(ON)
+end
+
+
+rule "Badtuer innen dreifach gedrueckt"
+when
+	Item Szenenschalter_Bad_Tuer received update 25
+//	or
+//	Item Szenenschalter_Bad_Tuer received command 25
+then
+	var Number Dauer = (Stosslueftung_Dauer.state as Number)
+	logInfo("Bad","Bad Tür Taster dreimal gedrückt, aktiviere Stosslüftung der KWL für " + Dauer + " Minuten (alter Modus KWL = " + Lueftung_Modus.state + ").")
+
+        if (LueftungsTimer !== null) {
+                LueftungsTimer.cancel
+                LueftungsTimer = null
+        }
+
+	Lueftung_Modus.sendCommand(4)
+	if (Lueftung_Modus.state < 4) {
+		Lueftungsspeicher = Lueftung_Modus.state as Number
+		Lueftung_Modus.sendCommand(4)
+        	LueftungsTimer = createTimer(now.plusMinutes(Dauer.intValue)) [|
+                	if ((OG_Bad_Auge.state == OFF) && (! OG_Bad_Auge.changedSince(now.minusMinutes(Dauer.intValue)))) {
+                        	Lueftung_Modus.sendCommand(Lueftungsspeicher)
+	                      	logDebug("Bad","Stosslüftung läuft seit " + Dauer + " Minuten, wird wieder deaktiviert.")
+                	}
+        	]
+	}
+
+end
