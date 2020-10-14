@@ -1,6 +1,4 @@
-var Timer waitTimer1
-var Timer waitTimer2
-var Timer waitTimer3
+val telegramAction = getActions("telegram","telegram:telegramBot:openhab")
 
 val Number EXEC_TIMEOUT = 20000
 
@@ -12,6 +10,11 @@ val Number Dauer_Anfeuer_Stummschaltung = 60
 
 val Number EWT_Schaltabstand = 0.5
 val Number EWT_default_kuehlen = 21.0	// EWT kuehlt, wenn Aussentemperatur oder Tagesminimum über diesem Wert liegt
+
+
+var Timer waitTimer1
+var Timer waitTimer2
+var Timer waitTimer3
 
 var Number EWT_Heizung_statisch
 var Number EWT_Kuehlung_statisch
@@ -385,6 +388,35 @@ then
 	val String value = transform("REGEX", ".*?VOC: (.*?), .*", rawout)
 	logDebug("Lueftung", "airsensor running resulted in " + rawout + "; transformed: " + value + "\n")
 	Luftguete.postUpdate(value)
+end
+
+
+rule "Fenster offen ?"
+when
+        Item Fensteroeffnung_ueberpruefen changed
+	or
+	Member of Fenster changed
+	or
+	Time cron "30 * * ? * *"
+then
+	val Boolean offeneFenster = false
+	var String msg = "Fenster zu lange offen:"
+
+//	val Number offene = Fenster.members.filter(s | s.state == OPEN).size as Number
+//	logDebug("Energie", "debug Oeffnungspruefung: " + offene + " Fenster sind offen; Schwellwert = " + Fensteroeffnung_maxDauer)
+
+	Fenster.members.filter(s | s.state == OPEN).forEach [ f |
+		if (! f.changedSince(now.minusMinutes((Fensteroeffnung_maxDauer.state as Number).intValue()))) {
+			logDebug("Energie", "Fenster " + f.label + " ist länger als " + Fensteroeffnung_maxDauer.state + " Minute offen.")
+			msg = msg + " " + f.label
+			offeneFenster = true
+		}
+	]
+        if (offeneFenster) {
+		logWarn("Energie", msg)
+		getActions("telegram","telegram:telegramBot:openhab")
+		telegramAction.sendTelegram((markus_telegram_chatid.state as Number).longValue(), msg)
+	}
 end
 
 // vim: syntax=Xtend

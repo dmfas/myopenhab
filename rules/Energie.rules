@@ -51,7 +51,7 @@ then
 end
 */
 
-
+/*
 rule "Fenster offen ?"
 when
         Item Fensteroeffnung_ueberpruefen changed
@@ -60,15 +60,15 @@ when
 	or
 	Time cron "30 * * ? * *"
 then
-	var String msg = "Fenster sind noch offen:"
-
 	val Boolean offeneFenster = false
-	val Number offene = Fenster.members.filter(s | s.state == OPEN).size as Number
-	logDebug("Energie", "debug Oeffnungspruefung: " + offene + " Fenster sind offen; Schwellwert = " + Fensteroeffnung_maxDauer)
+	var String msg = "Fenster zu lange offen:"
+
+//	val Number offene = Fenster.members.filter(s | s.state == OPEN).size as Number
+//	logDebug("Energie", "debug Oeffnungspruefung: " + offene + " Fenster sind offen; Schwellwert = " + Fensteroeffnung_maxDauer)
 
 	Fenster.members.filter(s | s.state == OPEN).forEach [ f |
 		if (! f.changedSince(now.minusMinutes((Fensteroeffnung_maxDauer.state as Number).intValue()))) {
-			logDebug("Energie", "Fenster " + f.label + " ist länger als " + Fensteroeffnung_maxDauer.state + " Minuten offen.")
+			logDebug("Energie", "Fenster " + f.label + " ist länger als " + Fensteroeffnung_maxDauer.state + " Minute offen.")
 			msg = msg + " " + f.label
 			offeneFenster = true
 		}
@@ -79,4 +79,4 @@ then
 		telegramAction.sendTelegram((markus_telegram_chatid.state as Number).longValue(), msg)
 	}
 end
-
+*/
