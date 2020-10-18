@@ -1,4 +1,8 @@
-val java.util.Random rand
+val Number morgens = 1
+val Number tags = 2
+val Number abends = 3
+val Number nachts = 4
+val Number Aus = 0
 
 val Number Programm_Aus = 1
 val Number Programm_Kamin = 6
@@ -107,20 +111,6 @@ then
 	AVR_Power.sendCommand(ON)
 	EG_Wohnen_TV.sendCommand(UP)
 
-	if (receivedCommand == 100) {
-		if (Tageslicht.state == OFF || EG_Wohnen_Auge_Lux.state < TV_Helligkeitsschwellwert)
-			hsb = new HSBType(Treppe_TV)
-		else
-			hsb = new HSBType(Licht_aus)
-//		EG_Wohnen_Decke_W.sendCommand(Deckenwert_TV)
-//		EG_Wohnen_Decke2_W.sendCommand(Deckenwert_TV)
-	} else {
-		hsb = new HSBType(Treppe_Kino)
-        	EG_Kueche_Decke.sendCommand(OFF)
-		mobil_Zwischenstecker20.sendCommand(OFF)
-	}
-	EG_Treppe_RGBW.sendCommand(hsb)
-
 	if (receivedCommand == 100) 
 		hsb = new HSBType(Wohnen_TV)
 	else
@@ -130,14 +120,25 @@ then
 	EG_Wohnen_Decke2_RGBW.sendCommand(hsb)
 	EG_Wohnen_Decke2_W.sendCommand(0)
 
+	EG_Wohnen_Spots_Mitten.sendCommand(0)
+	EG_Wohnen_Spots_Ecken.sendCommand(0)
+
+	if (receivedCommand == 100) {
+		if (Tageslicht.state == OFF || EG_Wohnen_Auge_Lux.state < TV_Helligkeitsschwellwert)
+			hsb = new HSBType(Treppe_TV)
+		else
+			hsb = new HSBType(Licht_aus)
+	} else {
+		hsb = new HSBType(Treppe_Kino)
+        	EG_Kueche_Decke.sendCommand(OFF)
+	}
+	EG_Treppe_RGBW.sendCommand(hsb)
+
         EG_Wohnen_Decke_Krone.sendCommand(0)
         EG_Essen_Decke.sendCommand(0)
 	EG_Kuechenlichter_Deckenstrip.sendCommand(0)
 	EG_Kuechenlichter_Haengeschrank.sendCommand(0)
 	EG_Kuechenlichter_Insel.sendCommand(0)
-
-	EG_Wohnen_Spots_Mitten.sendCommand(0)
-	EG_Wohnen_Spots_Ecken.sendCommand(0)
 
 	logInfo("Szenen","Schalte Szene " + receivedCommand + " TV/Kino.");
 end
@@ -300,9 +301,10 @@ then
 end
 
 
-rule "Alexa-Szenen"
+rule "Alexa-Szenen An"
 when
-        Item Szene_TV received command
+	Member of Szenen received command ON
+/*        Item Szene_TV received command
 	or
         Item Szene_Kino received command
 	or
@@ -314,7 +316,7 @@ when
 	or
         Item Szene_nachts received command
 	or
-        Item Szene_Aus received command
+        Item Szene_Aus received command */
 then
 	var String s = "tagsueber"
 
@@ -326,40 +328,152 @@ then
 	}
 
 	switch (s) {
-		case "TV": {
-			Rollaeden_setzen.sendCommand(100)
-			Szene.sendCommand(100)
+		case "TV",
+		case "Prime",
+		case "Netflix",
+		case "DisneyPlus",
+		case "AppleTV",
+		case "YouTube": {
+			if (Rollaedenstatus.state != 100) {
+				Rollaeden_setzen.sendCommand(100)
+				Szene.sendCommand(100)
+			}
+		}
+	}
+	switch (s) {
+		case "Prime": {
+			TV_Provider.sendCommand(1)
+		}
+		case "Netflix": {
+			TV_Provider.sendCommand(2)
+		}
+		case "DisneyPlus": {
+			TV_Provider.sendCommand(3)
+		}
+		case "AppleTV": {
+			TV_Provider.sendCommand(4)
+		}
+		case "YouTube": {
+			TV_Provider.sendCommand(5)
 		}
 		case "Kino": {
 			Rollaeden_setzen.sendCommand(101)
 			Szene.sendCommand(101)
 		}
 		case "morgens": {
-			Szene.sendCommand(1)
+			Szene.sendCommand(morgens)
 		}
 		case "tagsueber": {
-			Rollaeden_setzen.sendCommand(2)
-			Szene.sendCommand(2)
+			Rollaeden_setzen.sendCommand(tags)
+			Szene.sendCommand(tags)
 		}
 		case "abends": {
-			Szene.sendCommand(3)
+			Szene.sendCommand(abends)
 		}
 		case "nachts": {
-			Szene.sendCommand(4)
+			Szene.sendCommand(nachts)
 		}
 		case "Aus": {
-			Szene.sendCommand(0)
+			Szene.sendCommand(Aus)
 		}
 	}
 
-	var String t = "Szenen-Auftrag von Alexa erhalten für Szene " + s + "."
 
 	if (Durchsagen.state == ON) {
+		var String t = "Szenen-Auftrag von Alexa erhalten für Szene " + s + "."
+
 		t += " Verkünde Szene via Echo."
 		// Echo via amazonechocontrol
 //		Echo_Wohnen_TTS_Volume.sendCommand(Durchsagen_Lautstaerke.state)
 		Echo_Wohnen_TTS.sendCommand("Szene " + s)
 	}
-        logInfo("Szenen", t)
+        logInfo("Szenen", "Szene " + s + " aktiviert.")
+end
+
+
+rule "Alexa-Szenen Aus"
+when
+	Member of Szenen received command OFF
+then
+	var Number neue_Szene
+
+	if (Tageslicht.state == ON) 
+		neue_Szene = tags
+	else
+		if (Nachtschaltung.state == OFF)
+			neue_Szene = abends
+		else
+			neue_Szene = nachts
+	if (Rollaedenstatus.state == 100 || Rollaedenstatus.state == 101) {
+		EG_Wohnen_TV.sendCommand(DOWN)
+		Rollaeden_setzen.sendCommand(neue_Szene)
+	}
+	Szene.sendCommand(neue_Szene)
+	logInfo("Wohnen", "Stelle zu dieser Tageszeit übliche Beleuchtung wieder her.")
+end
+
+
+rule "TV Provider setzen" when
+	Item TV_Provider received command
+then
+/*
+curl -X POST http://192.168.178.57:8001/api/v2/applications/3201512006785	// Prime
+curl -X POST http://192.168.178.57:8001/ws/apps/Netflix				// Netflix
+curl -X POST http://192.168.178.57:8001/api/v2/applications/3201901017640	// Disney+
+curl -X POST http://192.168.178.57:8001/api/v2/applications/3201807016597	// Apple TV
+curl -X POST http://192.168.178.57:8001/ws/apps/YouTube				// YouTube
+curl -X POST http://192.168.178.57:8001/api/v2/applications/3201512006963	// Plex
+*/
+	val timeout = 5000
+	val TVprefix = "http://192.168.178.57:8001/"
+	val PrimeURL = TVprefix + "api/v2/applications/3201512006785"		// Prime
+	val NetflixURL = TVprefix + "ws/apps/Netflix"				// Netflix
+	val DisneyPlusURL = TVprefix + "api/v2/applications/3201901017640"	// Disney+
+	val AppleTvURL = TVprefix + "api/v2/applications/3201807016597"		// Apple TV
+	val YouTubeURL = TVprefix + "ws/apps/YouTube"				// YouTube
+	val PlexURL = TVprefix + "api/v2/applications/3201512006963"		// Plex
+
+	var String curlout
+	var String appname
+
+
+	TV_alive.sendCommand(ON)	// WakeOnLAN
+	EG_Wohnen_TV.sendCommand(UP)	// Klappe hoch
+//	logDebug("Szenen", "TV auf " + TV_Provider.state + " schalten; receivedCommand = " + receivedCommand)
+
+	switch (receivedCommand) {
+		case 1: {
+			//curlout = sendHttpGetRequest("http://samsungtv:8001/api/v2/applications/3201512006785",timeout)
+			//curlout = sendHttpGetRequest(PrimeURL,timeout)
+		        curlout = executeCommandLine("curl -X POST " + PrimeURL, timeout)
+			appname = "Prime"
+		}
+		case 2: {
+			curlout = sendHttpPostRequest(NetflixURL,timeout)
+		        //curlout = executeCommandLine("curl -X POST " + NetflixURL, timeout)
+			appname = "Netflix"
+		}
+		case 3: {
+			curlout = sendHttpRequest(DisneyPlusURL,timeout)
+		        //curlout = executeCommandLine("curl -X POST " + DisneyPlusURL, timeout)
+			appname = "DisneyPlus"
+		}
+		case 4: {
+			//curlout = sendHttpGetRequest(AppleTvURL,timeout)
+		        curlout = executeCommandLine("curl -X POST " + AppleTvURL, timeout)
+			appname = "AppleTV"
+		}
+		case 5: {
+			//curlout = sendHttpGetRequest(YouTubeURL,timeout)
+		        curlout = executeCommandLine("curl -X POST " + YouTubeURL, timeout)
+			appname = "YouTube"
+		}
+		case 6: {
+			//curlout = sendHttpGetRequest(PlexURL,timeout)
+		        curlout = executeCommandLine("curl -X POST " + PlexURL, timeout)
+			appname = "Plex"
+		}
+	}
+	logDebug("Wohnen", "Fernseher auf " + appname + " geschaltet:\n" + curlout)
 end
 

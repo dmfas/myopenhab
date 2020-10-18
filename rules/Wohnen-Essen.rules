@@ -1,13 +1,13 @@
-var Timer waitTimer
+val String Aus = "0,0,0"
+
+val Number Lux_Rueckwaertsfenster = 10		// min.
+val Number TVcheckInterval = 5			// sec.
+var Timer TVausTimer
 
 var HSBType hsbValue
 var String redValue
 var String blueValue
 var String greenValue
-
-val String Aus = "0,0,0"
-
-val Number Lux_Rueckwaertsfenster = 10
 
 var boolean TV_Klappe_offen = false
 
@@ -45,11 +45,33 @@ then
 end
 
 
-rule "Saeule einfach"
+rule "wurde TV wirklich ausgeschaltet"
 when
-	Item Szenenschalter_Saeule received update 26
+	Item TV_Power changed to OFF
 then
-	if (Szene.state != 100) {
+        if (TVausTimer !== null) {
+                TVausTimer.cancel
+                TVausTimer = null
+        }
+	logDebug("Wohnen","debug TV wurde per Fernbedienung ausgestellt.")
+
+        TVausTimer = createTimer(now.plusSeconds(TVcheckInterval.intValue)) [|
+		if (! TV_Power.changedSince(now.minusSeconds(TVcheckInterval.intValue))) {
+			TV_Power_bestaetigt.sendCommand(OFF)
+			logDebug("Wohnen","TV Szene wird beendet.")
+                }
+        ]
+end
+
+
+rule "TV Szene an/aus"
+when
+	// Schalter 1x gedrückt
+	Item Szenenschalter_Saeule received update 26
+	or
+	Item TV_Power_bestaetigt received command OFF
+then
+	if (Szene.state != 100 && Szene.state != 101) {
 		Szene.sendCommand(100)
 		Rollaeden_setzen.sendCommand(100)
 		logInfo("Wohnen", "Säulenschalter einfach gedrückt, stelle TV-Umgebung her.")
@@ -61,7 +83,7 @@ then
 		EG_Wohnen_TV.sendCommand(DOWN)
 		Rollaeden_setzen.sendCommand(neue_Szene)
 		Szene.sendCommand(neue_Szene)
-		logInfo("Wohnen", "Säulenschalter einfach gedrückt, stelle übliche Beleuchtung wieder her.")
+		logInfo("Wohnen", "TV ausgeschaltet, stelle übliche Beleuchtung wieder her.")
 	}
 end
 

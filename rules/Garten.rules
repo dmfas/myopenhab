@@ -423,7 +423,7 @@ end
 
 rule "Landroid Status-Update"
 when
-	Time cron "0/10 * * ? APR-NOV MON-SAT"
+	Time cron "0/10 * * ? APR-OCT MON-SAT"
 then
 	var String state
 	var String msg

@@ -13,8 +13,8 @@ from configuration import markus_telegram_chatid, LOG_PREFIX
 
 
 @rule("battery monitor", description="check battery percentage", tags=["battery"])
-# @when("Time cron 0 0 1 * * ?")
-@when("Time cron 0/10 * * * * ?")
+@when("Time cron 0 0 1 * * ?")
+#@when("Time cron 0/10 * * * * ?")
 def battery_check(event):
     """monitors battery charge state"""
     low_battery_threshold = 20

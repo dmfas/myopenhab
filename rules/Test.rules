@@ -177,36 +177,6 @@ end
 */
 
 /*
-rule "switch TV to Prime" when
-	Item TVtest received command
-then
-	var String curlout
-	var String appname
-
-
-	EG_Wohnen_TV.sendCommand(UP)	// Klappe hoch
-	TV_alive.sendCommand(ON)	// WakeOnLAN
-
-curl -X POST http://192.168.178.57:8001/ws/apps/YouTube curl -X POST http://192.168.178.57:8001/ws/apps/Netflix
-
-curl -X POST http://192.168.178.57:8001/api/v2/applications/3201512006963 (Plex)
-
-curl -X POST http://192.168.178.57:8001/api/v2/applications/3201512006785 (Prime)
-
-curl -X POST http://192.168.178.57:8001/api/v2/applications/3201807016597 (Apple TV)
-
-curl -X POST http://192.168.178.57:8001/api/v2/applications/3201901017640 (Disney+)
-	switch (receivedCommand) {
-		case 1: {
-			curlout = sendHttpGetRequest("http://samsungtv:8001/api/v2/applications/3201512006785",5000)
-			appname = "prime app"
-		}
-	}
-	logDebug("Test", "Instructed TV to switch to " + appname + ":\n" + curlout)
-end
-*/
-
-/*
 rule "test update proxy temperature values"
 when
 	Item TempTerrasseRohwerte changed
@@ -374,6 +344,34 @@ then
 end
 
 
+rule "TTS Test 3"
+when
+	Item Echo_Wohnen_LastVoiceCommand changed to "beleidige tim"
+	or 
+	Item Echo_Wohnen_LastVoiceCommand changed to "beleidige lutz"
+then
+	var String tim = "Tim hat Füße fleischiger als ein Hobbit."
+	var String lutz = "Lutz kickert schlechter als ein Minion."
+
+	var String s = triggeringItem.state.toString.replace('beleidige ','')
+	var String msg = "<speak>" +
+		"<audio src=\"soundbank://soundlibrary/home/amzn_sfx_doorbell_chime_01\" />" +
+
+	switch (s) {
+		case "tim": {
+			msg = msg + tim
+		}
+		case "lutz": {
+			msg = msg + lutz
+		}
+	}
+	msg = msg + "</speak>"
+
+        logDebug("Test","Ansage " + msg + " mit Lautstaerke " + Durchsagen_Lautstaerke.state)
+	Echo_Wohnen_TTS.sendCommand(msg)
+end
+
+
 /*
 rule "debug ICAL"
 when
@@ -390,15 +388,16 @@ then
 end
 */
 
-rule "Batterie wird geladen oder nicht"
+rule "Alexa - Fenster offen"
 when
-	Item PVtotalDCpower received update
-	or
-	Item PVtotalActivePower received update
+    Member of Amazon_Echos changed to "sind noch fenster offen"
 then
-	var OnOffType batteryCharges = (if (PVtotalDCpower.state >= PVtotalActivePower.state) ON else OFF)
-
-//        logDebug("Test","update PV Überschuss: " + PVtotalDCpower.state + " >? " + PVtotalActivePower.state + " = " + batteryCharges)
-	testBatteryIsCharging.postUpdate(batteryCharges)
+val currentEcho = Amazon_Echos.members.sortBy[lastUpdate].last
+    val OffeneFenster = Fenster.members.filter[ i | i.state == OPEN ].map[ label ].reduce[ s, label | s + ", " + label ]
+      if(Fenster.state == OPEN)   {
+currentEcho.sendCommand("Ja, folgende Fenster sind geöffnet. " + OffeneFenster)
+        }
+      else {
+currentEcho.sendCommand("Nein alle Fenster sind zu")
+      }
 end
-

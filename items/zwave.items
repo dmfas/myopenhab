@@ -193,7 +193,7 @@ Rollershutter EG_Essen_Rolladen "Esszimmer Rolladen [%d %%]"		<rollershutter>	(E
 Number:Power EG_Essen_Rolladen_Watt "Leistung Esszimmer [%.1f W]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node98:meter_watts" }  
 Number:Energy EG_Essen_Rolladen_Verbrauch "Verbr. Esszimmer [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node98:meter_kwh" }  
 
-Number Szenenschalter_Saeule "Szenenschalter Säule Essen/Wohnen"	<switch>	(Szenen)				{ channel="zwave:device:ddd23e6c:node51:scene_number" }
+Number Szenenschalter_Saeule "Szenenschalter Säule Essen/Wohnen"	<switch>	(Szenenschalter)			{ channel="zwave:device:ddd23e6c:node51:scene_number" }
 
 
 // Küche
@@ -317,7 +317,7 @@ Number:Energy EG_Bianca_Rolladen_Verbrauch "Verbr. Rolladen [%.2f kWh]"	<energy>
 // WC
 Dimmer EG_WC_Decke "WC Deckenlicht [%d %%]"				<whites>	(EG_WC,Dimmerschalter,Lichter)		{ channel="zwave:device:ddd23e6c:node127:switch_dimmer1",
 											alexa="PowerController.powerState,BrightnessController.brightness" } 
-Number Szenenschalter_WC_Tuer "Szenenschalter WC Tür"			<switch>        (Szenen)                               	{ channel="zwave:device:ddd23e6c:node127:scene_number" }
+Number Szenenschalter_WC_Tuer "Szenenschalter WC Tür"			<switch>        (Szenenschalter)			{ channel="zwave:device:ddd23e6c:node127:scene_number" }
 Switch EG_WC_Auge "Bewegung WC [MAP(motion.map):%s]"			<present>	(EG_WC,BewegungsmelderInnen)		{ channel="zwave:device:ddd23e6c:node36:alarm_motion" }
 Number:Temperature EG_WC_Auge_Temp "Roh-Temperatur [%.1f °C]"		<temperature>	(EG_WC,SteuerTemp,TempInnen)		{ channel="zwave:device:ddd23e6c:node36:sensor_temperature" }
 Number EG_WC_Auge_Lux "Helligkeit WC Auge [%.0f lux]"			<brightness>	(EG_WC,Lichtsensoren)			{ channel="zwave:device:ddd23e6c:node36:sensor_luminance" }
@@ -342,7 +342,7 @@ Dimmer Garage_Aussenlampe "Einfahrt Aussenleuchte"			<whites>	(Garage,Blinklicht
 											alexa="PowerController.powerState,BrightnessController.brightness" }
 //Switch EG_Eingangstuer "Eingangstür"					<frontdoor>	(EG_Diele)				{ channel="zwave:device:ddd23e6c:node159:lock_door" }
 //Switch EG_Eingangstuer_battery "Batterie Eingangstür"			<battery>	(EG_Diele)				{ channel="zwave:device:ddd23e6c:node159:battery-level" }
-Number Szenenschalter_Garage "Szenenschalter Garage"			<switch>	(Szenen)				{ channel="zwave:device:ddd23e6c:node19:scene_number" }
+Number Szenenschalter_Garage "Szenenschalter Garage"			<switch>	(Szenenschalter)			{ channel="zwave:device:ddd23e6c:node19:scene_number" }
 
 
 // Kabuff
@@ -377,8 +377,8 @@ Dimmer EG_Treppe_W "Treppenlicht Warmweiß [%.0f %%]"			<light_led>	(Treppe,Blin
 Number:Power EG_Treppe_Watt "Leistung Treppe [%.1f W]"			<energy>	(Treppe,Energie)			{ channel="zwave:device:ddd23e6c:node56:meter_watts" }
 Number:Energy EG_Treppe_Verbrauch "Verbrauch Treppe [%.2f kWh]"		<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node56:meter_kwh" }
 
-Number Szenenschalter_Treppe "Szenenschalter Treppenfuss"		<switch>	(Szenen)				{ channel="zwave:device:ddd23e6c:node15:scene_number" }
-Number Szenenschalter_Empore "Szenenschalter Empore"			<switch>	(Szenen)				{ channel="zwave:device:ddd23e6c:node58:scene_number" } 
+Number Szenenschalter_Treppe "Szenenschalter Treppenfuss"		<switch>	(Szenenschalter)			{ channel="zwave:device:ddd23e6c:node15:scene_number" }
+Number Szenenschalter_Empore "Szenenschalter Empore"			<switch>	(Szenenschalter)			{ channel="zwave:device:ddd23e6c:node58:scene_number" } 
 
 
 // Tim
@@ -419,7 +419,7 @@ Dimmer OG_Bad_Decke "Bad Deckenlicht [%d %%]"				<whites>	(OG_Bad,Dimmerschalter
 											alexa="PowerController.powerState,BrightnessController.brightness" }
 Number:Power OG_Bad_Decke_Watt "Leistung Decke [%.1f W]"		<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node27:meter_watts" }
 Number:Energy OG_Bad_Decke_Verbrauch "Verbrauch Decke [%.2f kWh]"	<energy>	(Energie)				{ channel="zwave:device:ddd23e6c:node27:meter_kwh" }  
-Number Szenenschalter_Bad_Tuer "Szenenschalter Bad Tür"			<switch>        (Szenen)                               	{ channel="zwave:device:ddd23e6c:node27:scene_number" }
+Number Szenenschalter_Bad_Tuer "Szenenschalter Bad Tür"			<switch>        (Szenenschalter)			{ channel="zwave:device:ddd23e6c:node27:scene_number" }
 //Switch OG_Bad_Auge "Bad Auge [MAP(motion.map):%s]"			<present>	(OG_Bad,BewegungsmelderInnen)		{ channel="zwave:device:ddd23e6c:node48:sensor_binary" }
 Switch OG_Bad_Auge "Bad Auge [MAP(motion.map):%s]"			<present>	(OG_Bad,BewegungsmelderInnen)		{ channel="zwave:device:ddd23e6c:node48:alarm_motion" }
 Number:Temperature OG_Bad_Auge_Temp "Roh-Temperatur [%.1f °C]"		<temperature>	(OG_Bad,SteuerTemp,TempInnen)		{ channel="zwave:device:ddd23e6c:node48:sensor_temperature" }

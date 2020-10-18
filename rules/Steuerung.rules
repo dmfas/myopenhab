@@ -157,7 +157,6 @@ then
 				EG_Wohnen_Rolladen.sendCommand(UP)
 			}
 			logDebug("Steuerung", "Rolladen_setzen: alle Rolläden geöffnet, starte (z.Zt. ignoriere) Befehl für Sonnenschutz ...")
-//			logDebug("Steuerung", "Sonnenschutzschaltung = " + Sonnenschutzschaltung.state)
 		}
 
 		case 3,
@@ -178,8 +177,10 @@ then
 			EG_WC_Rolladen.sendCommand(geschlossen)
 		}
 		case 100: {
-       			check_close_blinds.apply(EG_Wohnen_Jalousie_links,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
-       			check_close_blinds.apply(EG_Wohnen_Jalousie_links_Lamellen,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+			if (now.getMonthOfYear > 3 && now.getMonthOfYear < 10) {
+       				check_close_blinds.apply(EG_Wohnen_Jalousie_links,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+       				check_close_blinds.apply(EG_Wohnen_Jalousie_links_Lamellen,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)
+			}
 		}
 		case 101: {
        			check_close_blinds.apply(EG_Wohnen_Jalousie_links,EG_Wohnen_li1_Kontakt,EG_Wohnen_li2_Kontakt,geschlossen)

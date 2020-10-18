@@ -18,19 +18,19 @@ sitemap home label="unser Haus"
 //  "Power feed-in the grid" - genaue Bedeutung unklar
 //			Text item=PVstateFeedInPower label="Netzeinspeisung [MAP(invis.map):%s]" icon="status" visibility=[PVstateFeedInpower==1]
 			Text item=PVstateImportPowerFromGrid label="Haus bezieht aus dem Netz [MAP(invis.map):%s]" icon="status" visibility=[PVstateImportPowerFromGrid==1]
-			Text item=PVphaseAcurrent label="Phase A Stromstärke [%.1f A]" icon="energy"
-			Text item=PVphaseBcurrent label="Phase B Stromstärke [%.1f A]" icon="energy"
-			Text item=PVphaseCcurrent label="Phase C Stromstärke [%.1f A]" icon="energy"
+//			Text item=PVphaseAcurrent label="Phase A Stromstärke [%.1f A]" icon="energy"
+//			Text item=PVphaseBcurrent label="Phase B Stromstärke [%.1f A]" icon="energy"
+//			Text item=PVphaseCcurrent label="Phase C Stromstärke [%.1f A]" icon="energy"
 			Text item=PVtotalDCpower label="generierte PV Leistung [%d W]" icon="energy"
 			Text item=PVloadPower label="aktueller Verbrauch [%.0f W]" icon="energy"
 			Text item=PVexportPower label="aktuelle Einspeisung [%.0f W]" icon="energy"
-			Text item=PVtotalActivePower label="Leistungsabgabe PV plus Batterie an Haus plus Netz [%.0f W]" icon="energy"
+			Text item=PVtotalActivePower label="Leistungsabgabe PV plus Batterie an Haus plus Netz [%.0f W]" icon="energy" visibility=[PVtotalActivePower>0]
 //			Text item=PVbatteryPower label="Batterie Leistung absolut [%.0f W]" icon="battery"
 
-			Text item=PVbatteryPower label="Leistungsabgabe Batterie lt. Status-Bit [%.0f W]" icon="battery" visibility=[PVstateBatteryCharging==OFF]
-			Text item=PVbatteryPower label="Ladeleistung Batterie lt. Status-Bit [%.0f W]" icon="battery" visibility=[PVstateBatteryCharging==ON]
+			Text item=PVbatteryPower label="Leistungsabgabe Batterie lt. Status-Bit [%.0f W]" icon="battery" visibility=[PVstateBatteryDischarging==1]
+			Text item=PVbatteryPower label="Batterieladung lt. Status-Bit [%.0f W]" icon="battery" visibility=[PVstateBatteryCharging==1]
 			Text item=PVbatteryPower label="Leistungsabgabe Batterie lt. eigener Berechnung [%.0f W]" icon="battery" visibility=[testBatteryIsCharging==OFF]
-			Text item=PVbatteryPower label="Ladeleistung Batterie lt. eigener Berechnung [%.0f W]" icon="battery" visibility=[testBatteryIsCharging==ON]
+			Text item=PVbatteryPower label="Batterieladung lt. eigener Berechnung [%.0f W]" icon="battery" visibility=[testBatteryIsCharging==ON]
 
 			Text item=PVbatteryLevel label="Batterieladestand [%.1f %%]" icon="battery"
 			Text item=PVinsideTemperature label="Wechselrichter Temperatur [%.1f °C]" icon="temperature"
@@ -132,6 +132,9 @@ sitemap home label="unser Haus"
 		Switch item=mobil_Zwischenstecker7
 	}
 	Group item=Test label="Test" icon="settings" {
+		Switch item=TV_Provider label="[%d]" icon="screen" mappings=[1="Prime",2="Netflix",3="Disney+",4="AppleTV",5="YouTube",6="Plex"]
+		Switch item=TV_Power label="TV An/Aus" icon="control_on_off"
+		Switch item=EG_Wohnen_TV label="TV-Klappe" icon="rollershutter"
 		Switch item=EG_Kueche_Spuelmaschine label="Spülmaschine" //icon="scene_dishwasher"
 		Selection item=OG_Bad_Bodenstrip_Animation label="Programm Bad" icon="colorwheel" mappings=[1="Aus",6="Kamin",7="Sturm",8="Regenbogen",9="Aurora",10="Polizei"]
 		Text item=Garten_Auge_Lux label="akt. Helligkeit Hausecke/Ost [%.0f lux]" icon="sun"
@@ -429,6 +432,7 @@ sitemap home label="unser Haus"
 		Setpoint item=Aussentemperatur_Hysterese_Sonnenschutz label="Korrektur Sonneneintrag Terrasse [%.1f °C]" icon="temperature" step=1 minValue=0.0 maxValue=40.0
 		Setpoint item=Innentemperatur_Hysterese_Sonnenschutz label="Korrektur Sonneneintrag Wohnen [%.1f °C]" icon="temperature" step=1 minValue=0.0 maxValue=40.0
 		Switch item=Fensteroeffnung_ueberpruefen icon="window-open"
+		Setpoint item=Fensteroeffnung_maxDauer label="Dauer Fensteröffnung bis Warnung [%d min]" icon="window-open"
 //		Switch item=Tageslicht label="Tageslicht [MAP(yesno.map):%s]" icon="sun"
 		Switch item=Tageslicht
 		Switch item=Nachtschaltung
@@ -439,17 +443,17 @@ sitemap home label="unser Haus"
 		Switch item=Waschkeller_Lueftung label="Waschkeller automatisch lüften [MAP(yesno.map):%s]" icon="fan"
 		Setpoint item=EWT_Zuheizung
 		Setpoint item=EWT_Kuehlung
-		Setpoint item=Schwellwert_unten_Luftfeuchte_Waschkeller label="Schwellwert Luftfeuchte Kellerventilator [%.1f]" icon="humidity" step=1.0 minValue=40.0 maxValue=60.0
-		Setpoint item=Schwellwert_oben_Luftfeuchte_Waschkeller label="Schwellwert Luftfeuchte Kellerventilator [%.1f]" icon="humidity" step=1.0 minValue=40.0 maxValue=60.0
-		Setpoint item=Stummschaltung_Lueftung label="Dauer Abschaltung Lüftung [%.1f]" icon="fan" step=1 minValue=1 maxValue=600
-		Setpoint item=Stummschaltung_Lueftung_Bianca label="Dauer Abschaltung Lüftung Bianca [%.1f]" icon="fan" step=1 minValue=1 maxValue=600
+		Setpoint item=Schwellwert_unten_Luftfeuchte_Waschkeller label="Luftfeuchte min Kellerventilator [%.1f]" icon="humidity" step=1.0 minValue=40.0 maxValue=60.0
+		Setpoint item=Schwellwert_oben_Luftfeuchte_Waschkeller label="Luftfeuchte max Kellerventilator [%.1f]" icon="humidity" step=1.0 minValue=40.0 maxValue=60.0
+		Setpoint item=Stummschaltung_Lueftung label="Abschaltung Lüftung [%.1f min]" icon="fan" step=1 minValue=1 maxValue=600
+		Setpoint item=Stummschaltung_Lueftung_Bianca label="Abschaltung Lüftung Bianca [%.1f min]" icon="fan" step=1 minValue=1 maxValue=600
 
-		Setpoint item=Lux_Grenzwert_Sonnenschutz_morgens_niedrig label="untere Schwelle Sonnenschutz morgens [%d]" icon="sun" step=1000 minValue=2000 maxValue=30000
-		Setpoint item=Lux_Grenzwert_Sonnenschutz_morgens_hoch label="obere Schwelle Sonnenschutz morgens [%d]" icon="sun" step=1000 minValue=2000 maxValue=32767
-		Setpoint item=Lux_Grenzwert_Sonnenschutz_mittags_niedrig label="untere Schwelle Sonnenschutz mittags [%d]" icon="sun" step=1000 minValue=2000 maxValue=30000
-		Setpoint item=Lux_Grenzwert_Sonnenschutz_mittags_hoch label="obere Schwelle Sonnenschutz mittags [%d]" icon="sun" step=1000 minValue=200 maxValue=32767
-		Setpoint item=Aussentemperatur_Hysterese_Sonnenschutz label="Hysterese Sonnenschutz aussen [%.1f]" icon="temperature" step=0.1 minValue=15.0 maxValue=25.0
-		Setpoint item=Innentemperatur_Hysterese_Sonnenschutz label="Hysterese Sonnenschutz innen [%.1f]" icon="sun" step=1 minValue=1 maxValue=5
+		Setpoint item=Lux_Grenzwert_Sonnenschutz_morgens_niedrig label="min Sonnenschutz morgens [%d lux]" icon="sun" step=1000 minValue=2000 maxValue=30000
+		Setpoint item=Lux_Grenzwert_Sonnenschutz_morgens_hoch label="max Sonnenschutz morgens [%d lux]" icon="sun" step=1000 minValue=2000 maxValue=32767
+		Setpoint item=Lux_Grenzwert_Sonnenschutz_mittags_niedrig label="min Sonnenschutz mittags [%d lux]" icon="sun" step=1000 minValue=2000 maxValue=30000
+		Setpoint item=Lux_Grenzwert_Sonnenschutz_mittags_hoch label="max Sonnenschutz mittags [%d lux]" icon="sun" step=1000 minValue=200 maxValue=32767
+		Setpoint item=Aussentemperatur_Hysterese_Sonnenschutz label="Hysterese Sonnenschutz aussen [%.1f °C]" icon="temperature" step=0.1 minValue=15.0 maxValue=25.0
+		Setpoint item=Innentemperatur_Hysterese_Sonnenschutz label="Hysterese Sonnenschutz innen [%.1f °C]" icon="sun" step=1 minValue=1 maxValue=5
 
 	}
 

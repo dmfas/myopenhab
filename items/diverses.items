@@ -1,7 +1,8 @@
 // in diese Datei kommt alles, wofuer es kein eigenes Items-File gibt
 
 /* Globales */ 
-Number Szene "aktuelle Szene"											<color>		(Szenen)
+Number Szene "aktuelle Szene"											<color>
+Number Szenenschalter "Szenenschalter"
 Number Alarmmodus "Alarm"		 									<shield>	(Status,Einstellungen)
 Number Animation "Animationsprogramm"	 									<color>		(Status,Einstellungen)
 Number Anwesenheitsmodus "Anwesenheitsmodus"									<heating>	(Einstellungen,Test)
@@ -126,14 +127,19 @@ Group mobil	 				"mobile Geräte" 					<question>		(All)
 Group Bad_Bodenlicht				"Farblicht Bad Boden"					<colorwheel>
 
 
-Switch Szene_TV "Fernsehen"			{ alexa="SceneController.scene" }
-Switch Szene_Kino "Kinomodus"			{ alexa="SceneController.scene" }
-Switch Szene_morgens "morgens"			{ alexa="SceneController.scene" }
-Switch Szene_tagsueber "tagsüber"		{ alexa="SceneController.scene" }
-Switch Szene_abends "abends"			{ alexa="SceneController.scene" }
-Switch Szene_nachts "nachts"			{ alexa="SceneController.scene" }
-Switch Szene_Aus "Aus"				{ alexa="SceneController.scene" }
-Switch Rasenmaeher "Rasenmäher"			{ alexa="SceneController.scene" }
+Switch Szene_TV "Fernsehen"			<screen> (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_Prime "Prime"			<screen> (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_Netflix "Netflix"			<screen> (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_DisneyPlus "DisneyPlus"		<screen> (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_AppleTV "AppleTV"			<screen> (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_YouTube "YouTube"			<screen> (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_Kino "Kinomodus"			<screen> (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_morgens "morgens"			<color>  (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_tagsueber "tagsüber"		<color>  (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_abends "abends"			<color>  (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_nachts "nachts"			<color>  (Szenen)	{ alexa="SceneController.scene" }
+Switch Szene_Aus "Aus"				<color>  (Szenen)	{ alexa="SceneController.scene" }
+Switch Rasenmaeher "Rasenmäher"			<garden> (Szenen)	{ alexa="SceneController.scene" }
 
 
 DateTime Datum		"Datum [%1$tA, %1$td.%1$tm.%1$tY]"				<calendar> { channel="ntp:ntp:local:dateTime" }
