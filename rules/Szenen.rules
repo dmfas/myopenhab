@@ -396,6 +396,14 @@ when
 	Member of Szenen received command OFF
 then
 	var Number neue_Szene
+	var String s = "tagsueber"
+
+
+	if (triggeringItem !== null) {
+		s = triggeringItem.name
+		s = triggeringItem.toString().replace('Szene_', '')
+		s = triggeringItem.name.replace('Szene_', '')
+	}
 
 	if (Tageslicht.state == ON) 
 		neue_Szene = tags
@@ -404,12 +412,14 @@ then
 			neue_Szene = abends
 		else
 			neue_Szene = nachts
-	if (Rollaedenstatus.state == 100 || Rollaedenstatus.state == 101) {
+
+	logDebug("Wohnen", "Szene " + Szene.state + " wird zurückgesetzt auf die zu dieser Tageszeit übliche Beleuchtung " + neue_Szene.toString())
+	if (Szene.state == 100 || Szene.state == 101 || s == "TV" || s == "Prime" || s == "Netflix" || s == "DisneyPlus" || s == "AppleTV" || s == "YouTube") {
 		EG_Wohnen_TV.sendCommand(DOWN)
+		TV_Power.sendCommand(OFF)
 		Rollaeden_setzen.sendCommand(neue_Szene)
 	}
 	Szene.sendCommand(neue_Szene)
-	logInfo("Wohnen", "Stelle zu dieser Tageszeit übliche Beleuchtung wieder her.")
 end
 
 
@@ -436,6 +446,10 @@ curl -X POST http://192.168.178.57:8001/api/v2/applications/3201512006963	// Ple
 	var String curlout
 	var String appname
 
+	if ((receivedCommand as Number) == 0) {
+		TV_Power.sendCommand(OFF)
+		return;
+	}
 
 	TV_alive.sendCommand(ON)	// WakeOnLAN
 	EG_Wohnen_TV.sendCommand(UP)	// Klappe hoch

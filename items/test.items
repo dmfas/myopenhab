@@ -47,14 +47,4 @@ Switch XGarage_Auge_Tamper "Garage Auge Tamper"				<exclamation>	{ channel="zwav
 Switch XGarage_Auge_Access "Garage Auge Access"				<present>	{ channel="zwave:device:ddd23e6c:node21:alarm_access" }
 Switch XGarage_Auge_Burglar "Garage Auge Burglar"			<exclamation>	{ channel="zwave:device:ddd23e6c:node21:alarm_burglar" }
 
-// Sungrow Wechselrichter Test statt via PaperUI
-//Number val13000 "WR system state"			{ channel="modbus:data:sungrow:inputRegisters:reg13000:number" }
-//Number val13001 "WR running state"			{ channel="modbus:data:sungrow:inputRegisters:reg13001:number" } 
-//Number val13002 "daily PV generation"			{ channel="modbus:data:sungrow:inputRegisters:reg13002:number" } 
-//Number:Energy val13003 "total PV generation"		{ channel="modbus:data:sungrow:inputRegisters:reg13003:number" } 
-//Number:Energy val13005 "daily export power from PV"	{ channel="modbus:data:sungrow:inputRegisters:reg13005:number" } 
-//Number:Energy val13006 "total export energy from PV"	{ channel="modbus:data:sungrow:inputRegisters:reg13006:number" } 
-//Number:Power  val13008 "load power"			{ channel="modbus:data:sungrow:inputRegisters:reg13008:number" } 
-//Number testBatteryLevel "Batterie Level test"				<battery>	(PV)	{ channel="modbus:data:eebc81a5:number" }
-Switch testBatteryIsCharging "Batterie wird geladen"			<battery>	(PV)
 

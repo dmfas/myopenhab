@@ -23,7 +23,7 @@ Switch Tageslicht "Tageslicht [MAP(daylight.map):%s]"								<sun>		(Status)		{ 
 
 //Switch Kaffeeansagenschaltung "Kaffeeansagenschaltung [MAP(yesno.map):%s]"					<soundvolume>	(Einstellungen)
 Switch Kaffeeansage "Kaffeeansage [%s]"	 									<soundvolume>	(Test)	{ expire="20m,command=OFF" }
-Switch Kaffeeansage_auch_einen "Ansage mir auch einen Kaffee"	 						<soundvolume>	(Test)
+String Durchsage "Durchsage per Alexa"	 						<soundvolume>	(Test)
 
 String VoiceCommand
 

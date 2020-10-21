@@ -314,6 +314,9 @@ then
 	var response = sendHttpGetRequest("http://api.waqi.info/feed/geo:" + coordinates + "/?token=" + token, 3000)
 	logDebug("Lueftung","LuftqualitätsWebantwort: " + response + ".")
 
+	if (response === null)
+		return;
+
 	var aqi = transform("JSONPATH","$.data.aqi", response.toString)
 
 	if (aqi !== null) {

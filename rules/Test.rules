@@ -245,61 +245,6 @@ then
 end
 */
 
-/*
-rule "Alexa-Test"
-when
-        Item Szene_TV received command
-	or
-        Item Szene_Kino received command
-	or
-        Item Szene_morgens received command
-	or
-        Item Szene_tagsueber received command
-	or
-        Item Szene_abends received command
-	or
-        Item Szene_nachts received command
-	or
-        Item Szene_Aus received command
-then
-	var String s = "tagsueber"
-
-
-	if (triggeringItem !== null) {
-		s = triggeringItem.name
-	}
-        logInfo("Test","Szenen-Auftrag von Alexa erhalten für " + s + " bzw. " + triggeringItem)
-
-	switch (s) {
-		case "Szene_TV": {
-			Szene.sendCommand(100)
-		}
-		case "Szene_Kino": {
-			Szene.sendCommand(101)
-		}
-		case "Szene_morgens": {
-			Szene.sendCommand(1)
-		}
-		case "Szene_tagsueber": {
-			Szene.sendCommand(2)
-		}
-		case "Szene_abends": {
-			Szene.sendCommand()
-		}
-		case "Szene_nachts": {
-			Szene.sendCommand(4)
-		}
-		case "Szene_Aus": {
-			Szene.sendCommand(0)
-		}
-	}
-
-	var String t = "Szene " + s
-	// amazonechocontrol
-	Echo_Wohnen_TTS_Volume.sendCommand(30)
-	Echo_Wohnen_TTS.sendCommand(t)
-end
-*/
 
 /*
 rule "Homegear Thermostat Test MANU"
@@ -320,26 +265,62 @@ end
 
 rule "TTS Test 2"
 when
-	Item Kaffeeansage_auch_einen received command
+	Item Durchsage received command
 then
-	var String msg = "Würdest du mir bitte einen Kaffee anstellen ?"
+	var String msg
+	var String sound = null
+	var String emotion = null
+	var String intensity = null
 //	var String msg = "Da ist jemand an der Tür"
 //	var String s = "file:///etc/openhab2/sounds/doorbell.mp3"
 //	var String s = "file:doorbell-alexa.mp3"
-	var String t = "Testansage Szene " + Szene.state.toString
+	var String t
 
-//        Echo_Wohnen_TTS_Volume.sendCommand(Durchsagen_Lautstaerke.state)
-//        Echo_Wohnen_Volume.sendCommand(Durchsagen_Lautstaerke.state)
+	switch (receivedCommand) {
+		case "Kaffee": {
+			sound = "amzn_sfx_doorbell_chime_01"
+			msg = "Würdest du mir bitte einen Kaffee anstellen ?"
+		}
+		case "Essen":  {
+			msg = "Das Essen ist fertig." 
+			emotion = "excited"
+			intensity = "medium"
+		}
+		case "Essen2":  {
+			msg = "Das <emphasis level=\"strong\">Essen</emphasis> ist fertig." 
+			emotion = "disappointed"
+			intensity = "medium"
+		}
+		case "Tuer":  {
+			msg = "Gehst <emphasis level=\"strong\">du</emphasis> bitte an die Tür!" 
+			emotion = "excited"
+			intensity = "high"
+		}
+		default : msg = receivedCommand.toString
+	}
+
+//      Echo_Wohnen_TTS_Volume.sendCommand(Durchsagen_Lautstaerke.state)
+//      Echo_Wohnen_Volume.sendCommand(Durchsagen_Lautstaerke.state)
 //	setMasterVolume(Lautstaerke_Klingel) // funktioniert eh nicht, ggfs. nach Restart manuell alsamixer benutzen
-	t = "<speak>" +
-//		"<audio src=\"" + s + "\"/>" +
-		"<audio src=\"soundbank://soundlibrary/home/amzn_sfx_doorbell_chime_01\" />" +
-//		"<amazon:emotion name=\"excited\" intensity=\"high\">" +
-		msg +
-//		"</emphasis></amazon:emotion></speak>" +
-		"</speak>"
+//	t += "<audio src=\"" + s + "\"/>" +
 
-        logDebug("Test","Ansage " + msg + " mit Lautstaerke " + Durchsagen_Lautstaerke.state)
+        logDebug("Test","Ansage " + msg + " mit Lautstärke " + Durchsagen_Lautstaerke.state + " und Emotion \"" + emotion + "\" Intensität \"" + intensity + "\"")
+	t = "<speak>" 
+	if (sound !== null)
+		t += "<audio src=\"soundbank://soundlibrary/home/" + sound + "\" />"
+	if (emotion !== null) {
+		t += "<amazon:emotion name=\"" + emotion + "\" "
+		if (intensity !== null)
+			t += "intensity=\"" + intensity + "\""
+		t += ">"
+	}
+	t += msg
+	if (emotion !== null) {
+		t += "</amazon:emotion>"
+	}
+	t += "</speak>"
+
+        logDebug("Test","Ansagebefehl " + t)
 	Echo_Wohnen_TTS.sendCommand(t)
 end
 

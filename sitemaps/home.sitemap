@@ -10,13 +10,13 @@ sitemap home label="unser Haus"
 //			Text item=PVstatePVpower label="PV generiert Strom [MAP(1on0off.map):%s]" icon="status" visibility=[PVstatePVpower==1]
 //			Text item=PVstateBatteryCharging label="Batterie wird geladen [MAP(1on0off.map):%s]" icon="status" visibility=[PVstateBatteryCharging==1]
 //			Text item=PVstateBatteryDischarging label="Batterie entlädt sich [MAP(1on0off.map):%s]" icon="status" visibility=[PVstateBatteryDischarging==1]
-//			Text item=PVstateFeedInPower label="PV speist ins Netz [MAP(1on0off.map):%s]" icon="status" visibility=[PVstateFeedInpower==1]
+//			Text item=PVstateFeedInPower label="PV speist ins Netz [MAP(1on0off.map):%s]" icon="status" visibility=[PVstateFeedInPower==1]
 //			Text item=PVstateImportPowerFromGrid label="Haus bezieht aus dem Netz [MAP(1on0off.map):%s]" icon="status" visibility=[PVstateImportPowerFromGrid==1]
 			Text item=PVstatePVpower label="PV generiert Strom [MAP(invis.map):%s]" icon="status" visibility=[PVstatePVpower==1]
 			Text item=PVstateBatteryCharging label="Batterie wird geladen [MAP(invis.map):%s]" icon="status" visibility=[PVstateBatteryCharging==1]
 			Text item=PVstateBatteryDischarging label="Batterie entlädt sich [MAP(invis.map):%s]" icon="status" visibility=[PVstateBatteryDischarging==1]
 //  "Power feed-in the grid" - genaue Bedeutung unklar
-//			Text item=PVstateFeedInPower label="Netzeinspeisung [MAP(invis.map):%s]" icon="status" visibility=[PVstateFeedInpower==1]
+//			Text item=PVstateFeedInPower label="Netzeinspeisung [MAP(invis.map):%s]" icon="status" visibility=[PVstateFeedInPower==1]
 			Text item=PVstateImportPowerFromGrid label="Haus bezieht aus dem Netz [MAP(invis.map):%s]" icon="status" visibility=[PVstateImportPowerFromGrid==1]
 //			Text item=PVphaseAcurrent label="Phase A Stromstärke [%.1f A]" icon="energy"
 //			Text item=PVphaseBcurrent label="Phase B Stromstärke [%.1f A]" icon="energy"
@@ -29,8 +29,8 @@ sitemap home label="unser Haus"
 
 			Text item=PVbatteryPower label="Leistungsabgabe Batterie lt. Status-Bit [%.0f W]" icon="battery" visibility=[PVstateBatteryDischarging==1]
 			Text item=PVbatteryPower label="Batterieladung lt. Status-Bit [%.0f W]" icon="battery" visibility=[PVstateBatteryCharging==1]
-			Text item=PVbatteryPower label="Leistungsabgabe Batterie lt. eigener Berechnung [%.0f W]" icon="battery" visibility=[testBatteryIsCharging==OFF]
-			Text item=PVbatteryPower label="Batterieladung lt. eigener Berechnung [%.0f W]" icon="battery" visibility=[testBatteryIsCharging==ON]
+//			Text item=PVbatteryPower label="Leistungsabgabe Batterie lt. eigener Berechnung [%.0f W]" icon="battery" visibility=[testBatteryIsCharging==OFF]
+//			Text item=PVbatteryPower label="Batterieladung lt. eigener Berechnung [%.0f W]" icon="battery" visibility=[testBatteryIsCharging==ON]
 
 			Text item=PVbatteryLevel label="Batterieladestand [%.1f %%]" icon="battery"
 			Text item=PVinsideTemperature label="Wechselrichter Temperatur [%.1f °C]" icon="temperature"
@@ -38,7 +38,7 @@ sitemap home label="unser Haus"
 //			Text item=PVtotalDirectConsumption label="aktueller Direktverbrauch [%.0f W]" icon="energy"
 			}
 		}
-		Switch item=Kaffeeansage_auch_einen label="Ansage" mappings=[ON="mir auch einen Kaffee"] icon="scene_coffee_maker_automatic"
+		Switch item=Durchsage label="Durchsage" mappings=["Dies ist ein Test"="Test",Kaffee="Kaffee",Essen="Essen",Tuer="Tür"] icon="soundvolume"
 		Text item=aktuell_Temp
 
 //		Switch item=OG_Bad_durchsichtig label="Bad-Fenster" icon="windowtransparent" mappings=[ON="durchsichtig",OFF="sichtgeschützt"]
@@ -132,7 +132,7 @@ sitemap home label="unser Haus"
 		Switch item=mobil_Zwischenstecker7
 	}
 	Group item=Test label="Test" icon="settings" {
-		Switch item=TV_Provider label="[%d]" icon="screen" mappings=[1="Prime",2="Netflix",3="Disney+",4="AppleTV",5="YouTube",6="Plex"]
+		Switch item=TV_Provider label="[%d]" icon="screen" mappings=[1="Prime",2="Netflix",3="Disney+",4="AppleTV",5="YouTube",0="Aus"]
 		Switch item=TV_Power label="TV An/Aus" icon="control_on_off"
 		Switch item=EG_Wohnen_TV label="TV-Klappe" icon="rollershutter"
 		Switch item=EG_Kueche_Spuelmaschine label="Spülmaschine" //icon="scene_dishwasher"

@@ -1,0 +1,24 @@
+rule "Pruefe Ueberschuss"
+when
+	Item PVstateFeedInPower changed
+then
+end
+
+/*
+Verbraucher = Spülmaschine,Waschmaschine,Wallbox 
+optional Zeitpunkt-Einstellung wann der Verbraucher *fertig* sein muss (absolute Uhrzeit)
+
+Ist das die richtige Strategie:
+starte wenn > x; x abhängig vom Sonnenuntergang rückrechnen wann letztmöglicher Start (*außer* es ist hinterlegt einen weiteren Tag zu warten)
+sonst starte wenn Batterieenergie > y; y = bekannter Strombedarf des Verbrauchers
+=> wenn nicht genug Strom am Tag produziert wird, wird zum letztmöglichen Zeiitpunkt angestellt
+
+
+Berechnung der bekannten Nutzungsdauer aus persistence-Daten
+Berechnung des bekannten Strombedarfs jedes Verbrauchers aus persistence-Daten
+macht es auch Sinn, den bekannten Strombedarf während der Nach persistence-Daten zu prognostizieren ?
+	nein, wenn Batteriekapazität geringer
+	nein auch sonst?
+
+brauchen wir eine Reihenfolge oder können wir die Verbraucher einzeln betrachten ?
+*/
